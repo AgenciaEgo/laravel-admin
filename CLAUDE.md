@@ -45,7 +45,7 @@ Estado de partida: `master` = último commit upstream (`67c441eb`, 2023-02-03), 
 
 ### Dependencias (`composer.json`)
 
-- **Runtime:** `laravel/framework >=5.5` (sin techo), `php >=7.0.0`, `symfony/dom-crawler ~3.1|~4.0|~5.0`, `doctrine/dbal 2.*|3.*`.
+- **Runtime:** `php ^8.0.2`, `laravel/framework ^9.0|^10.0|^11.0|^12.0|^13.0`, `symfony/dom-crawler ^5.4|^6.0|^7.0|^8.0`. `doctrine/dbal` salió del `require` (pasó a `suggest`): solo lo usan los generadores en Laravel 9/10; en 11+ se usa `Schema::getColumns()`.
 - **Opcionales (`suggest`):** `intervention/image ~2.3` (manipulación de imágenes en uploads — `Form\Field\Image`/`ImageField`), `spatie/eloquent-sortable` (grids ordenables, `Grid\Displayers\Orderable`).
 - **Dev:** `laravel/laravel`, `fzaninotto/faker` (abandonado), `laravel/browser-kit-testing ^6.0`, `spatie/phpunit-watcher`.
 - **Auto-discovery:** registra `Encore\Admin\AdminServiceProvider` y el alias `Admin` → `Encore\Admin\Facades\Admin`.
@@ -73,13 +73,20 @@ Versiones efectivamente instaladas en sullair-click (composer.lock, oct-2026): l
 - [tests/](tests/) — PHPUnit + browser-kit-testing contra MySQL (`laravel_admin_test`); requieren levantar un `laravel/laravel` completo vía `require-dev`. Hoy no corren (browser-kit ^6 = Laravel ≤8); se conservan como base para una suite futura. No hay CI (se borraron Travis, dependabot y stale bot).
 - [docs/en/](docs/en/) — documentación de uso de upstream, conservada como referencia offline (se borró `docs/zh`).
 
-### Puntos sensibles para el upgrade a Laravel 10/11/12
+### Compatibilidad verificada (oct-2026)
 
-Detectados en el recorrido inicial (no verificados todavía contra un Laravel nuevo):
+Probado con un test de humo (login, dashboard, CRUD de usuarios con upload, roles, permisos, menú/árbol + reorder, logs, setting, filtros/orden/búsqueda, pjax, `_handle_action_`, `admin:make`/`admin:form`) más un recorrido HTTP real con `artisan serve` (sesión persistida, toastr, export CSV, assets), en apps Laravel limpias con SQLite: **Laravel 9.52, 10.50, 11.57, 12.70 y 13.39 sobre PHP 8.3, y Laravel 13 sobre PHP 8.5** (no hay binario de 8.4 instalado; 8.5 es superconjunto de sus deprecations). Resultado: todo OK y 0 deprecations.
 
-- **Doctrine DBAL:** [src/Console/ResourceGenerator.php:216-231](src/Console/ResourceGenerator.php#L216-L231) usa `isDoctrineAvailable()` / `getDoctrineSchemaManager()` / `registerDoctrineTypeMapping`, que Laravel 11 eliminó (reemplazar por `Schema::getColumns()`). Solo afecta a los generadores `admin:make`/`admin:form`, no al runtime del panel. Con L11+ también se puede quitar `doctrine/dbal` del `require`.
-- **`symfony/dom-crawler ~5.0`:** Laravel 10 trae Symfony 6, Laravel 11/12 Symfony 7. Hoy convive porque dom-crawler 5.4 es standalone, pero conviene ampliar a `^6.0|^7.0` (lo usan `Middleware/Pjax.php` y `Actions/Interactor/Form.php`).
-- **Chequeos de versión hardcodeados:** `version_compare(app()->version(), ...)` en `AdminServiceProvider.php:119`, `Traits/DefaultDatetimeFormat.php:11`, `Grid/Model.php:635` — legacy, revisar que sigan tomando la rama correcta.
-- **`intervention/image ~2.3`:** v3 cambió toda la API; si sullair-click sube a v3, rompen `Form/Field/ImageField.php`, `Image.php` y `MultipleImage.php`.
-- **PHP 8.x:** constraints `>=7.0.0` muy laxas; esperar deprecations (dynamic properties en 8.2, nullables implícitos en 8.4) en las ~300 clases.
-- **Tests/dev deps:** `fzaninotto/faker` abandonado (→ `fakerphp/faker`), `browser-kit-testing ^6.0` solo cubre Laravel ≤8; la suite de tests no corre tal cual en versiones nuevas.
+Cambios hechos para llegar ahí:
+- PHP 8.4: 37 parámetros con nullable implícito (`Tipo $x = null` → `?Tipo $x = null`); propiedades dinámicas declaradas (`Tree::$path`, `Grid\Column::$cast`); `null` a funciones internas (`array_filter(..., 'strlen')` en Select/MultipleSelect/Tags, `config()` nulo en `admin_path()`/`ensureHttps()`, `admin:form` sin `--title`).
+- Laravel 11+: `ResourceGenerator` usa `Schema::getColumns()` y cae a Doctrine solo si no existe.
+- Laravel 13: la sesión serializa en JSON por defecto, así que los flashes del paquete (`admin_toastr`, `admin_success/error/warning/info`, `Exception\Handler::error`) guardan arrays planos en vez de `MessageBag`; `partials/toastr` y `partials/alerts` aceptan ambos formatos.
+- Symfony 7.4 deprecó (y 8 elimina) `Request::get()`: reemplazado por `input()` en controllers/acciones/grid.
+- Ramas muertas de `version_compare(app()->version(), ...)` eliminadas (mínimo Laravel 9).
+
+Pendientes conocidos:
+- **sullair-click en Laravel 9/10** tiene migraciones con `renameColumn`, que necesitan `doctrine/dbal`: debe pedirlo en su propio `composer.json` (`^3.0`), ya no le llega por este paquete.
+- **`laravel-admin-ext/helpers`** (usado por sullair-click: scaffold, terminal DB/artisan, rutas) usa `Request::get()` → rompe con Symfony 8 y emite deprecations con 7.4. No es parte de este fork.
+- **`intervention/image ~2.3`** sigue siendo la API soportada por `Image`/`ImageField`/`MultipleImage`; v3 rompe.
+- **`ExcelExporter`** requiere `maatwebsite/excel` (no declarado ni en `suggest`).
+- **Tests/dev deps** de upstream (`fzaninotto/faker`, `browser-kit-testing ^6`) siguen sin correr en Laravel nuevo; la validación real es contra apps reales.

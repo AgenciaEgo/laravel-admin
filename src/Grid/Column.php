@@ -104,6 +104,13 @@ class Column
     protected static $model;
 
     /**
+     * Cast name set through the deprecated `cast()` method.
+     *
+     * @var string
+     */
+    protected $cast;
+
+    /**
      * @param string $name
      * @param string $label
      */

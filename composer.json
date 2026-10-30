@@ -12,10 +12,9 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "symfony/dom-crawler": "~3.1|~4.0|~5.0",
-        "laravel/framework": ">=5.5",
-        "doctrine/dbal": "2.*|3.*"
+        "php": "^8.0.2",
+        "symfony/dom-crawler": "^5.4|^6.0|^7.0|^8.0",
+        "laravel/framework": "^9.0|^10.0|^11.0|^12.0|^13.0"
     },
     "require-dev": {
         "laravel/laravel": ">=5.5",
@@ -45,6 +44,7 @@
         "test": "./vendor/bin/phpunit"
     },
     "suggest": {
+        "doctrine/dbal": "Required by admin:make/admin:form to read table columns on Laravel 9/10 (^2.0|^3.0).",
         "intervention/image": "Required to handling and manipulation upload images (~2.3).",
         "spatie/eloquent-sortable": "Required to built orderable gird."
     },

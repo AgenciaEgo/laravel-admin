@@ -99,7 +99,7 @@ class Model
      * @param EloquentModel $model
      * @param Grid          $grid
      */
-    public function __construct(EloquentModel $model, Grid $grid = null)
+    public function __construct(EloquentModel $model, ?Grid $grid = null)
     {
         $this->model = $model;
 
@@ -279,7 +279,7 @@ class Model
      *
      * @return $this
      */
-    public function collection(\Closure $callback = null)
+    public function collection(?\Closure $callback = null)
     {
         $this->collectionCallback = $callback;
 
@@ -632,11 +632,9 @@ class Model
         $relatedTable = $relation->getRelated()->getTable();
 
         if ($relation instanceof BelongsTo) {
-            $foreignKeyMethod = version_compare(app()->version(), '5.8.0', '<') ? 'getForeignKey' : 'getForeignKeyName';
-
             return [
                 $relatedTable,
-                $relation->{$foreignKeyMethod}(),
+                $relation->getForeignKeyName(),
                 '=',
                 $relatedTable.'.'.$relation->getRelated()->getKeyName(),
             ];

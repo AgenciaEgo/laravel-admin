@@ -35,7 +35,7 @@ class FormCommand extends GeneratorCommand
     {
         $stub = parent::replaceClass($stub, $name);
 
-        return str_replace('DummyTitle', $this->option('title'), $stub);
+        return str_replace('DummyTitle', (string) $this->option('title'), $stub);
     }
 
     /**

@@ -54,7 +54,7 @@ trait HasQuickSearch
      */
     protected function applyQuickSearch()
     {
-        if (!$query = request()->get(static::$searchKey)) {
+        if (!$query = request()->input(static::$searchKey)) {
             return;
         }
 

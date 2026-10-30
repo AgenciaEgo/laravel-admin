@@ -77,11 +77,18 @@ class Tree implements Renderable
     public $tools;
 
     /**
+     * Current request path.
+     *
+     * @var string
+     */
+    protected $path;
+
+    /**
      * Menu constructor.
      *
      * @param Model|null $model
      */
-    public function __construct(Model $model = null, \Closure $callback = null)
+    public function __construct(?Model $model = null, ?\Closure $callback = null)
     {
         $this->model = $model;
 

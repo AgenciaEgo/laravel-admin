@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\MessageBag;
-
 if (!function_exists('admin_path')) {
 
     /**
@@ -13,7 +11,7 @@ if (!function_exists('admin_path')) {
      */
     function admin_path($path = '')
     {
-        return ucfirst(config('admin.directory')).($path ? DIRECTORY_SEPARATOR.$path : $path);
+        return ucfirst((string) config('admin.directory')).($path ? DIRECTORY_SEPARATOR.$path : $path);
     }
 }
 
@@ -74,9 +72,8 @@ if (!function_exists('admin_toastr')) {
      */
     function admin_toastr($message = '', $type = 'success', $options = [])
     {
-        $toastr = new MessageBag(get_defined_vars());
-
-        session()->flash('toastr', $toastr);
+        // plain array so it survives `json` session serialization (Laravel 13 default)
+        session()->flash('toastr', compact('message', 'type', 'options'));
     }
 }
 
@@ -133,9 +130,8 @@ if (!function_exists('admin_info')) {
      */
     function admin_info($title, $message = '', $type = 'info')
     {
-        $message = new MessageBag(get_defined_vars());
-
-        session()->flash($type, $message);
+        // plain array so it survives `json` session serialization (Laravel 13 default)
+        session()->flash($type, compact('title', 'message'));
     }
 }
 

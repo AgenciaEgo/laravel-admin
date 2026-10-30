@@ -4,6 +4,10 @@ Fork de [z-song/laravel-admin](https://github.com/z-song/laravel-admin) (paquete
 
 Lo mantenemos para seguir usándolo en proyectos propios (principalmente **sullair-click**) mientras subimos de versión PHP y Laravel, en lugar de reescribir esos paneles con otra herramienta.
 
+## Compatibilidad
+
+Laravel 9, 10, 11, 12 y 13 · PHP 8.0.2 o superior (probado en 8.3 y 8.5).
+
 ## Uso
 
 El nombre del paquete sigue siendo `encore/laravel-admin`. En el `composer.json` del proyecto que lo usa:

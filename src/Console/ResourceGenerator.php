@@ -83,12 +83,12 @@ class ResourceGenerator
         $output = '';
 
         foreach ($this->getTableColumns() as $column) {
-            $name = $column->getName();
+            $name = $column['name'];
             if (in_array($name, $reservedColumns)) {
                 continue;
             }
-            $type = $column->getType()->getName();
-            $default = $column->getDefault();
+            $type = $column['type'];
+            $default = $column['default'];
 
             $defaultValue = '';
 
@@ -166,7 +166,7 @@ class ResourceGenerator
         $output = '';
 
         foreach ($this->getTableColumns() as $column) {
-            $name = $column->getName();
+            $name = $column['name'];
 
             // set column label
             $label = $this->formatLabel($name);
@@ -184,7 +184,7 @@ class ResourceGenerator
         $output = '';
 
         foreach ($this->getTableColumns() as $column) {
-            $name = $column->getName();
+            $name = $column['name'];
             $label = $this->formatLabel($name);
 
             $output .= sprintf($this->formats['grid_column'], $name, $label);
@@ -209,19 +209,47 @@ class ResourceGenerator
      *
      * @throws \Exception
      *
-     * @return \Doctrine\DBAL\Schema\Column[]
+     * @return array[] each item has `name`, `type` (doctrine-style type name) and `default`
      */
     protected function getTableColumns()
     {
-        if (!$this->model->getConnection()->isDoctrineAvailable()) {
+        $connection = $this->model->getConnection();
+        $schemaBuilder = $connection->getSchemaBuilder();
+
+        // Laravel >= 10.x ships native schema introspection, doctrine/dbal was dropped in Laravel 11.
+        if (method_exists($schemaBuilder, 'getColumns')) {
+            return array_map(function ($column) {
+                return [
+                    'name'    => $column['name'],
+                    'type'    => $this->normalizeNativeType($column['type_name'], $column['type']),
+                    'default' => $this->normalizeNativeDefault($column['default']),
+                ];
+            }, $schemaBuilder->getColumns($this->model->getTable()));
+        }
+
+        return $this->getDoctrineTableColumns();
+    }
+
+    /**
+     * Get columns through doctrine/dbal (Laravel 9 and early 10.x).
+     *
+     * @throws \Exception
+     *
+     * @return array[]
+     */
+    protected function getDoctrineTableColumns()
+    {
+        $connection = $this->model->getConnection();
+
+        if (!method_exists($connection, 'isDoctrineAvailable') || !$connection->isDoctrineAvailable()) {
             throw new \Exception(
-                'You need to require doctrine/dbal: ~2.3 in your own composer.json to get database columns. '
+                'You need to require doctrine/dbal: ^3.0 in your own composer.json to get database columns. '
             );
         }
 
-        $table = $this->model->getConnection()->getTablePrefix().$this->model->getTable();
+        $table = $connection->getTablePrefix().$this->model->getTable();
         /** @var \Doctrine\DBAL\Schema\MySqlSchemaManager $schema */
-        $schema = $this->model->getConnection()->getDoctrineSchemaManager($table);
+        $schema = $connection->getDoctrineSchemaManager($table);
 
         // custom mapping the types that doctrine/dbal does not support
         $databasePlatform = $schema->getDatabasePlatform();
@@ -237,7 +265,70 @@ class ResourceGenerator
             list($database, $table) = explode('.', $table);
         }
 
-        return $schema->listTableColumns($table, $database);
+        return array_map(function ($column) {
+            return [
+                'name'    => $column->getName(),
+                'type'    => $column->getType()->getName(),
+                'default' => $column->getDefault(),
+            ];
+        }, array_values($schema->listTableColumns($table, $database)));
+    }
+
+    /**
+     * Map a native database type to the doctrine-style type names used by the generators.
+     *
+     * @param string $typeName e.g. `varchar`, `tinyint`
+     * @param string $type     full type, e.g. `tinyint(1)`
+     *
+     * @return string
+     */
+    protected function normalizeNativeType($typeName, $type)
+    {
+        $typeName = strtolower($typeName);
+
+        if ($typeName === 'tinyint' && preg_match('/^tinyint\(1\)/i', $type)) {
+            return 'boolean';
+        }
+
+        $map = [
+            'boolean'   => ['bool', 'boolean'],
+            'integer'   => ['int', 'integer', 'mediumint', 'tinyint', 'int4', 'int2'],
+            'bigint'    => ['bigint', 'int8'],
+            'smallint'  => ['smallint'],
+            'decimal'   => ['decimal', 'numeric'],
+            'float'     => ['float', 'double', 'real', 'double precision', 'float4', 'float8'],
+            'datetime'  => ['datetime', 'datetime2', 'timestamp without time zone', 'timestamptz', 'timestamp with time zone'],
+            'timestamp' => ['timestamp'],
+            'date'      => ['date'],
+            'time'      => ['time', 'time without time zone'],
+            'json'      => ['json', 'jsonb'],
+            'text'      => ['text', 'tinytext', 'mediumtext', 'longtext'],
+            'blob'      => ['blob', 'tinyblob', 'mediumblob', 'longblob', 'binary', 'varbinary', 'bytea'],
+        ];
+
+        foreach ($map as $normalized => $types) {
+            if (in_array($typeName, $types, true)) {
+                return $normalized;
+            }
+        }
+
+        return 'string';
+    }
+
+    /**
+     * Strip the quotes some drivers keep around string defaults (e.g. sqlite).
+     *
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    protected function normalizeNativeDefault($default)
+    {
+        if (is_string($default) && preg_match("/^'(.*)'$/s", $default, $matches)) {
+            return str_replace("''", "'", $matches[1]);
+        }
+
+        return $default;
     }
 
     /**

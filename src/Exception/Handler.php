@@ -40,8 +40,6 @@ class Handler
      */
     public static function error($title = '', $message = '')
     {
-        $error = new MessageBag(compact('title', 'message'));
-
-        return session()->flash('error', $error);
+        return session()->flash('error', compact('title', 'message'));
     }
 }
