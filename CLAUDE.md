@@ -70,7 +70,8 @@ Versiones efectivamente instaladas en sullair-click (composer.lock, oct-2026): l
 - [config/admin.php](config/admin.php) — config publicada al consumidor (route prefix/namespace/middleware, guard `admin`, tablas, upload disk, operation_log, skin/layout, extensiones). sullair-click usa prefix `cms` vía `ADMIN_ROUTE_PREFIX`.
 - [database/migrations/2016_01_04_173148_create_admin_tables.php](database/migrations/2016_01_04_173148_create_admin_tables.php) — 9 tablas `admin_*` (users, roles, permissions, menu, pivotes, operation_log), nombres tomados de config.
 - [resources/views/](resources/views/) (Blade: grid, form, show, tree, widgets, login, partials), [resources/lang/](resources/lang/) (23 idiomas, incluye `es`).
-- [tests/](tests/) — PHPUnit + browser-kit-testing contra MySQL (`laravel_admin_test`); requieren levantar un `laravel/laravel` completo vía `require-dev`. CI heredado: [.travis.yml](.travis.yml) (PHP 7.2–8.0, muerto). `.github/` solo tiene dependabot y stale bot. No hay CI activo en el fork.
+- [tests/](tests/) — PHPUnit + browser-kit-testing contra MySQL (`laravel_admin_test`); requieren levantar un `laravel/laravel` completo vía `require-dev`. Hoy no corren (browser-kit ^6 = Laravel ≤8); se conservan como base para una suite futura. No hay CI (se borraron Travis, dependabot y stale bot).
+- [docs/en/](docs/en/) — documentación de uso de upstream, conservada como referencia offline (se borró `docs/zh`).
 
 ### Puntos sensibles para el upgrade a Laravel 10/11/12
 
