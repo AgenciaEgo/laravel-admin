@@ -12,6 +12,10 @@ APP=$2
 PKG=$(cd "$(dirname "$0")/../.." && pwd)
 VERSION=$(php -r 'preg_match("/const VERSION = \x27([^\x27]+)\x27/", file_get_contents($argv[1]), $m); echo $m[1];' "$PKG/src/Admin.php")
 
+# Composer >= 2.9 refuses packages with security advisories, and every Laravel 9-11
+# release has unpatched ones (EOL). This throwaway app only exists to test against them.
+export COMPOSER_NO_BLOCKING=1 COMPOSER_NO_SECURITY_BLOCKING=1
+
 rm -rf "$APP"
 composer create-project "laravel/laravel:^$LARAVEL.0" "$APP" --prefer-dist --no-interaction --quiet
 APP=$(cd "$APP" && pwd)
