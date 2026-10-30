@@ -17,16 +17,32 @@ El nombre del paquete sigue siendo `encore/laravel-admin`. En el `composer.json`
   { "type": "vcs", "url": "https://github.com/AgenciaEgo/laravel-admin" }
 ],
 "require": {
-  "encore/laravel-admin": "dev-master as 1.8.19"
+  "encore/laravel-admin": "^1.9"
 }
 ```
 
-El alias `as 1.8.19` mantiene compatibles a extensiones que piden una versión `1.x` (por ejemplo, `laravel-admin-ext/helpers`).
-
-Para traer cambios nuevos del fork:
+Composer toma las versiones de los tags de este repo (no hace falta Packagist). Para traer una versión nueva:
 
 ```bash
 composer update encore/laravel-admin --with-dependencies
+```
+
+En Laravel 9/10, si el proyecto usa `admin:make` o migraciones con `renameColumn`/`change()`, tiene que pedir `doctrine/dbal` (`^3.0`) en su propio `composer.json`.
+
+## Versiones
+
+Semver, siguiendo la línea 1.x de upstream. Cada release es un tag `vX.Y.Z` con su [GitHub Release](https://github.com/AgenciaEgo/laravel-admin/releases).
+
+- `1.9.0` — primer release del fork: soporte Laravel 9–13 y PHP 8.4+.
+
+## Tests
+
+El CI ([.github/workflows/tests.yml](.github/workflows/tests.yml)) crea apps Laravel limpias de cada versión soportada, instala el paquete y recorre el panel completo (test de feature + servidor HTTP real). Para correrlo localmente:
+
+```bash
+tests/smoke/setup-app.sh 13 /tmp/app
+(cd /tmp/app && vendor/bin/phpunit --filter AdminSmokeTest)
+tests/smoke/http-smoke.sh /tmp/app
 ```
 
 ## Documentación

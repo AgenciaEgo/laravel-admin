@@ -1,0 +1,61 @@
+name: Release
+
+# Pushing a tag like v1.9.0 runs the full test matrix and, if it passes,
+# publishes the GitHub release. Composer installs straight from the tag.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag is semver, matches Admin::VERSION and is on master
+        run: |
+          tag="$GITHUB_REF_NAME"
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag $tag is not of the form vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+
+          version=$(php -r 'preg_match("/const VERSION = \x27([^\x27]+)\x27/", file_get_contents("src/Admin.php"), $m); echo $m[1];')
+          if [ "v$version" != "$tag" ]; then
+            echo "::error::Tag $tag does not match Admin::VERSION ($version) in src/Admin.php"
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "::error::Tag $tag points to a commit that is not on master"
+            exit 1
+          fi
+
+  tests:
+    name: Tests
+    needs: check
+    uses: ./.github/workflows/tests.yml
+
+  release:
+    name: Publish release
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --generate-notes

@@ -1,0 +1,88 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# github.workflow is the caller's name when run from release.yml, so releases get their own group
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # lowest supported PHP for syntax, newest PHP for compile-time deprecations
+        php: ['8.0', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+
+      - name: Lint src/ (syntax errors and deprecations)
+        run: |
+          output=$(find src -name '*.php' -print0 \
+            | xargs -0 -n1 php -d error_reporting=E_ALL -d display_errors=stderr -d log_errors=0 -l 2>&1 \
+            | grep -v '^No syntax errors detected' || true)
+          if [ -n "$output" ]; then
+            echo "$output"
+            exit 1
+          fi
+
+  smoke:
+    name: Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { laravel: 9, php: '8.3' }
+          - { laravel: 10, php: '8.3' }
+          - { laravel: 11, php: '8.3' }
+          - { laravel: 12, php: '8.3' }
+          - { laravel: 13, php: '8.3' }
+          - { laravel: 11, php: '8.4' }
+          - { laravel: 12, php: '8.4' }
+          - { laravel: 13, php: '8.4' }
+          - { laravel: 12, php: '8.5' }
+          - { laravel: 13, php: '8.5' }
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sqlite3, pdo_sqlite, gd, fileinfo
+          coverage: none
+          tools: composer:v2
+
+      - name: Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-laravel${{ matrix.laravel }}-php${{ matrix.php }}-${{ github.run_id }}
+          restore-keys: composer-laravel${{ matrix.laravel }}-php${{ matrix.php }}-
+
+      - name: Create Laravel ${{ matrix.laravel }} app with this package
+        run: tests/smoke/setup-app.sh ${{ matrix.laravel }} "$RUNNER_TEMP/app"
+
+      - name: Smoke test (feature test, fails on any deprecation)
+        working-directory: ${{ runner.temp }}/app
+        run: vendor/bin/phpunit --filter AdminSmokeTest
+
+      - name: HTTP smoke test (real server and session)
+        run: tests/smoke/http-smoke.sh "$RUNNER_TEMP/app"
