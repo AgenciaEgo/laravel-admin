@@ -83,3 +83,8 @@ a.editable-empty {
 .file-input .glyphicon-folder-open {
     display: inline;
 }
+
+/* bootstrap-editable.css hides ".datepicker > div"; with jQuery 3 the picker's .show() only clears the inline display */
+.bootstrap-datetimepicker-widget .datepicker > div {
+    display: block;
+}
