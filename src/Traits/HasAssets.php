@@ -92,7 +92,14 @@ trait HasAssets
     /**
      * @var string
      */
-    public static $jQuery = 'vendor/laravel-admin/AdminLTE/plugins/jQuery/jQuery-2.1.4.min.js';
+    public static $jQuery = 'vendor/laravel-admin/AdminLTE/plugins/jQuery/jquery-3.7.1.min.js';
+
+    /**
+     * Restores the jQuery 1.x/2.x APIs that bundled plugins still rely on.
+     *
+     * @var string|null
+     */
+    public static $jQueryMigrate = 'vendor/laravel-admin/AdminLTE/plugins/jQuery/jquery-migrate-3.6.0.min.js';
 
     /**
      * @var array
@@ -328,6 +335,14 @@ trait HasAssets
     public function jQuery()
     {
         return admin_asset(static::$jQuery);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function jQueryMigrate()
+    {
+        return static::$jQueryMigrate ? admin_asset(static::$jQueryMigrate) : null;
     }
 
     /**

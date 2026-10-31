@@ -59,9 +59,19 @@ fi
 
 for uri in /admin /admin/auth/users /admin/auth/users/create /admin/auth/users/1/edit /admin/auth/users/1 \
     /admin/auth/roles /admin/auth/permissions /admin/auth/menu /admin/auth/logs /admin/auth/setting \
-    "/admin/auth/users?_export_=all" /vendor/laravel-admin/laravel-admin/laravel-admin.js \
-    /vendor/laravel-admin/AdminLTE/dist/css/AdminLTE.min.css; do
+    "/admin/auth/users?_export_=all"; do
     expect 200 "GET $uri" "$BASE$uri"
+done
+
+# every script and stylesheet the login page and the layout reference must be published
+LOGIN=$(curl -s "$BASE/admin/auth/login")
+ASSETS=$(printf '%s\n%s' "$LOGIN" "$DASHBOARD" | grep -oE '(src|href)="[^"]+\.(js|css)"' | sed -E 's/^(src|href)="//; s/"$//' | grep "^$BASE/" | sort -u)
+if [ -z "$ASSETS" ]; then
+    echo "FAIL no local assets found on the login page or the dashboard"
+    FAILED=1
+fi
+for url in $ASSETS; do
+    expect 200 "GET ${url#$BASE}" "$url"
 done
 
 if [ -f storage/logs/laravel.log ] && grep -qE '\.(ERROR|WARNING|CRITICAL)' storage/logs/laravel.log; then

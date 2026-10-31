@@ -27,6 +27,12 @@ Composer toma las versiones de los tags de este repo (no hace falta Packagist). 
 composer update encore/laravel-admin --with-dependencies
 ```
 
+Si la versión nueva trae cambios en los assets (JS/CSS), hay que republicarlos:
+
+```bash
+php artisan vendor:publish --tag=laravel-admin-assets --force
+```
+
 En Laravel 9/10, si el proyecto usa `admin:make` o migraciones con `renameColumn`/`change()`, tiene que pedir `doctrine/dbal` (`^3.0`) en su propio `composer.json`.
 
 ## Versiones

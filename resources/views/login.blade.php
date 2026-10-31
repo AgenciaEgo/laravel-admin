@@ -84,9 +84,11 @@
 </div>
 <!-- /.login-box -->
 
-<!-- jQuery 2.1.4 -->
-<script src="{{ admin_asset("vendor/laravel-admin/AdminLTE/plugins/jQuery/jQuery-2.1.4.min.js")}}"></script>
-<!-- Bootstrap 3.3.5 -->
+<script src="{{ Admin::jQuery() }}"></script>
+@if($jQueryMigrate = Admin::jQueryMigrate())
+<script src="{{ $jQueryMigrate }}"></script>
+@endif
+<!-- Bootstrap 3.4.1 -->
 <script src="{{ admin_asset("vendor/laravel-admin/AdminLTE/bootstrap/js/bootstrap.min.js")}}"></script>
 <!-- iCheck -->
 <script src="{{ admin_asset("vendor/laravel-admin/AdminLTE/plugins/iCheck/icheck.min.js")}}"></script>

@@ -16,6 +16,9 @@
     {!! Admin::css() !!}
 
     <script src="{{ Admin::jQuery() }}"></script>
+    @if($jQueryMigrate = Admin::jQueryMigrate())
+    <script src="{{ $jQueryMigrate }}"></script>
+    @endif
     {!! Admin::headerJs() !!}
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
