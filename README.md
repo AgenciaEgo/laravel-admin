@@ -39,6 +39,7 @@ En Laravel 9/10, si el proyecto usa `admin:make` o migraciones con `renameColumn
 
 Semver, siguiendo la línea 1.x de upstream. Cada release es un tag `vX.Y.Z` con su [GitHub Release](https://github.com/AgenciaEgo/laravel-admin/releases).
 
+- `1.10.0` — Bootstrap 3.4.1 y jQuery 3.7.1 (+ jquery-migrate) por XSS conocidos; datetimepicker 4.17.49. Requiere republicar los assets.
 - `1.9.0` — primer release del fork: soporte Laravel 9–13 y PHP 8.4+.
 
 ## Tests
