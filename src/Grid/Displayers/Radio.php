@@ -16,7 +16,8 @@ class Radio extends AbstractDisplayer
             'resource' => $this->getResource(),
             'trigger'  => "ie-trigger-{$this->getClassName()}",
             'target'   => "ie-template-{$this->getClassName()}",
-            'display'  => Arr::get($options, $this->getValue(), ''),
+            // Arr::get() with a null key returns the whole array
+            'display'  => is_null($this->getValue()) ? '' : Arr::get($options, $this->getValue(), ''),
             'options'  => $options,
         ]);
     }
