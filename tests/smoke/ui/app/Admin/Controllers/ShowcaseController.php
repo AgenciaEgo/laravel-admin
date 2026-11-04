@@ -133,11 +133,12 @@ class ShowcaseController extends AdminController
     protected function form()
     {
         $form = new Form(new Showcase());
+        $form->ignore(['password_virtual']);
 
         $form->fieldset('Basic inputs', function (Form $form) {
             $form->display('id', 'ID');
-            $form->text('title')->required()->help('Help text under a field');
-            $form->email('email');
+            $form->text('title')->required()->rules('required')->help('Help text under a field');
+            $form->email('email')->rules('nullable|email');
             $form->url('url');
             $form->ip('ip');
             $form->mobile('mobile');

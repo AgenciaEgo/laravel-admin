@@ -1210,13 +1210,13 @@ class Field implements Renderable
     {
         if ($this->horizontal) {
             return [
-                'label'      => "col-sm-{$this->width['label']} {$this->getLabelClass()}",
+                'label'      => trim("col-sm-{$this->width['label']} col-form-label text-sm-end {$this->getLabelClass()}"),
                 'field'      => "col-sm-{$this->width['field']}",
                 'form-group' => $this->getGroupClass(true),
             ];
         }
 
-        return ['label' => $this->getLabelClass(), 'field' => '', 'form-group' => ''];
+        return ['label' => trim("form-label {$this->getLabelClass()}"), 'field' => '', 'form-group' => trim('form-group mb-3 '.$this->getGroupClass())];
     }
 
     /**
@@ -1360,7 +1360,7 @@ class Field implements Renderable
      */
     protected function getGroupClass($default = false): string
     {
-        return ($default ? 'form-group ' : '').implode(' ', array_filter($this->groupClass));
+        return trim(($default ? 'form-group row mb-3 ' : '').implode(' ', array_filter($this->groupClass)));
     }
 
     /**

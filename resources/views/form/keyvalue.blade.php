@@ -1,6 +1,6 @@
 <div class="{{$viewClass['form-group']}}">
 
-    <label class="{{$viewClass['label']}} control-label">{{$label}}</label>
+    <label class="{{$viewClass['label']}}">{{$label}}</label>
 
     <div class="{{$viewClass['field']}}">
         <table class="table table-hover">
@@ -8,7 +8,7 @@
             <tr>
                 <th>{{ __('Key') }}</th>
                 <th>{{ __('Value') }}</th>
-                <th style="width: 75px;"></th>
+                <th style="width: 100px;"></th>
             </tr>
             </thead>
             <tbody class="kv-{{$column}}-table">
@@ -20,25 +20,25 @@
 
                 <tr>
                     <td>
-                        <div class="form-group {{ $errors->has($keysErrorKey) ? 'has-error' : '' }}">
+                        <div class="form-group row mb-3 {{ $errors->has($keysErrorKey) ? 'has-error' : '' }}">
                             <div class="col-sm-12">
                                 <input name="{{ $name }}[keys][]" value="{{ old("{$column}.keys.{$k}", $k) }}" class="form-control" required/>
 
                                 @if($errors->has($keysErrorKey))
                                     @foreach($errors->get($keysErrorKey) as $message)
-                                        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> {{$message}}</label><br/>
+                                        <div class="invalid-feedback d-block"><i class="fa fa-times-circle-o"></i> {{$message}}</div>
                                     @endforeach
                                 @endif
                             </div>
                         </div>
                     </td>
                     <td>
-                        <div class="form-group {{ $errors->has($valsErrorKey) ? 'has-error' : '' }}">
+                        <div class="form-group row mb-3 {{ $errors->has($valsErrorKey) ? 'has-error' : '' }}">
                             <div class="col-sm-12">
                                 <input name="{{ $name }}[values][]" value="{{ old("{$column}.values.{$k}", $v) }}" class="form-control" />
                                 @if($errors->has($valsErrorKey))
                                     @foreach($errors->get($valsErrorKey) as $message)
-                                        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> {{$message}}</label><br/>
+                                        <div class="invalid-feedback d-block"><i class="fa fa-times-circle-o"></i> {{$message}}</div>
                                     @endforeach
                                 @endif
                             </div>
@@ -47,8 +47,8 @@
 
                     <td class="form-group">
                         <div>
-                            <div class="{{$column}}-remove btn btn-warning btn-sm pull-right">
-                                <i class="fa fa-trash">&nbsp;</i>{{ __('admin.remove') }}
+                            <div class="{{$column}}-remove btn btn-warning btn-sm float-end">
+                                <i class="fa fa-trash"></i>&nbsp;{{ __('admin.remove') }}
                             </div>
                         </div>
                     </td>
@@ -60,7 +60,7 @@
                     <td></td>
                     <td></td>
                     <td>
-                        <div class="{{ $column }}-add btn btn-success btn-sm pull-right">
+                        <div class="{{ $column }}-add btn btn-success btn-sm float-end">
                             <i class="fa fa-save"></i>&nbsp;{{ __('admin.new') }}
                         </div>
                     </td>
@@ -71,14 +71,14 @@
     <template class="{{$column}}-tpl">
         <tr>
             <td>
-                <div class="form-group  ">
+                <div class="form-group row mb-3  ">
                     <div class="col-sm-12">
                         <input name="{{ $name }}[keys][]" class="form-control" required/>
                     </div>
                 </div>
             </td>
             <td>
-                <div class="form-group  ">
+                <div class="form-group row mb-3  ">
                     <div class="col-sm-12">
                         <input name="{{ $name }}[values][]" class="form-control" />
                     </div>
@@ -87,8 +87,8 @@
 
             <td class="form-group">
                 <div>
-                    <div class="{{$column}}-remove btn btn-warning btn-sm pull-right">
-                        <i class="fa fa-trash">&nbsp;</i>{{ __('admin.remove') }}
+                    <div class="{{$column}}-remove btn btn-warning btn-sm float-end">
+                        <i class="fa fa-trash"></i>&nbsp;{{ __('admin.remove') }}
                     </div>
                 </div>
             </td>

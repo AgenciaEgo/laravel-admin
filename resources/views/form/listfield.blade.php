@@ -3,13 +3,13 @@
 
 <div class="{{$viewClass['form-group']}} {{ $errors->has($listErrorKey) ? 'has-error' : '' }}">
 
-    <label class="{{$viewClass['label']}} control-label">{{$label}}</label>
+    <label class="{{$viewClass['label']}}">{{$label}}</label>
 
     <div class="{{$viewClass['field']}}">
 
         @if($errors->has($listErrorKey))
             @foreach($errors->get($listErrorKey) as $message)
-                <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> {{$message}}</label><br/>
+                <div class="invalid-feedback d-block"><i class="fa fa-times-circle-o"></i> {{$message}}</div>
             @endforeach
         @endif
 
@@ -23,21 +23,21 @@
 
                 <tr>
                     <td>
-                        <div class="form-group {{ $errors->has($itemErrorKey) ? 'has-error' : '' }}">
+                        <div class="form-group row mb-3 {{ $errors->has($itemErrorKey) ? 'has-error' : '' }}">
                             <div class="col-sm-12">
                                 <input name="{{ $column }}[values][]" value="{{ old("{$column}.values.{$k}", $v) }}" class="form-control" />
                                 @if($errors->has($itemErrorKey))
                                     @foreach($errors->get($itemErrorKey) as $message)
-                                        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> {{$message}}</label><br/>
+                                        <div class="invalid-feedback d-block"><i class="fa fa-times-circle-o"></i> {{$message}}</div>
                                     @endforeach
                                 @endif
                             </div>
                         </div>
                     </td>
 
-                    <td style="width: 75px;">
-                        <div class="{{$column}}-remove btn btn-warning btn-sm pull-right">
-                            <i class="fa fa-trash">&nbsp;</i>{{ __('admin.remove') }}
+                    <td style="width: 100px;">
+                        <div class="{{$column}}-remove btn btn-warning btn-sm float-end">
+                            <i class="fa fa-trash"></i>&nbsp;{{ __('admin.remove') }}
                         </div>
                     </td>
                 </tr>
@@ -47,7 +47,7 @@
                 <tr>
                     <td></td>
                     <td>
-                        <div class="{{ $column }}-add btn btn-success btn-sm pull-right">
+                        <div class="{{ $column }}-add btn btn-success btn-sm float-end">
                             <i class="fa fa-save"></i>&nbsp;{{ __('admin.new') }}
                         </div>
                     </td>
@@ -58,16 +58,16 @@
     <template class="{{$column}}-tpl">
         <tr>
             <td>
-                <div class="form-group">
+                <div class="form-group row mb-3">
                     <div class="col-sm-12">
                         <input name="{{ $column }}[values][]" class="form-control" />
                     </div>
                 </div>
             </td>
 
-            <td style="width: 75px;">
-                <div class="{{$column}}-remove btn btn-warning btn-sm pull-right">
-                    <i class="fa fa-trash">&nbsp;</i>{{ __('admin.remove') }}
+            <td style="width: 100px;">
+                <div class="{{$column}}-remove btn btn-warning btn-sm float-end">
+                    <i class="fa fa-trash"></i>&nbsp;{{ __('admin.remove') }}
                 </div>
             </td>
         </tr>

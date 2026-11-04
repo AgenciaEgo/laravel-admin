@@ -215,7 +215,7 @@ trait CanCascadeFields
         var default_value = '{$this->getValueByJs()}' + '';
         var class_name = event.class;
         if(default_value == event.value) {
-            $('.'+class_name+'').removeClass('hide');
+            $('.'+class_name+'').removeClass('d-none');
         }
     });
     
@@ -226,9 +226,9 @@ trait CanCascadeFields
         cascade_groups.forEach(function (event) {
             var group = $('div.cascade-group.'+event.class);
             if( operator_table[event.operator](checked, event.value) ) {
-                group.removeClass('hide');
+                group.removeClass('d-none');
             } else {
-                group.addClass('hide');
+                group.addClass('d-none');
             }
         });
     })

@@ -83,7 +83,7 @@ STYLE;
         Admin::style($style);
 
         $this->append = <<<HTML
-<div class="text-right textarea-picker">
+<div class="text-end textarea-picker">
     {$btn}
 </div>
 HTML;

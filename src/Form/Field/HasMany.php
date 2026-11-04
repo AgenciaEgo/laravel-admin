@@ -535,7 +535,7 @@ $('#has-many-{$this->column} > .nav').off('click', 'i.close-tab').on('click', 'i
     }else{
         \$pane.removeClass('active').find('.$removeClass').val(1);
     }
-    if(\$navTab.closest('li').hasClass('active')){
+    if(\$navTab.hasClass('active')){
         \$navTab.closest('li').remove();
         $('#has-many-{$this->column} > .nav > li:nth-child(1) > a').tab('show');
     }else{
@@ -557,11 +557,11 @@ $('#has-many-{$this->column} > .header').off('click', '.add').on('click', '.add'
 if ($('.has-error').length) {
     $('.has-error').parent('.tab-pane').each(function () {
         var tabId = '#'+$(this).attr('id');
-        $('li a[href="'+tabId+'"] i').removeClass('hide');
+        $('a[href="'+tabId+'"] i').removeClass('d-none');
     });
 
     var first = $('.has-error:first').parent().attr('id');
-    $('li a[href="#'+first+'"]').tab('show');
+    $('a[href="#'+first+'"]').tab('show');
 }
 EOT;
 
@@ -695,7 +695,7 @@ EOT;
                 $hidden[] = $field->render();
             } else {
                 /* Hide label and set field width 100% */
-                $field->setLabelClass(['hidden']);
+                $field->setLabelClass(['d-none']);
                 $field->setWidth(12, 0);
                 $fields[] = $field->render();
                 $headers[] = $field->label();

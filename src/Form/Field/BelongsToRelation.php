@@ -81,10 +81,8 @@ trait BelongsToRelation
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content" style="border-radius: 5px;">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <h4 class="modal-title">{$trans['choose']}</h4>
+        <h5 class="modal-title">{$trans['choose']}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
       <div class="loading text-center">
@@ -92,7 +90,7 @@ trait BelongsToRelation
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">{$trans['cancal']}</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{$trans['cancal']}</button>
         <button type="button" class="btn btn-primary submit">{$trans['submit']}</button>
       </div>
     </div>

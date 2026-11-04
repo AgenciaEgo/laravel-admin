@@ -113,7 +113,8 @@ const SHOTS = [
     ['57-showcase-form-iconpicker', '/admin/showcases/create', (p) => focus(p, 'input#icon')],
     ['58-showcase-form-select2-tags', '/admin/showcases/1/edit', (p) => click(p, '.form-group:has(select[name="tags[]"]) .select2-selection')],
     ['59-showcase-form-validation', '/admin/showcases/create', async (p) => {
-        await p.evaluate(() => { document.querySelector('input#title')?.removeAttribute('required'); });
+        // skip HTML5 validation so the server-side errors get rendered
+        await p.evaluate(() => { document.querySelectorAll('form').forEach((f) => { f.noValidate = true; }); });
         await Promise.all([
             p.waitForNavigation({ timeout: 8000 }).catch(() => {}),
             p.evaluate(() => [...document.querySelectorAll('button[type="submit"]')].find((b) => b.offsetParent)?.click()),
