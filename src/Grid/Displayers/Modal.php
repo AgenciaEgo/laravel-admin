@@ -47,7 +47,7 @@ class Modal extends AbstractDisplayer
         }
 
         return Admin::component('admin::components.column-modal', [
-            'url'     => $this->getLoadUrl(),
+            'url'     => $async ? $this->getLoadUrl() : '',
             'async'   => $async,
             'grid'    => is_subclass_of($callback, Simple::class),
             'title'   => $title,

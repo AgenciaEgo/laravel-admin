@@ -4,12 +4,13 @@ Fork de `z-song/laravel-admin` (`encore/laravel-admin`), el paquete de CMS admin
 
 ## Por qué existe este fork
 
-Este paquete es consumido por **sullair-click** (Laravel 9, PHP 8.3), un sitio de concursos fotográficos cuyo panel admin (montado bajo el prefijo de ruta `cms`, no `/admin`) depende de él directamente en **31 archivos** de `app/Admin` (clases `Encore\Admin\*`). Reemplazarlo por otra solución (ej. Filament) implicaría reescribir todo eso, así que se decidió forkearlo y mantenerlo en paralelo a los upgrades de PHP/Laravel que sullair-click necesita por los EOL de Azure.
+Este paquete es consumido por **sullair-click** (Laravel 13, PHP 8.3), un sitio de concursos fotográficos cuyo panel admin (montado bajo el prefijo de ruta `cms`, no `/admin`) depende de él directamente en **31 archivos** de `app/Admin` (clases `Encore\Admin\*`). Reemplazarlo por otra solución (ej. Filament) implicaría reescribir todo eso, así que se decidió forkearlo y mantenerlo en paralelo a los upgrades de PHP/Laravel que sullair-click necesita por los EOL de Azure.
 
 Cronología relevante en sullair-click:
 - PHP 8.2 → 8.3 (Azure EOL de 8.2): el paquete original en `^1.8.19` sobrevivió sin cambios de código.
 - MySQL 8.0 → 8.4 (EOL de 8.0): también sin fricción del lado del paquete.
-- Próximo salto grande previsto: **Laravel 9 → 10/11/12**. Ahí es donde se espera que el paquete original empiece a romper de verdad (bindings de service providers, cambios en el query builder, etc.) — ese es el motivo concreto de tener este fork listo antes de necesitarlo con urgencia.
+- Laravel 9 → 10 → 11 → 12 → 13 (oct/nov-2026), ya sobre este fork (1.9.x/1.10.x). En el camino sullair-click dejó de usar `laravel-admin-ext/helpers` y pasó a pedir `doctrine/dbal ^3.0` por su cuenta.
+- Próximo paso: **2.0 = UI en Bootstrap 5 + AdminLTE 4**, en la rama `ui-upgrade` (ver instrucción 2).
 
 ## Cómo lo consume sullair-click
 
@@ -20,25 +21,23 @@ En el `composer.json` de sullair-click:
   { "type": "vcs", "url": "https://github.com/AgenciaEgo/laravel-admin" }
 ],
 "require": {
-  "encore/laravel-admin": "dev-master as 1.8.19"
+  "encore/laravel-admin": "^1.10.0"
 }
 ```
 
-Esto le dice a Composer: traé el paquete desde este repo Git (rama `master`), pero hacé como si fuera la versión `1.8.19` (alias) — así `laravel-admin-ext/helpers` (otra dependencia de sullair-click, que pide `~1.6`) queda satisfecha sin tener que tocarla también.
+Composer resuelve el paquete desde los tags `vX.Y.Z` de este repo. Para que sullair-click reciba un release nuevo: `composer update encore/laravel-admin --with-dependencies` (y, si el release toca [resources/assets/](resources/assets/), republicar assets — ver pendientes). Históricamente usó `dev-master as 1.8.19` mientras dependía de `laravel-admin-ext/helpers` (`~1.6`); ya no hace falta.
 
-Para que sullair-click reciba cambios nuevos de este fork: `composer update encore/laravel-admin --with-dependencies` (el alias de versión ya queda fijo, no hace falta cambiarlo en cada update).
-
-Una vez publicado el tag `v1.9.0`, lo previsto es pasar a una constraint normal sobre releases (`"encore/laravel-admin": "^1.9"`, manteniendo el bloque `repositories`), que también satisface el `~1.6` de helpers sin alias.
+Para probar una rama sin release (ej. `ui-upgrade`), en una rama propia de sullair-click: `"encore/laravel-admin": "dev-ui-upgrade as 2.0.0"` (rama pusheada) o un path repository a este working copy.
 
 Al momento de crear este fork, su `composer.json` era una copia sin tocar del original (`"name": "encore/laravel-admin"`, `"php": ">=7.0.0"`, `"laravel/framework": ">=5.5"`, `"symfony/dom-crawler": "~3.1|~4.0|~5.0"`, `"doctrine/dbal": "2.*|3.*"`) — todavía sin ningún parche propio.
 
 ## Instrucciones para trabajar en este repo
 
 1. **No renombrar el paquete.** Tiene que seguir siendo `"name": "encore/laravel-admin"` en `composer.json` — sullair-click (y cualquier otro consumidor futuro) lo importa por ese nombre exacto. Cambiarlo rompe la resolución de Composer del lado consumidor.
-2. **Trabajar sobre `master`** (decisión ya tomada por el usuario — no crear branches de feature separadas salvo que se indique lo contrario).
+2. **Trabajar sobre `master`** (decisión ya tomada por el usuario — no crear branches de feature separadas salvo que se indique lo contrario). **Excepción acordada:** la migración de UI a Bootstrap 5 + AdminLTE 4 (futura 2.0) vive en la rama `ui-upgrade`, con plan, inventario y decisiones en `docs/ui-upgrade.md` (en esa rama) y arnés de capturas en `tests/smoke/ui/`. `master` se queda en 1.x/Bootstrap 3 hasta que el usuario decida mergear; los fixes de 1.x van a `master` y se mergean hacia `ui-upgrade`. sullair-click la prueba desde su propia rama paralela, idealmente contra una copia de su base (el iconpicker nuevo guarda nombres FA6 en `admin_menu.icon`, que FA4 no muestra).
 3. **Objetivo de los upgrades:** cuando el usuario lo pida, actualizar las constraints de `composer.json` (`php`, `laravel/framework`, `symfony/dom-crawler`, `doctrine/dbal`, etc.) para soportar versiones más nuevas de Laravel y PHP, y parchear el código fuente donde haga falta (deprecations, cambios de firma del framework, etc.). Probablemente incremental, a medida que sullair-click vaya subiendo de versión — no asumir que hay que saltar directo a la última versión de Laravel sin que el usuario lo confirme.
 4. **Validar siempre contra el consumidor real**, nunca en el vacío — los cambios de este fork solo importan si sullair-click sigue funcionando. Flujo de prueba típico: cambiar algo acá → pushear a `master` → en sullair-click, `composer update encore/laravel-admin --with-dependencies` → `php artisan serve` → chequear home pública + `/cms/auth/login` + al menos un CRUD real logueado. (sullair-click corre localmente con MySQL 8.4 en Docker — si algo da 500 apenas arranca, lo primero a chequear es si el contenedor está levantado, no el código del fork.)
-5. **Releases/versionado** (decidido con el usuario, oct-2026): semver continuando la línea 1.x de upstream, tags `vMAJOR.MINOR.PATCH`. Primer release del fork: **`v1.9.0`** (soporte Laravel 9–13). Se queda en 1.x mientras sullair-click dependa de `laravel-admin-ext/helpers` (`~1.6`); el salto a **2.0** está previsto recién cuando todo esté probado en sullair-click — no adelantarlo. Nada de sufijos tipo `-sullair.1` (Composer los trata como pre-release). Proceso: subir `Admin::VERSION` en [src/Admin.php](src/Admin.php) en un commit en `master` → pushear → con CI verde, pushear el tag `vX.Y.Z` → [.github/workflows/release.yml](.github/workflows/release.yml) valida que el tag coincida con `Admin::VERSION` y esté en `master`, corre toda la matriz y publica el GitHub Release con notas auto-generadas. Crear/pushear tags solo cuando el usuario lo pida.
+5. **Releases/versionado** (decidido con el usuario, oct-2026): semver continuando la línea 1.x de upstream, tags `vMAJOR.MINOR.PATCH`. Primer release del fork: **`v1.9.0`** (soporte Laravel 9–13). La **2.0** es la migración de UI (rama `ui-upgrade`, rompe el HTML de los consumidores); sale recién cuando esté probada en sullair-click — no adelantarla. Nada de sufijos tipo `-sullair.1` (Composer los trata como pre-release). Proceso: subir `Admin::VERSION` en [src/Admin.php](src/Admin.php) en un commit en `master` → pushear → con CI verde, pushear el tag `vX.Y.Z` → [.github/workflows/release.yml](.github/workflows/release.yml) valida que el tag coincida con `Admin::VERSION` y esté en `master`, corre toda la matriz y publica el GitHub Release con notas auto-generadas. Crear/pushear tags solo cuando el usuario lo pida.
 6. **Nunca tocar `z-song/laravel-admin`** (el repo original). Este fork es independiente; cualquier sync con upstream sería un merge manual y deliberado que el usuario debe pedir explícitamente, nunca algo a automatizar por iniciativa propia.
 
 ## Mapa del codebase
@@ -53,7 +52,7 @@ Estado de partida: `master` = último commit upstream (`67c441eb`, 2023-02-03), 
 - **Auto-discovery:** registra `Encore\Admin\AdminServiceProvider` y el alias `Admin` → `Encore\Admin\Facades\Admin`.
 - **Frontend:** no hay build (sin npm/webpack). Todos los assets vienen vendoreados en [resources/assets/](resources/assets/) y se publican a `public/vendor/laravel-admin`: AdminLTE 2.3 + Bootstrap 3.4.1, jQuery 3.7.1 + jquery-migrate 3.6 (`HasAssets::$jQuery`/`$jQueryMigrate`, cargados en `index` y `login`) + jquery-pjax, Font Awesome 4, bootstrap-fileinput, bootstrap-switch, bootstrap3-editable, eonasdan datetimepicker 4.17.49 + moment, flatpickr, iconpicker, nestable, nprogress, sweetalert2, toastr, duallistbox.
 
-Versiones efectivamente instaladas en sullair-click (composer.lock, oct-2026): laravel/framework v9.52.22, doctrine/dbal 3.10.6, symfony/dom-crawler v5.4.52, intervention/image 2.7.2, laravel-admin-ext/helpers v1.2. PHP local 8.3.
+Versiones efectivamente instaladas en sullair-click (composer.lock, nov-2026): encore/laravel-admin v1.10.1, laravel/framework v13.40.0, doctrine/dbal 3.10.6 (pedido por sullair-click), symfony/dom-crawler v7.4.22, intervention/image 2.7.2, maatwebsite/excel 3.1. PHP local 8.3.
 
 ### Estructura de `src/` (~300 archivos, namespace `Encore\Admin\`)
 
@@ -92,8 +91,7 @@ Cambios hechos para llegar ahí:
 
 Pendientes conocidos:
 - **Assets publicados en consumidores:** sullair-click commitea `public/vendor/laravel-admin`. Cuando un cambio del fork toca [resources/assets/](resources/assets/), el consumidor tiene que correr `php artisan vendor:publish --tag=laravel-admin-assets --force` y commitear el resultado; si no, el layout pide archivos que no existen (ej. sin jQuery el panel entero deja de funcionar).
-- **sullair-click en Laravel 9/10** tiene migraciones con `renameColumn`, que necesitan `doctrine/dbal`: debe pedirlo en su propio `composer.json` (`^3.0`), ya no le llega por este paquete.
-- **`laravel-admin-ext/helpers`** (usado por sullair-click: scaffold, terminal DB/artisan, rutas) usa `Request::get()` → rompe con Symfony 8 y emite deprecations con 7.4. No es parte de este fork.
+- **Consumidores con `laravel-admin-ext/helpers`**: usa `Request::get()` → rompe con Symfony 8 y emite deprecations con 7.4. No es parte de este fork (sullair-click ya no lo usa).
 - **`intervention/image ~2.3`** sigue siendo la API soportada por `Image`/`ImageField`/`MultipleImage`; v3 rompe.
-- **`ExcelExporter`** requiere `maatwebsite/excel` (no declarado ni en `suggest`).
+- **`ExcelExporter`** requiere `maatwebsite/excel` (no declarado ni en `suggest`; sullair-click lo pide por su cuenta).
 - **Tests/dev deps** de upstream (`fzaninotto/faker`, `browser-kit-testing ^6`) siguen sin correr en Laravel nuevo; la validación real es contra apps reales.

@@ -98,6 +98,21 @@ class AdminSmokeTest extends TestCase
             $this->check($label, $this->get($prefix.$uri));
         }
 
+        // grid features the built-in controllers don't use
+        \Illuminate\Support\Facades\Route::middleware(config('admin.route.middleware'))->get("$prefix/smoke-grid", function (\Encore\Admin\Layout\Content $content) {
+            $grid = new \Encore\Admin\Grid(new Administrator());
+            $grid->column('username')->expand(function () {
+                return "expanded {$this->username}";
+            });
+            $grid->column('name')->modal('Modal', function () {
+                return "modal {$this->name}";
+            });
+            $grid->quickSearch('username');
+
+            return $content->body($grid);
+        });
+        $this->check('grid expand/modal/quick search', $this->get("$prefix/smoke-grid?__search__=adm"));
+
         // pjax (symfony/dom-crawler)
         $this->check('pjax users grid', $this->get("$prefix/auth/users", ['X-PJAX' => 'true', 'X-PJAX-Container' => '#pjax-container']));
 
