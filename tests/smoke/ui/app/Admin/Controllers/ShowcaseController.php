@@ -164,7 +164,10 @@ class ShowcaseController extends AdminController
             $form->checkbox('checkbox')->options(self::OPTIONS);
             $form->checkboxButton('checkbox_button', 'Checkbox button')->options(self::OPTIONS);
             $form->checkboxCard('checkbox_card', 'Checkbox card')->options(self::OPTIONS);
-            $form->switch('switch');
+            $form->switch('switch')->states([ // same states as sullair-click
+                'on'  => ['value' => 1, 'text' => 'SI', 'color' => 'primary'],
+                'off' => ['value' => 0, 'text' => 'NO', 'color' => 'danger'],
+            ]);
             $form->listbox('listbox')->options(self::OPTIONS);
             $form->tags('tags');
             $form->icon('icon');
@@ -204,6 +207,7 @@ class ShowcaseController extends AdminController
                 $form->text('name');
                 $form->number('qty');
                 $form->select('kind')->options(self::OPTIONS);
+                $form->switch('active');
             });
             $form->hasMany('tableItems', 'Has many (table)', function (Form\NestedForm $form) {
                 $form->text('name');
@@ -259,7 +263,10 @@ class ShowcaseController extends AdminController
                 $form->text('name')->required();
                 $form->email('email');
                 $form->select('select')->options(self::OPTIONS);
-                $form->switch('switch');
+                $form->switch('switch')->states([ // same states as sullair-click
+                'on'  => ['value' => 1, 'text' => 'SI', 'color' => 'primary'],
+                'off' => ['value' => 0, 'text' => 'NO', 'color' => 'danger'],
+            ]);
                 $form->datetime('datetime');
                 $row->column(6, new Widgets\Box('Widgets\Form', $form));
                 $row->column(6, new Widgets\Box('Buttons & labels', implode(' ', [

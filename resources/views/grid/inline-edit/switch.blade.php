@@ -1,53 +1,40 @@
-<input type="checkbox" class="{{ $class }}" {{ $checked }} data-key="{{ $key }}" />
+<div class="form-check form-switch la-grid-switch m-0">
+    <input type="checkbox" role="switch" class="form-check-input {{ $class }} {{ $colors }}" {{ $checked }} data-key="{{ $key }}" />
+</div>
 
 <script>
-    $('.{{ $class }}').bootstrapSwitch({
-        size:'mini',
-        onText: '{{ $states['on']['text'] }}',
-        offText: '{{ $states['off']['text'] }}',
-        onColor: '{{ $states['on']['color'] }}',
-        offColor: '{{ $states['off']['color'] }}',
-        onSwitchChange: function(event, state){
+    // native Bootstrap 5 switch; on a failed save the switch goes back to its previous state
+    $('.{{ $class }}').off('change.la-switch').on('change.la-switch', function () {
+        var $switch = $(this);
+        var checked = this.checked;
+        var revert = function () { $switch.prop('checked', !checked); };
 
-            $(this).val(state ? {{ $states['on']['value'] }} : {{ $states['off']['value'] }});
-
-            var key = $(this).data('key');
-            var value = $(this).val();
-            var _status = true;
-
-            $.ajax({
-                url: "{{ $resource }}/" + key,
-                type: "POST",
-                async:false,
-                data: {
-                    "{{ $name }}": value,
-                    _token: LA.token,
-                    _method: 'PUT',
-                    _edit_inline: true
-                },
-                success: function (data) {
-                    if (data.status)
-                        toastr.success(data.message);
-                    else
-                        toastr.warning(data.message);
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    _status = false;
-                    var data = xhr.responseJSON
-                    if (data['errors'] || data['message']) {
-                        var message = data['message'] || Object.values(data['errors']).join("\n");
-                        toastr.error(message);
-                    } else {
-                        toastr.error('Error: ' + errorThrown);
-                    }
-                },
-                complete:function(xhr,status) {
-                    if (status == 'success')
-                        _status = xhr.responseJSON.status;
+        $.ajax({
+            url: "{{ $resource }}/" + $switch.data('key'),
+            type: "POST",
+            data: {
+                "{{ $name }}": checked ? @json($states['on']['value']) : @json($states['off']['value']),
+                _token: LA.token,
+                _method: 'PUT',
+                _edit_inline: true
+            },
+            success: function (data) {
+                if (data.status) {
+                    toastr.success(data.message);
+                } else {
+                    revert();
+                    toastr.warning(data.message);
                 }
-            });
-
-            return _status;
-        }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                revert();
+                var data = xhr.responseJSON || {};
+                if (data['errors'] || data['message']) {
+                    toastr.error(data['message'] || Object.values(data['errors']).join("\n"));
+                } else {
+                    toastr.error('Error: ' + errorThrown);
+                }
+            }
+        });
     });
 </script>

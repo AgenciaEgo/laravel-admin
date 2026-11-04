@@ -3,6 +3,7 @@
 namespace Encore\Admin\Grid\Displayers;
 
 use Encore\Admin\Admin;
+use Encore\Admin\Form\Field\SwitchField;
 use Illuminate\Support\Arr;
 
 class SwitchDisplay extends AbstractDisplayer
@@ -37,6 +38,7 @@ class SwitchDisplay extends AbstractDisplayer
             'name'     => $this->getPayloadName(),
             'states'   => $this->states,
             'checked'  => $this->states['on']['value'] == $this->getValue() ? 'checked' : '',
+            'colors'   => SwitchField::colorClasses($this->states),
         ]);
     }
 }

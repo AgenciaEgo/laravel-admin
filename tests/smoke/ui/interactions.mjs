@@ -104,6 +104,14 @@ async function select2Type(page, selectSelector, text) {
     await sleep(200);
 }
 
+async function clickEl(page, selector) {
+    const el = await page.$(selector);
+    if (!el) throw new Error(`no element ${selector}`);
+    await el.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await el.click();
+    await sleep(150);
+}
+
 const isSelect2 = (page, selector) => page.evaluate((sel) => $(sel).length > 0 && $(sel).toArray().every((el) => $(el).hasClass('select2-hidden-accessible')), selector);
 
 // --- run ---
@@ -140,6 +148,7 @@ try {
     await page.evaluate(() => document.querySelector('#has-many-items .add').click());
     await sleep(300);
     check('select2: initialised in a hasMany row added later', await isSelect2(page, '#has-many-items .has-many-items-form select.items.kind'));
+    check('switch: rendered in a hasMany row added later', await page.evaluate(() => $('#has-many-items .has-many-items-form input.items.active.la_checkbox').length === 1));
 
     // --- select2: values picked in the UI reach the database ---
     const title = `Interactions ${Date.now()}`;
@@ -151,6 +160,8 @@ try {
     await select2Type(page, 'select.tags', 'blue');
     await page.type('#has-many-items .has-many-items-form input.items.name', 'Row added in the UI');
     await select2Pick(page, '#has-many-items .has-many-items-form select.items.kind', 'Beta');
+    await clickEl(page, 'input.switch.la_checkbox');
+    await clickEl(page, '#has-many-items .has-many-items-form input.items.active.la_checkbox');
     await mark(page);
     await submit(page, { afterSave: 1 });
     const [row] = sql(`select * from showcases where title = '${title}'`);
@@ -163,8 +174,9 @@ try {
     check('select2 multipleSelect: saved', same(json(row.multiple_select), ['a', 'c']), row.multiple_select);
     // Tags::prepare() implodes the tags (then the model's array cast encodes that string)
     check('select2 tags: saved (new tags typed in)', json(row.tags) === 'red,blue', row.tags);
-    const items = sql(`select name, kind from showcase_items where showcase_id = ${row.id}`);
-    check('select2 in hasMany row: saved', same(items, [{ name: 'Row added in the UI', kind: 'b' }]), JSON.stringify(items));
+    check('switch: turned on, saved as the "on" value', row.switch === 1, row.switch);
+    const items = sql(`select name, kind, active from showcase_items where showcase_id = ${row.id}`);
+    check('select2 + switch in a hasMany row: saved', same(items, [{ name: 'Row added in the UI', kind: 'b', active: 1 }]), JSON.stringify(items));
 
     // --- select2: edit page shows the stored values ---
     await page.goto(`${BASE}/admin/showcases/${row.id}/edit`, { waitUntil: 'networkidle0' });
@@ -173,13 +185,16 @@ try {
         multiple: $('select.multiple_select').val(),
         tags: $('select.tags').val(),
         rendered: $('select.select').next('.select2').find('.select2-selection__rendered').text().trim(),
+        switchOn: $('input.switch.la_checkbox').prop('checked'),
     }));
+    check('switch: edit page shows it on', shown.switchOn === true, JSON.stringify(shown));
     check('select2: edit page shows stored values', shown.select === 'c' && same(shown.multiple, ['a', 'c']) && same(shown.tags, ['red', 'blue']) && shown.rendered.includes('Gamma'), JSON.stringify(shown));
 
     // --- select2: old input survives a validation error ---
     await page.evaluate(() => { document.querySelector('input#title').value = ''; });
     await select2Pick(page, 'select.select', 'Beta');
     await select2Pick(page, 'select.multiple_select', 'Beta');
+    await clickEl(page, 'input.switch.la_checkbox');
     await mark(page);
     await submit(page);
     const afterError = await page.evaluate(() => ({
@@ -187,11 +202,54 @@ try {
         select: $('select.select').val(),
         multiple: $('select.multiple_select').val(),
         tags: $('select.tags').val(),
+        switchOn: $('input.switch.la_checkbox').prop('checked'),
+        switchHidden: $('input[type="hidden"][name="switch"]').val(),
     }));
     check('validation: error page via pjax, on the edit url', afterError.errors > 0 && page.url().endsWith(`/admin/showcases/${row.id}/edit`) && await notReloaded(page), `${page.url()} errors=${afterError.errors}`);
     check('select2: old input kept after a validation error', afterError.select === 'b' && same(afterError.multiple, ['a', 'b', 'c']) && same(afterError.tags, ['red', 'blue']), JSON.stringify(afterError));
+    check('switch: old input kept after a validation error (turned off)', afterError.switchOn === false && afterError.switchHidden === 'off', JSON.stringify(afterError));
     const [unchanged] = sql(`select select_ from (select "select" as select_ from showcases where id = ${row.id})`);
     check('validation: nothing saved', unchanged.select_ === 'c', unchanged.select_);
+
+    // a valid save with the switch off stores the "off" value
+    await page.type('input#title', title);
+    await submit(page, { afterSave: 1 });
+    const [off] = sql(`select switch from showcases where id = ${row.id}`);
+    check('switch: turned off, saved as the "off" value', off.switch === 0, off.switch);
+
+    // grid switch: toggling it in the list saves through the inline-edit endpoint
+    // TODO(phase 4): drop this stub. x-editable is not loaded until the grid phase and the
+    // showcase grid uses ->editable(); its error would abort every page script after it
+    // (they all run inside one $(function () {...})), the switch handler included.
+    const stub = await page.evaluateOnNewDocument(() => {
+        let jq;
+        Object.defineProperty(window, 'jQuery', {
+            configurable: true,
+            get: () => jq,
+            set: (v) => {
+                jq = v;
+                if (v && v.fn && !v.fn.editable) {
+                    v.fn.editable = function () { return this; };
+                    v.fn.editable.defaults = {};
+                }
+            },
+        });
+    });
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await page.removeScriptToEvaluateOnNewDocument(stub.identifier);
+    const gridSwitch = `input.grid-switch-switch[data-key="${row.id}"]`;
+    const toggleInGrid = async () => {
+        if (!(await page.$(gridSwitch))) throw new Error(`no grid switch ${gridSwitch}`);
+        const saved = page.waitForResponse((r) => r.url().endsWith(`/admin/showcases/${row.id}`) && r.request().method() === 'POST', { timeout: 5000 });
+        await clickEl(page, gridSwitch);
+        return (await saved).status();
+    };
+    const onStatus = await toggleInGrid();
+    const [gridOn] = sql(`select switch from showcases where id = ${row.id}`);
+    check('grid switch: turned on in the list, saved', onStatus === 200 && gridOn.switch === 1, `http ${onStatus}, db ${gridOn.switch}`);
+    const offStatus = await toggleInGrid();
+    const [gridOff] = sql(`select switch from showcases where id = ${row.id}`);
+    check('grid switch: turned off in the list, saved', offStatus === 200 && gridOff.switch === 0, `http ${offStatus}, db ${gridOff.switch}`);
 
     // cleanup
     sql(`delete from showcase_items where showcase_id = ${row.id}`);

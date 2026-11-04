@@ -65,6 +65,7 @@ return new class extends Migration {
             $table->string('name');
             $table->integer('qty')->default(1);
             $table->string('kind')->nullable();
+            $table->boolean('active')->default(false);
             $table->timestamps();
         });
     }
