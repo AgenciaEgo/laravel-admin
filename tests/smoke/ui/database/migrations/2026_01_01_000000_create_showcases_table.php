@@ -41,6 +41,7 @@ return new class extends Migration {
             $table->time('time_start')->nullable();
             $table->time('time_end')->nullable();
             $table->string('date_multiple')->nullable();
+            $table->string('date_dmy')->nullable();
             $table->string('icon')->nullable();
             $table->text('tags')->nullable();
             $table->text('listbox')->nullable();

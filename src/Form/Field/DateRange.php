@@ -7,12 +7,14 @@ use Encore\Admin\Form\Field;
 class DateRange extends Field
 {
     protected static $css = [
-        '/vendor/laravel-admin/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css',
+        '/vendor/laravel-admin/flatpickr/dist/flatpickr.min.css',
+        '/vendor/laravel-admin/flatpickr/dist/plugins/monthSelect/style.css',
     ];
 
     protected static $js = [
-        '/vendor/laravel-admin/moment/min/moment-with-locales.min.js',
-        '/vendor/laravel-admin/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js',
+        '/vendor/laravel-admin/flatpickr/dist/flatpickr.min.js',
+        '/vendor/laravel-admin/flatpickr/dist/l10n/index.js',
+        '/vendor/laravel-admin/flatpickr/dist/plugins/monthSelect/index.js',
     ];
 
     protected $format = 'YYYY-MM-DD';
@@ -52,20 +54,12 @@ class DateRange extends Field
     {
         $this->options['locale'] = array_key_exists('locale', $this->options) ? $this->options['locale'] : config('app.locale');
 
-        $startOptions = json_encode($this->options);
-        $endOptions = json_encode($this->options + ['useCurrent' => false]);
+        $options = json_encode($this->options);
 
         $class = $this->getElementClassSelector();
 
         $this->script = <<<EOT
-            $('{$class['start']}').datetimepicker($startOptions);
-            $('{$class['end']}').datetimepicker($endOptions);
-            $("{$class['start']}").on("dp.change", function (e) {
-                $('{$class['end']}').data("DateTimePicker").minDate(e.date);
-            });
-            $("{$class['end']}").on("dp.change", function (e) {
-                $('{$class['start']}').data("DateTimePicker").maxDate(e.date);
-            });
+            $.admin.datetimeRange('{$class['start']}', '{$class['end']}', $options);
 EOT;
 
         return parent::render();

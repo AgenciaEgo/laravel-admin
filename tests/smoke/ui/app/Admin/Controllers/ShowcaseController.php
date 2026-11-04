@@ -175,6 +175,8 @@ class ShowcaseController extends AdminController
 
         $form->fieldset('Dates', function (Form $form) {
             $form->date('date');
+            // like sullair-click's contest dates, with a Spanish calendar
+            $form->date('date_dmy', 'Date (DD/MM/YYYY)')->format('DD/MM/YYYY')->options(['locale' => 'es']);
             $form->datetime('datetime');
             $form->time('time');
             $form->month('month');

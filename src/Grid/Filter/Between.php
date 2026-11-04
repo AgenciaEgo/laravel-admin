@@ -112,18 +112,10 @@ class Between extends AbstractFilter
         $options['format'] = Arr::get($options, 'format', 'YYYY-MM-DD HH:mm:ss');
         $options['locale'] = Arr::get($options, 'locale', config('app.locale'));
 
-        $startOptions = json_encode($options);
-        $endOptions = json_encode($options + ['useCurrent' => false]);
+        $options = json_encode($options);
 
         $script = <<<EOT
-            $('#{$this->id['start']}').datetimepicker($startOptions);
-            $('#{$this->id['end']}').datetimepicker($endOptions);
-            $("#{$this->id['start']}").on("dp.change", function (e) {
-                $('#{$this->id['end']}').data("DateTimePicker").minDate(e.date);
-            });
-            $("#{$this->id['end']}").on("dp.change", function (e) {
-                $('#{$this->id['start']}').data("DateTimePicker").maxDate(e.date);
-            });
+            $.admin.datetimeRange('#{$this->id['start']}', '#{$this->id['end']}', $options);
 EOT;
 
         Admin::script($script);

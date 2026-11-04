@@ -11,9 +11,9 @@ class DateMultiple extends Text
     ];
 
     protected static $js = [
-        '/vendor/laravel-admin/flatpickr/dist/flatpickr.js',
+        '/vendor/laravel-admin/flatpickr/dist/flatpickr.min.js',
+        '/vendor/laravel-admin/flatpickr/dist/l10n/index.js',
         '/vendor/laravel-admin/flatpickr/dist/shortcut-buttons-flatpickr/shortcut-buttons-flatpickr.min.js',
-        '/vendor/laravel-admin/flatpickr/dist/l10n/zh.js',
     ];
 
     protected $format = 'YYYY-MM-DD';
@@ -40,7 +40,7 @@ class DateMultiple extends Text
         $this->options['locale'] = array_key_exists('locale', $this->options) ? $this->options['locale'] : config('app.locale');
         $this->options['allowInputToggle'] = true;
 
-        $this->script = "$('{$this->getElementClassSelector()}').flatpickr({mode: 'multiple',dateFormat: 'Y-m-d', locale: 'zh', plugins: [
+        $this->script = "$('{$this->getElementClassSelector()}').flatpickr({mode: 'multiple',dateFormat: 'Y-m-d', locale: $.admin.flatpickrLocale('{$this->options['locale']}'), plugins: [
             ShortcutButtonsPlugin({
               button: {
                 label: 'Clear',

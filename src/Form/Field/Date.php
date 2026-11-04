@@ -5,12 +5,14 @@ namespace Encore\Admin\Form\Field;
 class Date extends Text
 {
     protected static $css = [
-        '/vendor/laravel-admin/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css',
+        '/vendor/laravel-admin/flatpickr/dist/flatpickr.min.css',
+        '/vendor/laravel-admin/flatpickr/dist/plugins/monthSelect/style.css',
     ];
 
     protected static $js = [
-        '/vendor/laravel-admin/moment/min/moment-with-locales.min.js',
-        '/vendor/laravel-admin/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js',
+        '/vendor/laravel-admin/flatpickr/dist/flatpickr.min.js',
+        '/vendor/laravel-admin/flatpickr/dist/l10n/index.js',
+        '/vendor/laravel-admin/flatpickr/dist/plugins/monthSelect/index.js',
     ];
 
     protected $format = 'YYYY-MM-DD';
@@ -35,9 +37,8 @@ class Date extends Text
     {
         $this->options['format'] = $this->format;
         $this->options['locale'] = array_key_exists('locale', $this->options) ? $this->options['locale'] : config('app.locale');
-        $this->options['allowInputToggle'] = true;
-
-        $this->script = "$('{$this->getElementClassSelector()}').parent().datetimepicker(".json_encode($this->options).');';
+        // flatpickr through the eonasdan-compatible adapter in laravel-admin.js
+        $this->script = "$.admin.datetimepicker('{$this->getElementClassSelector()}', ".json_encode($this->options).');';
 
         $this->prepend('<i class="fa fa-calendar fa-fw"></i>')
             ->defaultAttribute('style', 'width: 110px');

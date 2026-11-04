@@ -23,14 +23,15 @@
             @slot('shown')
             var $input  = $popover.find('.ie-input');
 
-            $popover.find('.ie-container').datetimepicker({
+            $.admin.datetimepicker($input, {
                 inline: true,
+                appendTo: $popover.find('.ie-container')[0],
                 format: '{{ $format }}',
-                date: $input.val(),
-                locale: '{{ $locale }}'
-            }).on('dp.change', function (event) {
-                var date = event.date.format('{{ $format }}');
-                $input.val(date);
+                defaultDate: $input.val() || null,
+                locale: '{{ $locale }}',
+                onChange: function (dates, value) {
+                    $input.val(value);
+                }
             });
             @endslot
         @endcomponent

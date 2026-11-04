@@ -112,6 +112,41 @@ async function clickEl(page, selector) {
     await sleep(150);
 }
 
+// --- flatpickr helpers: open the calendar from the input and click in it ---
+async function openPicker(page, selector) {
+    await clickEl(page, selector);
+    await page.waitForSelector('.flatpickr-calendar.open', { visible: true, timeout: 3000 });
+}
+async function pickDay(page, day) {
+    const cell = await page.evaluateHandle((day) => [...document.querySelectorAll('.flatpickr-calendar.open .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)')]
+        .find((d) => d.textContent.trim() === String(day)), day);
+    if (!cell.asElement()) throw new Error(`no day ${day} in the open calendar`);
+    await cell.click();
+    await sleep(200);
+}
+async function pickMonth(page, label) {
+    const cell = await page.evaluateHandle((label) => [...document.querySelectorAll('.flatpickr-calendar.open .flatpickr-monthSelect-month')]
+        .find((m) => m.textContent.trim() === label), label);
+    if (!cell.asElement()) throw new Error(`no month ${label} in the open calendar`);
+    await cell.click();
+    await sleep(200);
+}
+async function typeDate(page, selector, text) {
+    await clickEl(page, selector);
+    await page.evaluate((sel) => { document.querySelector(sel).select(); }, selector);
+    await page.keyboard.type(text);
+    await page.keyboard.press('Enter');
+    await sleep(200);
+    await page.keyboard.press('Escape');
+}
+const dayDisabled = (page, day) => page.evaluate((day) => {
+    const d = [...document.querySelectorAll('.flatpickr-calendar.open .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)')].find((c) => c.textContent.trim() === String(day));
+    return d ? d.classList.contains('flatpickr-disabled') : null;
+}, day);
+const closePicker = async (page) => { await page.keyboard.press('Escape'); await page.mouse.click(5, 5); await sleep(200); };
+const value = (page, selector) => page.evaluate((sel) => document.querySelector(sel).value, selector);
+const parsed = (page, selector) => page.evaluate((sel) => { const fp = document.querySelector(sel)._flatpickr; return !!fp && fp.selectedDates.length === 1; }, selector);
+
 const isSelect2 = (page, selector) => page.evaluate((sel) => $(sel).length > 0 && $(sel).toArray().every((el) => $(el).hasClass('select2-hidden-accessible')), selector);
 
 // --- run ---
@@ -346,6 +381,110 @@ try {
     sql(`delete from showcases where id = ${up.id}`);
 } catch (e) {
     check('uploads run', false, e.message.split('\n')[0]);
+}
+
+// --- dates (flatpickr behind the eonasdan options): values picked in the calendar reach the db ---
+try {
+    const now = new Date();
+    const Y = now.getFullYear();
+    const MM = String(now.getMonth() + 1).padStart(2, '0');
+    const title = `Dates ${Date.now()}`;
+
+    await page.goto(`${BASE}/admin/showcases/create`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', title);
+
+    await openPicker(page, 'input.date');
+    await pickDay(page, 15);
+    check('flatpickr date: day clicked in the calendar, YYYY-MM-DD', await value(page, 'input.date') === `${Y}-${MM}-15`, await value(page, 'input.date'));
+    await closePicker(page);
+
+    await typeDate(page, 'input.datetime', '2026-03-04 05:06:07');
+    await typeDate(page, 'input.time', '08:30:00');
+
+    await openPicker(page, 'input.month');
+    await pickMonth(page, 'Mar');
+    check('flatpickr month (MM): month grid', await value(page, 'input.month') === '03', await value(page, 'input.month'));
+    await closePicker(page);
+
+    await openPicker(page, 'input.year');
+    await clickEl(page, '.flatpickr-calendar.open .flatpickr-prev-month');
+    await pickMonth(page, 'Jun');
+    check('flatpickr year (YYYY, like sullair-click catalogs): previous year picked', await value(page, 'input.year') === String(Y - 1), await value(page, 'input.year'));
+    await closePicker(page);
+
+    await typeDate(page, 'input.date_start', `${Y}-${MM}-10`);
+    await openPicker(page, 'input.date_end');
+    const before = await dayDisabled(page, 9);
+    const after = await dayDisabled(page, 11);
+    check('flatpickr dateRange: end calendar starts at the start date', before === true && after === false, `9 disabled=${before}, 11 disabled=${after}`);
+    await pickDay(page, 20);
+    await closePicker(page);
+
+    await typeDate(page, 'input.datetime_start', '2026-10-01 08:00:00');
+    await typeDate(page, 'input.datetime_end', '2026-10-31 18:00:00');
+    await typeDate(page, 'input.time_start', '09:00:00');
+    await typeDate(page, 'input.time_end', '17:30:00');
+
+    await openPicker(page, 'input.date_dmy');
+    const weekdays = await page.evaluate(() => [...document.querySelectorAll('.flatpickr-calendar.open .flatpickr-weekday')].map((w) => w.textContent.trim()).join(' '));
+    check('flatpickr locale (->options([locale => es])): Spanish calendar', /Lun/.test(weekdays), weekdays);
+    await pickDay(page, 15);
+    check('flatpickr DD/MM/YYYY (like sullair-click contests)', await value(page, 'input.date_dmy') === `15/${MM}/${Y}`, await value(page, 'input.date_dmy'));
+    await closePicker(page);
+
+    await submit(page, { afterSave: 1 });
+    const [d] = sql(`select * from showcases where title = '${title}'`);
+    if (!d) throw new Error('dates showcase was not created');
+    const got = {
+        date: d.date, datetime: d.datetime, time: d.time, month: d.month, year: d.year, date_dmy: d.date_dmy,
+        date_start: d.date_start, date_end: d.date_end, datetime_start: d.datetime_start, datetime_end: d.datetime_end,
+        time_start: d.time_start, time_end: d.time_end,
+    };
+    const want = {
+        date: `${Y}-${MM}-15`, datetime: '2026-03-04 05:06:07', time: '08:30:00', month: '03', year: String(Y - 1), date_dmy: `15/${MM}/${Y}`,
+        date_start: `${Y}-${MM}-10`, date_end: `${Y}-${MM}-20`, datetime_start: '2026-10-01 08:00:00', datetime_end: '2026-10-31 18:00:00',
+        time_start: '09:00:00', time_end: '17:30:00',
+    };
+    for (const k of Object.keys(want)) {
+        check(`flatpickr ${k}: saved`, String(got[k]) === want[k], `${got[k]} (want ${want[k]})`);
+    }
+
+    // edit page: every stored value is parsed back by its picker
+    const fields = ['date', 'datetime', 'time', 'month', 'year', 'date_dmy', 'date_start', 'date_end', 'datetime_start', 'datetime_end', 'time_start', 'time_end'];
+    const unparsed = [];
+    for (const f of fields) {
+        if (!(await parsed(page, `input.${f}`)) || await value(page, `input.${f}`) !== want[f]) unparsed.push(`${f}=${await value(page, `input.${f}`)}`);
+    }
+    check('flatpickr: edit page shows and parses every stored value', unparsed.length === 0, unparsed.join(' '));
+
+    // validation error keeps the typed date
+    await page.evaluate(() => { document.querySelector('input#title').value = ''; });
+    await typeDate(page, 'input.date', '2026-01-02');
+    await submit(page);
+    const [unchanged] = sql(`select date from showcases where id = ${d.id}`);
+    check('flatpickr: old input kept after a validation error', await value(page, 'input.date') === '2026-01-02' && await parsed(page, 'input.date') && unchanged.date === want.date,
+        `${await value(page, 'input.date')} db=${unchanged.date}`);
+
+    sql(`delete from showcases where id = ${d.id}`);
+
+    // grid filter between()->date() (like sullair-click's users filter)
+    const stub = await page.evaluateOnNewDocument(() => { // TODO(phase 4): same x-editable stub as the grid switch check
+        let jq;
+        Object.defineProperty(window, 'jQuery', { configurable: true, get: () => jq, set: (v) => { jq = v; if (v && v.fn && !v.fn.editable) { v.fn.editable = function () { return this; }; v.fn.editable.defaults = {}; } } });
+    });
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await page.removeScriptToEvaluateOnNewDocument(stub.identifier);
+    const filterReady = await page.evaluate(() => ['#date_start', '#date_end'].every((s) => document.querySelector(s)?._flatpickr?.config.dateFormat === 'Y-m-d'));
+    check('flatpickr grid filter between()->date(): pickers with Y-m-d', filterReady);
+    await page.evaluate(() => {
+        document.querySelector('#date_start')._flatpickr.setDate('2026-10-11', true);
+        document.querySelector('#date_end')._flatpickr.setDate('2026-10-11', true);
+    });
+    await waitPjax(page, () => page.evaluate(() => $('#date_start').closest('form').trigger('submit')));
+    const rows = await page.evaluate(() => [...document.querySelectorAll('td.column-title')].map((t) => t.textContent.trim()).filter(Boolean)); // the totals row has an empty title cell
+    check('flatpickr grid filter between()->date(): filters the rows', rows.length === 1 && rows[0].includes('Second'), `${page.url()} ${JSON.stringify(rows)}`);
+} catch (e) {
+    check('dates run', false, e.message.split('\n')[0]);
 }
 
 const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));

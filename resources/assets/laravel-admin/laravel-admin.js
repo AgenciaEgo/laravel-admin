@@ -168,3 +168,184 @@ $('#totop').on('click', function (e) {
     }
 
 })(jQuery);
+
+/**
+ * Date/time pickers (2.0): flatpickr behind the options of the eonasdan
+ * bootstrap-datetimepicker that 1.x used, so fields keep taking moment formats
+ * (->format('DD/MM/YYYY')) and its main options. Options flatpickr knows are
+ * passed through as they are.
+ *
+ *   $.admin.datetimepicker(target, options)          one picker per input in target
+ *   $.admin.datetimeRange(start, end, options)        two pickers limiting each other
+ */
+(function ($) {
+
+    // moment token => flatpickr token (longest tokens first)
+    var TOKENS = [
+        ['YYYY', 'Y'], ['YY', 'y'],
+        ['MMMM', 'F'], ['MMM', 'M'], ['MM', 'm'], ['M', 'n'],
+        ['dddd', 'l'], ['ddd', 'D'], ['Do', 'J'], ['DD', 'd'], ['D', 'j'],
+        ['HH', 'H'], ['H', 'H'], ['hh', 'G'], ['h', 'h'],
+        ['mm', 'i'], ['m', 'i'], ['ss', 'S'], ['s', 's'],
+        ['A', 'K'], ['a', 'K'], ['X', 'U']
+    ];
+
+    // eonasdan-only options with no flatpickr equivalent
+    var DROPPED = ['format', 'locale', 'useCurrent', 'allowInputToggle', 'sideBySide', 'viewMode', 'keepOpen',
+        'widgetPositioning', 'widgetParent', 'icons', 'toolbarPlacement', 'showClear', 'showClose',
+        'showTodayButton', 'collapse', 'calendarWeeks', 'stepping', 'daysOfWeekDisabled', 'disabledDates',
+        'enabledDates', 'date', 'useStrict', 'keepInvalid', 'focusOnShow', 'ignoreReadonly', 'debug', 'tooltips'];
+
+    function convertFormat(format) {
+        var out = '', i = 0;
+
+        while (i < format.length) {
+            if (format[i] === '[') { // [literal text]
+                var end = format.indexOf(']', i);
+                var literal = end < 0 ? format.slice(i + 1) : format.slice(i + 1, end);
+                out += literal.replace(/[a-zA-Z]/g, '\\$&');
+                i = end < 0 ? format.length : end + 1;
+                continue;
+            }
+
+            var token = null;
+            for (var t = 0; t < TOKENS.length; t++) {
+                if (format.substr(i, TOKENS[t][0].length) === TOKENS[t][0]) {
+                    token = TOKENS[t];
+                    break;
+                }
+            }
+
+            if (token) {
+                out += token[1];
+                i += token[0].length;
+            } else {
+                out += /[a-zA-Z]/.test(format[i]) ? '\\' + format[i] : format[i];
+                i++;
+            }
+        }
+
+        return out;
+    }
+
+    // 'es', 'pt-BR', 'zh_CN'... => a key of flatpickr.l10ns
+    function locale(name) {
+        var l10ns = (window.flatpickr && flatpickr.l10ns) || {};
+        var key = String(name || '').toLowerCase().replace('-', '_');
+
+        if (!key || key === 'en' || key.indexOf('en_') === 0) {
+            return 'default';
+        }
+        if (l10ns[key]) {
+            return key;
+        }
+        if (key === 'zh_tw' || key === 'zh_hk') {
+            return l10ns.zh_tw ? 'zh_tw' : 'zh';
+        }
+        key = key.split('_')[0];
+
+        return l10ns[key] ? key : 'default';
+    }
+
+    function config(input, options) {
+        options = $.extend({}, options);
+
+        var format = options.format || 'YYYY-MM-DD HH:mm:ss';
+        var plain = format.replace(/\[[^\]]*\]/g, '');
+        var hasDate = /[YMDd]/.test(plain);
+        var hasDay = /[Dd]/.test(plain);
+        var hasTime = /[Hhms]/.test(plain);
+        var dateFormat = convertFormat(format);
+
+        var cfg = {
+            dateFormat: dateFormat,
+            allowInput: true,
+            disableMobile: true,
+            locale: locale(options.locale),
+            time_24hr: !/[Aa]/.test(plain),
+            enableTime: hasTime,
+            enableSeconds: /s/.test(plain),
+            noCalendar: !hasDate
+        };
+
+        // year and/or month only (e.g. 'YYYY', 'YYYY-MM', 'MM'): month grid instead of days
+        if (hasDate && !hasDay && !hasTime && window.monthSelectPlugin) {
+            cfg.plugins = [new monthSelectPlugin({shorthand: true, dateFormat: dateFormat, altFormat: dateFormat})];
+        }
+
+        if (options.stepping) {
+            cfg.minuteIncrement = options.stepping;
+        }
+
+        var disable = [];
+        if ($.isArray(options.daysOfWeekDisabled) && options.daysOfWeekDisabled.length) {
+            var days = options.daysOfWeekDisabled.map(Number);
+            disable.push(function (date) { return days.indexOf(date.getDay()) !== -1; });
+        }
+        if ($.isArray(options.disabledDates)) {
+            disable = disable.concat(options.disabledDates);
+        }
+        if (disable.length) {
+            cfg.disable = disable;
+        }
+        if ($.isArray(options.enabledDates)) {
+            cfg.enable = options.enabledDates;
+        }
+        if (options.minDate === false) {
+            delete options.minDate;
+        }
+        if (options.maxDate === false) {
+            delete options.maxDate;
+        }
+
+        // inside a dropdown, popover or modal keep the calendar next to the input, so clicking
+        // it does not close the container
+        if ($(input).closest('.dropdown-menu, .popover, .modal').length && !options.inline) {
+            cfg['static'] = true;
+        }
+
+        $.each(DROPPED, function (i, key) { delete options[key]; });
+
+        return $.extend(cfg, options);
+    }
+
+    function inputsOf(target) {
+        return $(target).map(function () {
+            return $(this).is('input') ? this : $(this).find('input:not([type="hidden"])').get();
+        });
+    }
+
+    $.admin = $.admin || {};
+
+    $.admin.flatpickrLocale = locale;
+
+    $.admin.datetimepicker = function (target, options) {
+        if (typeof flatpickr === 'undefined') {
+            return [];
+        }
+
+        return inputsOf(target).map(function () {
+            if (this._flatpickr) {
+                this._flatpickr.destroy();
+            }
+            return flatpickr(this, config(this, options));
+        }).get();
+    };
+
+    $.admin.datetimeRange = function (start, end, options) {
+        var from = $.admin.datetimepicker(start, options);
+        var to = $.admin.datetimepicker(end, options);
+
+        $.each(from, function (i, fp) {
+            fp.config.onChange.push(function (dates) {
+                $.each(to, function (j, other) { other.set('minDate', dates[0] || null); });
+            });
+        });
+        $.each(to, function (i, fp) {
+            fp.config.onChange.push(function (dates) {
+                $.each(from, function (j, other) { other.set('maxDate', dates[0] || null); });
+            });
+        });
+    };
+
+})(jQuery);

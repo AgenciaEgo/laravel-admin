@@ -68,7 +68,7 @@ class RangeFilter extends Filter
 
         $options = json_encode($options);
 
-        Admin::script("$('.{$this->class['start']},.{$this->class['end']}').datetimepicker($options);");
+        Admin::script("$.admin.datetimeRange('.{$this->class['start']}', '.{$this->class['end']}', $options);");
     }
 
     /**
