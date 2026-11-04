@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "description": "Screenshot harness for the laravel-admin UI showcase",
+  "type": "module",
+  "devDependencies": {
+    "puppeteer-core": "22.12.1"
+  }
+}
