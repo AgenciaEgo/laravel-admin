@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 y 2 hechas (ver sección 9); próxima: fase 3 (form)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 y 2 hechas, fase 3 en curso: markup base del form hecho; siguen los plugins, uno por commit (ver sección 9)**.
 
 ## 1. Punto de partida
 
@@ -108,7 +108,9 @@ El showcase cubre más código que el smoke test y destapó deprecations de PHP 
 - `Grid\Displayers\Expand::getLoadUrl()` y `Modal::getLoadUrl()`: `str_replace()` recibe `null` cuando `expand()`/`modal()` se usan con closure, que es el uso más común.
 - `Grid\Tools\QuickSearch` (vía `HasQuickSearch::$searchKey`): accede a una propiedad estática de trait a través del trait. Está deprecado desde PHP 8.1.
 
-Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para que cubra estos casos.
+Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para que cubra estos casos. (Hecho en 1.10.2.)
+
+- **pjax con jQuery 3** (desde 1.10.0, arreglado en `master` en 9de59ee3): jQuery 3 eliminó `$.fn.selector`, así que jquery-pjax mandaba `X-PJAX-Container: undefined`, el middleware `Pjax` no podía recortar la respuesta (`abort(422)`, tragado por el `catch`) y pjax caía a una recarga completa de la URL del request. Consecuencias: cada click era una recarga completa, y los submits de formularios se repetían como GET del action. Un form con errores de validación terminaba en el listado sin errores ni input, y "continuar editando" terminaba en la vista de detalle. Lo detectó la captura de validación del showcase.
 
 ## 9. Avance
 
@@ -133,3 +135,13 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 - `Layout\Column` con ancho `['xs' => n]` genera `col-n`.
 - Dashboard (environment / extensions / dependencies) y alerts de sesión (`partials/alerts`, `partials/exception`) convertidos.
 - Validación: smoke y HTTP en verde. Página de widgets y dashboard OK en las capturas (`shots/bs5-phase2`).
+
+### Fase 3: formularios (en curso)
+
+**3a, markup base (2026-11-04).**
+- Grupos de campo: `.form-group.row.mb-3`. Si el campo no es horizontal, `.form-group.mb-3`. Se conservan `form-group` y `has-error` como ganchos, porque los usan los scripts de los campos (cascade, tabs con errores, select2).
+- Labels `col-form-label text-sm-end` o `form-label`, que salen de `Field::getViewElementClasses()`. Errores con `invalid-feedback d-block`, ayuda con `form-text`, `input-group-text` y botones directo en `.input-group`. Un par de reglas en `laravel-admin.css` marcan en rojo el label y el control cuando hay `.has-error`.
+- Form → card. Footer con flex: reset a la izquierda, submit y checkboxes de "después de guardar" a la derecha (nativos, sin iCheck). Tabs del form y hasMany-tab con `nav-item`/`nav-link`. `hide` → `d-none` en cascade groups, selectable y belongsTo. Modal de belongsTo con markup de BS5.
+- Checkbox/radio en modo botón o tarjeta: `btn-outline-secondary` y `card` en un contenedor `la-card-group` (el `.card-group` de BS5 une las cards).
+- Showcase: `title` lleva `rules('required')` (`required()` solo pone el atributo HTML) y se ignora `password_virtual`. La captura de validación desactiva la validación HTML5 para que se vean los errores del servidor.
+- Pendiente para los plugins: select2, switch, fileinput, flatpickr (el datetimepicker viejo tira un error de posicionamiento con el markup nuevo), checkbox/radio sin iCheck, colorpicker, duallistbox, iconpicker. Plan de prueba por plugin: render, alta, edición, error de validación (old input), pjax y filas dinámicas de hasMany, más un chequeo de ida y vuelta contra la DB en el smoke.
