@@ -308,7 +308,10 @@ try {
     await deleted;
     await sleep(800);
     const [afterDel] = sql(`select multiple_files from showcases where id = ${up.id}`);
-    const left = json(afterDel.multiple_files) || [];
+    // MultipleFile::destroy() keeps the keys (1.x behaviour: the widget keeps sending the keys it
+    // was rendered with, so reindexing would break a second delete without reloading), so the
+    // column can become a JSON object: compare the values
+    const left = Object.values(json(afterDel.multiple_files) || {});
     check('fileinput removable(): deleting a stored file updates the db and the disk', left.length === 1 && left[0] === files[1] && !stored(files[0]) && stored(files[1]),
         afterDel.multiple_files);
     check('fileinput removable(): the deleted preview is gone', (await previews('multiple_files')).length === 1, JSON.stringify(await previews('multiple_files')));
