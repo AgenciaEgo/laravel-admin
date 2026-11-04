@@ -487,6 +487,118 @@ try {
     check('dates run', false, e.message.split('\n')[0]);
 }
 
+// --- checkbox / radio (native form-check, iCheck in 1.x) ---
+try {
+    const title = `Checks ${Date.now()}`;
+    // click the label like a user does
+    const clickOption = async (name, value) => {
+        const label = await page.evaluateHandle((name, value) => document.querySelector(`input[name="${name}"][value="${value}"]`)?.closest('label'), name, value);
+        if (!label.asElement()) throw new Error(`no option ${name}=${value}`);
+        await label.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+        await label.click();
+        await sleep(150);
+    };
+    const checkedValues = (name) => page.evaluate((name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((i) => i.value), name);
+    const cascadeVisible = () => page.evaluate(() => {
+        const g = document.querySelector('input.radio_extra')?.closest('.cascade-group');
+        return !!g && !g.classList.contains('d-none');
+    });
+
+    await page.goto(`${BASE}/admin/showcases/create`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', title);
+    await clickOption('radio', 'c');
+    const shownForGamma = await cascadeVisible();
+    await clickOption('radio', 'a');
+    check('radio ->when(): cascade group follows the checked option', shownForGamma && !(await cascadeVisible()), `gamma=${shownForGamma}`);
+    await clickOption('checkbox[]', 'a');
+    await clickOption('checkbox[]', 'c');
+    await clickOption('radio_button', 'c');
+    await clickOption('radio_card', 'a');
+    await clickOption('checkbox_button[]', 'b');
+    await clickOption('checkbox_card[]', 'a');
+    await clickOption('checkbox_card[]', 'b');
+    await submit(page, { afterSave: 1 });
+    const [c] = sql(`select * from showcases where title = '${title}'`);
+    if (!c) throw new Error('checks showcase was not created');
+    check('radio: saved', c.radio === 'a', c.radio);
+    check('checkbox: saved', same(json(c.checkbox), ['a', 'c']), c.checkbox);
+    check('radioButton / radioCard: saved', c.radio_button === 'c' && c.radio_card === 'a', `${c.radio_button} ${c.radio_card}`);
+    check('checkboxButton / checkboxCard: saved', same(json(c.checkbox_button), ['b']) && same(json(c.checkbox_card), ['a', 'b']),
+        `${c.checkbox_button} ${c.checkbox_card}`);
+
+    const shown = {
+        radio: await checkedValues('radio'),
+        checkbox: await checkedValues('checkbox[]'),
+        rb: await checkedValues('radio_button'),
+        cc: await checkedValues('checkbox_card[]'),
+    };
+    check('checkbox / radio: edit page shows the stored values', same(shown, { radio: ['a'], checkbox: ['a', 'c'], rb: ['c'], cc: ['a', 'b'] }), JSON.stringify(shown));
+
+    // validation error keeps what was clicked
+    await page.evaluate(() => { document.querySelector('input#title').value = ''; });
+    await clickOption('radio', 'b');
+    await clickOption('checkbox[]', 'a'); // uncheck
+    await submit(page);
+    const afterError = { radio: await checkedValues('radio'), checkbox: await checkedValues('checkbox[]') };
+    check('checkbox / radio: old input kept after a validation error', same(afterError, { radio: ['b'], checkbox: ['c'] }), JSON.stringify(afterError));
+
+    // check all, then uncheck all: the hidden input makes an empty selection reach the db
+    await page.type('input#title', title);
+    const checkAll = await page.$('input[class*="check-all-"]');
+    await checkAll.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await checkAll.click();
+    check('checkbox ->canCheckAll(): checks every option', same(await checkedValues('checkbox[]'), ['a', 'b', 'c']), JSON.stringify(await checkedValues('checkbox[]')));
+    await checkAll.click();
+    await submit(page, { afterSave: 1 });
+    const [empty] = sql(`select checkbox, radio from showcases where id = ${c.id}`);
+    check('checkbox: unchecking everything saves an empty list', same(json(empty.checkbox), []) && empty.radio === 'b', `${empty.checkbox} ${empty.radio}`);
+
+    // grid: row selection drives the batch button, select-all, filter with checkboxes
+    const stub = await page.evaluateOnNewDocument(() => { // TODO(phase 4): same x-editable stub as the grid switch check
+        let jq;
+        Object.defineProperty(window, 'jQuery', {
+            configurable: true,
+            get: () => jq,
+            set: (v) => {
+                jq = v;
+                if (v && v.fn && !v.fn.editable) {
+                    v.fn.editable = function () { return this; };
+                    v.fn.editable.defaults = {};
+                }
+            },
+        });
+    });
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    const rowBoxes = await page.$$('input[class$="-checkbox"][data-id]');
+    await rowBoxes[0].click();
+    await rowBoxes[1].click();
+    const twoSelected = await page.evaluate(() => ({
+        n: $.admin.grid.selected().length,
+        btn: $('[class$="-btn"] .selected').filter(':visible').text().trim(),
+    }));
+    check('grid row checkboxes: selection + batch button count', twoSelected.n === 2 && /2/.test(twoSelected.btn), JSON.stringify(twoSelected));
+    const selectAll = await page.$('thead input.form-check-input');
+    await selectAll.click();
+    const all = await page.evaluate(() => ({ n: $.admin.grid.selected().length, rows: $('input[class$="-checkbox"][data-id]').length }));
+    await selectAll.click();
+    const none = await page.evaluate(() => ({ n: $.admin.grid.selected().length, visible: $('[class$="-btn"] .selected').filter(':visible').length }));
+    check('grid select-all: selects every row, then clears them', all.n === all.rows && none.n === 0 && none.visible === 0, `${JSON.stringify(all)} ${JSON.stringify(none)}`);
+
+    sql(`update showcases set radio = 'a' where id = ${c.id}`); // the seeded rows are all 'b'
+    await waitPjax(page, () => page.evaluate(() => {
+        const i = document.querySelector('input[name="radio[]"][value="a"]');
+        i.checked = true;
+        $(i).closest('form').trigger('submit');
+    }));
+    await page.removeScriptToEvaluateOnNewDocument(stub.identifier);
+    const filtered = await page.evaluate(() => [...document.querySelectorAll('td.column-title')].map((t) => t.textContent.trim()).filter(Boolean));
+    check('grid filter in()->checkbox(): filters the rows', filtered.length === 1 && filtered[0] === title, `${page.url()} ${JSON.stringify(filtered)}`);
+
+    sql(`delete from showcases where id = ${c.id}`);
+} catch (e) {
+    check('checks run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 

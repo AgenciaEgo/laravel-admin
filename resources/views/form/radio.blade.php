@@ -6,17 +6,15 @@
 
         @include('admin::form.error')
 
+        <div class="la-checks">
         @foreach($options as $option => $label)
-
-            {!! $inline ? '<span class="icheck">' : '<div class="radio icheck">'  !!}
-
-                <label @if($inline)class="radio-inline"@endif>
-                    <input type="radio" name="{{$name}}" value="{{$option}}" class="minimal {{$class}}" {{ ($option == old($column, $value)) || ($value === null && in_array($label, $checked)) ?'checked':'' }} {!! $attributes !!} />&nbsp;{{$label}}&nbsp;&nbsp;
+            <div class="form-check {{ $inline ? 'form-check-inline' : '' }}">
+                <label class="form-check-label">
+                    <input type="radio" name="{{$name}}" value="{{$option}}" class="form-check-input {{$class}}" {{ ($option == old($column, $value)) || ($value === null && in_array($label, $checked)) ?'checked':'' }} {!! $attributes !!} />{{$label}}
                 </label>
-
-            {!! $inline ? '</span>' :  '</div>' !!}
-
+            </div>
         @endforeach
+        </div>
 
         @include('admin::form.help-block')
 

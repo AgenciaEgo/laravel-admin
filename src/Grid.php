@@ -492,7 +492,7 @@ class Grid
             return;
         }
 
-        $checkAllBox = "<input type=\"checkbox\" class=\"{$this->getSelectAllName()}\" />&nbsp;";
+        $checkAllBox = "<input type=\"checkbox\" class=\"form-check-input {$this->getSelectAllName()}\" />";
 
         $this->prependColumn(Column::SELECT_COLUMN_NAME, ' ')
             ->displayUsing(Displayers\RowSelector::class)

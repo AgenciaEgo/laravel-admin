@@ -53,15 +53,11 @@ class BelongsToMany extends MultipleSelect
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
             modal.find('.box-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), selected) >=0 ) {
-                    $(el).iCheck('toggle');
+                    $(el).laToggle();
                 }
             });
         });
@@ -100,18 +96,21 @@ class BelongsToMany extends MultipleSelect
         load($(this).attr('href'));
         e.preventDefault();
     }).on('click', 'tr', function (e) {
-        $(this).find('input.select').iCheck('toggle');
+        if ($(e.target).is('input.select')) return; // the checkbox toggles itself
+        $(this).find('input.select').laToggle();
         e.preventDefault();
     }).on('submit', '.box-header form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         e.preventDefault();
         return false;
-    }).on('ifChecked', 'input.select', function (e) {
+    }).on('change', 'input.select', function (e) {
+        if (!this.checked) return;
         if (selected.indexOf($(this).val()) < 0) {
             selected.push($(this).val());
             rows[$(e.target).val()] = $(e.target).parents('tr');
         }
-    }).on('ifUnchecked', 'input.select', function (e) {
+    }).on('change', 'input.select', function (e) {
+        if (this.checked) return;
            var val = $(this).val();
            var index = selected.indexOf(val);
            if (index !== -1) {

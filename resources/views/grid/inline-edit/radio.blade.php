@@ -2,9 +2,9 @@
 
 @section('field')
     @foreach($options as $option => $label)
-        <div class="radio icheck">
-            <label>
-                <input type="radio" name='radio-{{ $name }}' class="minimal ie-input" value="{{ $option }}" data-label="{{ $label }}"/>&nbsp;{{$label}}&nbsp;&nbsp;
+        <div class="form-check my-1">
+            <label class="form-check-label">
+                <input type="radio" name='radio-{{ $name }}' class="form-check-input ie-input" value="{{ $option }}" data-label="{{ $label }}"/>{{$label}}
             </label>
         </div>
     @endforeach
@@ -12,10 +12,6 @@
 
 @section('assert')
     <style>
-        .icheck.radio {
-            margin: 5px 0 5px 20px;
-        }
-
         .ie-content-{{ $name }} .ie-container  {
             width: 150px;
             position: relative;

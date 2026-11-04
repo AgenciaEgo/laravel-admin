@@ -133,7 +133,7 @@ class ShowcaseController extends AdminController
     protected function form()
     {
         $form = new Form(new Showcase());
-        $form->ignore(['password_virtual']);
+        $form->ignore(['password_virtual', 'radio_extra']);
 
         $form->fieldset('Basic inputs', function (Form $form) {
             $form->display('id', 'ID');
@@ -158,10 +158,12 @@ class ShowcaseController extends AdminController
         $form->fieldset('Choices', function (Form $form) {
             $form->select('select')->options(self::OPTIONS);
             $form->multipleSelect('multiple_select')->options(self::OPTIONS);
-            $form->radio('radio')->options(self::OPTIONS);
+            $form->radio('radio')->options(self::OPTIONS)->when('c', function (Form $form) {
+                $form->text('radio_extra', 'Shown for Gamma'); // cascade group (ignored on save)
+            });
             $form->radioButton('radio_button', 'Radio button')->options(self::OPTIONS);
             $form->radioCard('radio_card', 'Radio card')->options(self::OPTIONS);
-            $form->checkbox('checkbox')->options(self::OPTIONS);
+            $form->checkbox('checkbox')->options(self::OPTIONS)->canCheckAll();
             $form->checkboxButton('checkbox_button', 'Checkbox button')->options(self::OPTIONS);
             $form->checkboxCard('checkbox_card', 'Checkbox card')->options(self::OPTIONS);
             $form->switch('switch')->states([ // same states as sullair-click

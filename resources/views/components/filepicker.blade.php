@@ -37,7 +37,8 @@ modal.on('show.bs.modal', function (e) {
     load($(this).attr('href'));
     e.preventDefault();
 }).on('click', 'tr', function (e) {
-    $(this).find('input.select').iCheck('toggle');
+    if ($(e.target).is('input.select')) return; // the checkbox toggles itself
+    $(this).find('input.select').laToggle();
     e.preventDefault();
 }).on('submit', '.box-header form', function (e) {
     load($(this).attr('action')+'&'+$(this).serialize());
@@ -55,21 +56,18 @@ modal.on('show.bs.modal', function (e) {
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('input.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
             modal.find('.box-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), value) >=0 ) {
-                    $(el).iCheck('toggle');
+                    $(el).laToggle();
                 }
             });
         });
     };
 
-    modal.on('ifChecked', 'input.select', function (e) {
+    modal.on('change', 'input.select', function (e) {
+        if (!this.checked) return;
         if ($(this).val().length == 0) {
             return;
         }
@@ -77,7 +75,8 @@ modal.on('show.bs.modal', function (e) {
         if (value.indexOf($(this).val()) < 0) {
             value.push($(this).val());
         }
-    }).on('ifUnchecked', 'input.select', function (e) {
+    }).on('change', 'input.select', function (e) {
+        if (this.checked) return;
         var val = $(this).val();
         var index = value.indexOf(val);
         if (index !== -1) {
@@ -99,21 +98,18 @@ modal.on('show.bs.modal', function (e) {
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('input.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
             modal.find('.box-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($(el).val() == value) {
-                    $(el).iCheck('toggle');
+                    $(el).laToggle();
                 }
             });
         });
     };
 
-    modal.on('ifChecked', 'input.select', function (e) {
+    modal.on('change', 'input.select', function (e) {
+        if (!this.checked) return;
         value = $(this).val();
     }).find('.modal-footer .submit').click(function () {
         pickInput.val(value);

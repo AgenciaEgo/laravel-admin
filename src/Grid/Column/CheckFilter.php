@@ -50,17 +50,8 @@ class CheckFilter extends Filter
     protected function addScript()
     {
         $script = <<<SCRIPT
-$('.{$this->class['all']}').on('ifChanged', function () {
-    if (this.checked) {
-        $('.{$this->class['item']}').iCheck('check');
-    } else {
-        $('.{$this->class['item']}').iCheck('uncheck');
-    }
-    return false;
-});
-
-$('.{$this->class['item']},.{$this->class['all']}').iCheck({
-    checkboxClass:'icheckbox_minimal-blue'
+$('.{$this->class['all']}').on('change', function () {
+    $('.{$this->class['item']}').laCheck(this.checked);
 });
 SCRIPT;
 
@@ -80,9 +71,9 @@ SCRIPT;
             $checked = in_array($key, $value) ? 'checked' : '';
 
             return <<<HTML
-<li class="checkbox icheck" style="margin: 0;">
-    <label style="width: 100%;padding: 3px;">
-        <input type="checkbox" class="{$this->class['item']}" name="{$this->getColumnName()}[]" value="{$key}" {$checked}/>&nbsp;&nbsp;&nbsp;{$label}
+<li class="form-check" style="margin: 0;">
+    <label class="form-check-label" style="width: 100%;padding: 3px;">
+        <input type="checkbox" class="form-check-input {$this->class['item']}" name="{$this->getColumnName()}[]" value="{$key}" {$checked}/>{$label}
     </label>
 </li>
 HTML;
@@ -103,9 +94,9 @@ HTML;
 
         <li>
             <ul style='padding: 0;'>
-            <li class="checkbox icheck" style="margin: 0;">
-                <label style="width: 100%;padding: 3px;">
-                    <input type="checkbox" class="{$this->class['all']}" {$allCheck}/>&nbsp;&nbsp;&nbsp;{$this->trans('all')}
+            <li class="form-check" style="margin: 0;">
+                <label class="form-check-label" style="width: 100%;padding: 3px;">
+                    <input type="checkbox" class="form-check-input {$this->class['all']}" {$allCheck}/>{$this->trans('all')}
                 </label>
             </li>
                 <li class="divider"></li>

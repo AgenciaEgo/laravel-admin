@@ -1,13 +1,9 @@
-<div class="input-group input-group-sm">
+<div class="la-checks">
     @foreach($options as $option => $label)
-
-        {!! $inline ? '<span class="icheck">' : '<div class="radio icheck">'  !!}
-
-            <label @if($inline)class="radio-inline"@endif>
-                <input type="radio" class="{{$id}}" name="{{$name}}" value="{{$option}}" class="minimal" {{ ((string)$option === request($name, is_null($value) ? '' : $value)) ? 'checked' : '' }} />&nbsp;{{$label}}&nbsp;&nbsp;
+        <div class="form-check {{ $inline ? 'form-check-inline' : '' }}">
+            <label class="form-check-label">
+                <input type="radio" class="form-check-input {{$id}}" name="{{$name}}" value="{{$option}}" {{ ((string)$option === request($name, is_null($value) ? '' : $value)) ? 'checked' : '' }} />{{$label}}
             </label>
-
-        {!! $inline ? '</span>' :  '</div>' !!}
-
+        </div>
     @endforeach
 </div>

@@ -8,8 +8,6 @@ class Checkbox extends Radio
 {
     protected function prepare()
     {
-        $script = "$('.{$this->filter->getId()}').iCheck({checkboxClass:'icheckbox_minimal-blue'});";
-
-        Admin::script($script);
+        // native form-check inputs: nothing to initialise (iCheck in 1.x)
     }
 }

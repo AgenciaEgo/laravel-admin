@@ -16,9 +16,9 @@
                 }
                 @endphp
 
-                <li class="checkbox icheck">
-                    <label>
-                        <input type="checkbox" class="column-select-item" value="{{ $key }}" {{ $checked }}/>&nbsp;&nbsp;&nbsp;{{ $label }}
+                <li class="form-check">
+                    <label class="form-check-label">
+                        <input type="checkbox" class="form-check-input column-select-item" value="{{ $key }}" {{ $checked }}/>{{ $label }}
                     </label>
                 </li>
                 @endforeach
@@ -84,11 +84,8 @@ $('.column-select-submit').on('click', function () {
 });
 
 $('.column-select-all').on('click', function () {
-    $('.column-select-item').iCheck('check');
+    $('.column-select-item').prop('checked', true);
     return false;
 });
 
-$('.column-select-item').iCheck({
-    checkboxClass:'icheckbox_minimal-blue'
-});
 </script>

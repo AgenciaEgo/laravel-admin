@@ -18,6 +18,22 @@ if ($.fn.editable) {
     };
 }
 
+// native replacements for the iCheck calls of 1.x: set the state and fire 'change'
+$.fn.laCheck = function (checked) {
+    return this.each(function () {
+        if (this.checked !== checked) {
+            this.checked = checked;
+            $(this).trigger('change');
+        }
+    });
+};
+
+$.fn.laToggle = function () {
+    return this.each(function () {
+        $(this).laCheck(this.type === 'radio' ? true : !this.checked);
+    });
+};
+
 toastr.options = {
     closeButton: true,
     progressBar: true,

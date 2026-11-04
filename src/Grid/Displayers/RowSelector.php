@@ -11,7 +11,7 @@ class RowSelector extends AbstractDisplayer
         Admin::script($this->script());
 
         return <<<EOT
-<input type="checkbox" class="{$this->grid->getGridRowName()}-checkbox" data-id="{$this->getKey()}"  autocomplete="off"/>
+<input type="checkbox" class="form-check-input {$this->grid->getGridRowName()}-checkbox" data-id="{$this->getKey()}"  autocomplete="off"/>
 EOT;
     }
 
@@ -23,7 +23,7 @@ EOT;
         $selected = trans('admin.grid_items_selected');
 
         return <<<EOT
-$('.{$row}-checkbox').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifChanged', function () {
+$('.{$row}-checkbox').on('change', function () {
 
     var id = $(this).data('id');
 
@@ -33,15 +33,6 @@ $('.{$row}-checkbox').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifCha
     } else {
         \$.admin.grid.unselect(id);
         $(this).closest('tr').css('background-color', '');
-    }
-}).on('ifClicked', function () {
-
-    var id = $(this).data('id');
-
-    if (this.checked) {
-        $.admin.grid.unselect(id);
-    } else {
-        $.admin.grid.select(id);
     }
 
     var selected = $.admin.grid.selected().length;

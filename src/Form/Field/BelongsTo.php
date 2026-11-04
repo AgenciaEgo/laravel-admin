@@ -39,15 +39,11 @@ class BelongsTo extends Select
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
             modal.find('.box-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($(el).val() == selected) {
-                    $(el).iCheck('toggle');
+                    $(el).laToggle();
                 }
             });
         });
@@ -77,12 +73,14 @@ class BelongsTo extends Select
         load($(this).attr('href'));
         e.preventDefault();
     }).on('click', 'tr', function (e) {
-        $(this).find('input.select').iCheck('toggle');
+        if ($(e.target).is('input.select')) return; // the checkbox toggles itself
+        $(this).find('input.select').laToggle();
         e.preventDefault();
     }).on('submit', '.box-header form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         return false;
-    }).on('ifChecked', 'input.select', function (e) {
+    }).on('change', 'input.select', function (e) {
+        if (!this.checked) return;
         row = $(e.target).parents('tr');
         selected = $(this).val();
     }).find('.modal-footer .submit').click(function () {
