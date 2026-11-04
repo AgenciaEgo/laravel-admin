@@ -55,6 +55,15 @@ class AdminSmokeTest extends TestCase
                 $e ? get_class($e).': '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine() : substr(strip_tags($response->getContent()), 0, 300));
         }
 
+        // laravel-admin catches exceptions thrown while rendering a page (Content::build())
+        // and shows them inside a 200 page: treat that as a failure too
+        $content = (string) $response->getContent();
+        if ($status === 200 && strpos($content, 'laravel-admin-exception-trace') !== false) {
+            preg_match('/laravel-admin-exception-trace.*?<\/i>(.*?)<\/a>/s', $content, $m);
+            $this->failures[] = sprintf('%s => exception rendered in the page: %s', $label,
+                trim(html_entity_decode(strip_tags($m[1] ?? 'unknown'))));
+        }
+
         return $response;
     }
 
@@ -108,10 +117,12 @@ class AdminSmokeTest extends TestCase
                 return "modal {$this->name}";
             });
             $grid->quickSearch('username');
+            // inline radio on a null value (no such attribute)
+            $grid->column('smoke_null')->radio(['a' => 'A', 'b' => 'B']);
 
             return $content->body($grid);
         });
-        $this->check('grid expand/modal/quick search', $this->get("$prefix/smoke-grid?__search__=adm"));
+        $this->check('grid expand/modal/quick search/inline radio on null', $this->get("$prefix/smoke-grid?__search__=adm"));
 
         // pjax (symfony/dom-crawler)
         $this->check('pjax users grid', $this->get("$prefix/auth/users", ['X-PJAX' => 'true', 'X-PJAX-Container' => '#pjax-container']));
