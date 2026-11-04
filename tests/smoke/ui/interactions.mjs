@@ -258,6 +258,93 @@ try {
     check('run', false, e.message.split('\n')[0]);
 }
 
+// --- uploads (bootstrap-fileinput): files picked in the widget reach the disk and the database ---
+try {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'la-uploads-'));
+    const sampleJpg = path.join(APP, 'public/uploads/images/sample.jpg');
+    const jpg = (name) => { const f = path.join(tmp, name); fs.copyFileSync(sampleJpg, f); return f; };
+    const txt = (name, body) => { const f = path.join(tmp, name); fs.writeFileSync(f, body); return f; };
+    const stored = (rel) => !!rel && fs.existsSync(path.join(APP, 'public/uploads', rel));
+    const pick = async (field, files) => {
+        const input = await page.$(`input.${field}[type="file"]`);
+        if (!input) throw new Error(`no file input for ${field}`);
+        await input.uploadFile(...files);
+        await sleep(300);
+    };
+    const previews = (field) => page.evaluate((field) => $(`input.${field}[type="file"]`).closest('.form-group').find('.file-preview-frame')
+        .filter((i, f) => !$(f).closest('.kv-zoom-cache').length) // hidden copies kept for the zoom modal
+        .map((i, f) => $(f).find('img').attr('src') || $(f).text()).get(), field);
+
+    const title = `Uploads ${Date.now()}`;
+    await page.goto(`${BASE}/admin/showcases/create`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', title);
+    await pick('image', [jpg('photo.jpg')]);
+    await pick('file', [txt('notes.txt', 'first version')]);
+    await pick('multiple_images', [jpg('one.jpg'), jpg('two.jpg')]);
+    await pick('multiple_files', [txt('a.txt', 'a'), txt('b.txt', 'b')]);
+    check('fileinput: picked files show a preview before saving', (await previews('image')).length === 1 && (await previews('multiple_images')).length === 2);
+    await submit(page, { afterSave: 1 });
+    const [up] = sql(`select * from showcases where title = '${title}'`);
+    if (!up) throw new Error('upload showcase was not created');
+    const multi = json(up.multiple_images) || [];
+    check('fileinput image: stored on disk and in the db', stored(up.image), up.image);
+    check('fileinput file: stored on disk and in the db', stored(up.file) && fs.readFileSync(path.join(APP, 'public/uploads', up.file), 'utf8') === 'first version', up.file);
+    check('fileinput multipleImage: both stored', multi.length === 2 && multi.every(stored), up.multiple_images);
+    const files = json(up.multiple_files) || [];
+    check('fileinput multipleFile: both stored', files.length === 2 && files.every(stored), up.multiple_files);
+
+    check('fileinput: edit page previews the stored files', (await previews('image')).some((s) => s.includes(up.image)) && (await previews('multiple_images')).length === 2,
+        JSON.stringify(await previews('image')));
+
+    // removable(): delete a stored file from its preview (fileinput event + sweetalert confirm)
+    const del = await page.evaluateHandle(() => $('input.multiple_files[type="file"]').closest('.form-group')
+        .find('.file-preview-frame').filter((i, f) => !$(f).closest('.kv-zoom-cache').length).first().find('.kv-file-remove')[0]);
+    if (!del.asElement()) throw new Error('no delete button on the stored multiple_files preview');
+    await del.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await del.click();
+    await page.waitForSelector('.swal2-confirm', { visible: true, timeout: 3000 });
+    const deleted = page.waitForResponse((r) => r.url().endsWith(`/admin/showcases/${up.id}`) && r.request().method() === 'POST', { timeout: 5000 });
+    await page.click('.swal2-confirm');
+    await deleted;
+    await sleep(800);
+    const [afterDel] = sql(`select multiple_files from showcases where id = ${up.id}`);
+    const left = json(afterDel.multiple_files) || [];
+    check('fileinput removable(): deleting a stored file updates the db and the disk', left.length === 1 && left[0] === files[1] && !stored(files[0]) && stored(files[1]),
+        afterDel.multiple_files);
+    check('fileinput removable(): the deleted preview is gone', (await previews('multiple_files')).length === 1, JSON.stringify(await previews('multiple_files')));
+
+    // validation error: nothing changes, stored previews still there
+    await page.evaluate(() => { document.querySelector('input#title').value = ''; });
+    await pick('image', [jpg('other.jpg')]);
+    await submit(page);
+    const [afterError] = sql(`select image from showcases where id = ${up.id}`);
+    check('fileinput: validation error keeps the stored file (db + preview)', afterError.image === up.image && (await previews('image')).some((s) => s.includes(up.image)),
+        `${afterError.image} ${JSON.stringify(await previews('image'))}`);
+
+    // a rule on the upload itself (mimes) shows its error under the field
+    await page.type('input#title', title);
+    await pick('file', [jpg('not-a-text.jpg')]);
+    await submit(page);
+    const fileError = await page.evaluate(() => $('input.file[type="file"]').closest('.form-group').hasClass('has-error'));
+    const [afterMimes] = sql(`select file from showcases where id = ${up.id}`);
+    check('fileinput: mimes rule error shown under the field, nothing saved', fileError && afterMimes.file === up.file, `has-error=${fileError} ${afterMimes.file}`);
+
+    // replacing a stored file
+    await pick('file', [txt('notes-v2.txt', 'second version')]);
+    await submit(page, { afterSave: 1 });
+    const [replaced] = sql(`select file from showcases where id = ${up.id}`);
+    check('fileinput file: replaced on edit', replaced.file !== up.file && stored(replaced.file)
+        && fs.readFileSync(path.join(APP, 'public/uploads', replaced.file), 'utf8') === 'second version', replaced.file);
+    console.log(`info old file after replacing it: ${stored(up.file) ? 'kept on disk' : 'deleted'}`);
+
+    for (const rel of [up.image, up.file, replaced.file, ...multi, ...files]) {
+        if (stored(rel)) fs.unlinkSync(path.join(APP, 'public/uploads', rel));
+    }
+    sql(`delete from showcases where id = ${up.id}`);
+} catch (e) {
+    check('uploads run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 

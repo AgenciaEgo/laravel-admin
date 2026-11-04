@@ -187,9 +187,9 @@ class ShowcaseController extends AdminController
 
         $form->fieldset('Uploads', function (Form $form) {
             $form->image('image');
-            $form->file('file');
+            $form->file('file')->rules('mimes:txt,pdf'); // like sullair-click's mimes:pdf
             $form->multipleImage('multiple_images', 'Multiple images');
-            $form->multipleFile('multiple_files', 'Multiple files');
+            $form->multipleFile('multiple_files', 'Multiple files')->removable();
         });
 
         $form->fieldset('Complex', function (Form $form) {

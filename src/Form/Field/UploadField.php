@@ -65,6 +65,7 @@ trait UploadField
     protected $fileActionSettings = [
         'showRemove' => false,
         'showDrag'   => false,
+        'showRotate' => false, // added in bootstrap-fileinput 5, kept off as in 1.x
     ];
 
     /**
@@ -112,6 +113,7 @@ trait UploadField
     protected function setupDefaultOptions()
     {
         $defaults = [
+            'theme'                => 'fa6', // icons from the bundled Font Awesome 6
             'overwriteInitial'     => false,
             'initialPreviewAsData' => true,
             'msgPlaceholder'       => trans('admin.choose_file'),
@@ -133,7 +135,12 @@ trait UploadField
             $defaults['deleteUrl'] = $this->form->resource().'/'.$this->form->model()->getKey();
         }
 
-        $defaults = array_merge($defaults, ['fileActionSettings' => $this->fileActionSettings]);
+        $defaults = array_merge($defaults, [
+            'fileActionSettings'       => $this->fileActionSettings,
+            // bootstrap-fileinput 5 shows "delete" on stored files unless told otherwise:
+            // only with removable(), as in 1.x
+            'initialPreviewShowDelete' => $this->fileActionSettings['showRemove'],
+        ]);
 
         $this->options($defaults);
     }
