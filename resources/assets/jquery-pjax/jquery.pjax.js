@@ -646,14 +646,22 @@ function optionsFor(container, options) {
 //
 // Returns a jQuery object whose context is `document` and has a selector.
 function findContainerFor(container) {
+  // jQuery 3 removed $.fn.selector (and .context), which pjax sends as the
+  // X-PJAX-Container header: keep the selector by hand
+  var selector = typeof container === 'string' ? container : null
   container = $(container)
 
   if ( !container.length ) {
-    throw "no pjax container for " + container.selector
-  } else if ( container.selector !== '' && container.context === document ) {
+    throw "no pjax container for " + (selector || container.selector)
+  } else if ( selector ) {
+    container.selector = selector
+    return container
+  } else if ( container.selector && container.context === document ) {
     return container
   } else if ( container.attr('id') ) {
-    return $('#' + container.attr('id'))
+    var byId = $('#' + container.attr('id'))
+    byId.selector = '#' + container.attr('id')
+    return byId
   } else {
     throw "cant get selector for pjax container!"
   }
