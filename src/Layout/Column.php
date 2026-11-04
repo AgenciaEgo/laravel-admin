@@ -113,7 +113,8 @@ class Column implements Buildable
     {
         // get class name using width array
         $classnName = collect($this->width)->map(function ($value, $key) {
-            return "col-$key-$value";
+            // "xs" is the breakpoint-less class in Bootstrap 5
+            return $key === 'xs' ? "col-$value" : "col-$key-$value";
         })->implode(' ');
 
         echo "<div class=\"{$classnName}\">";

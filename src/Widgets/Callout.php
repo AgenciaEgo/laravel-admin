@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Widgets;
 
+use Encore\Admin\Support\Color;
 use Illuminate\Contracts\Support\Renderable;
 
 class Callout extends Widget implements Renderable
@@ -61,7 +62,7 @@ class Callout extends Widget implements Renderable
      */
     protected function variables()
     {
-        $this->class("callout callout-{$this->style}");
+        $this->class('callout callout-'.Color::bootstrap($this->style));
 
         return [
             'title'      => $this->title,

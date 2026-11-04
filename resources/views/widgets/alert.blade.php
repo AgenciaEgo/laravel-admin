@@ -1,5 +1,5 @@
-<div {!! $attributes !!} >
-    <button type="button" class="close" data-dismiss="alert">×</button>
-    <h4><i class="icon fa fa-{{ $icon }}"></i> {{ $title }}</h4>
+<div {!! $attributes !!} role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <h5><i class="icon fa fa-{{ $icon }}"></i> {{ $title }}</h5>
     {!! $content !!}
 </div>

@@ -1,18 +1,18 @@
-<div class="box box-default">
-    <div class="box-header with-border">
-        <h3 class="box-title">Environment</h3>
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Environment</h3>
 
-        <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                <i data-lte-icon="expand" class="fa fa-plus"></i><i data-lte-icon="collapse" class="fa fa-minus"></i>
             </button>
-            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-remove"><i class="fa fa-times"></i></button>
         </div>
     </div>
 
-    <!-- /.box-header -->
-    <div class="box-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-striped mb-0">
 
                 @foreach($envs as $env)
                 <tr>
@@ -22,7 +22,5 @@
                 @endforeach
             </table>
         </div>
-        <!-- /.table-responsive -->
     </div>
-    <!-- /.box-body -->
 </div>

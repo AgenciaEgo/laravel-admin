@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fase 1 hecha (ver sección 9); próxima: fase 2**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 y 2 hechas (ver sección 9); próxima: fase 3 (form)**.
 
 ## 1. Punto de partida
 
@@ -123,3 +123,13 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 - Login: sin iCheck ni jQuery; `form-check` nativo e `input-group-text`.
 - x-editable salió de los assets base antes de lo previsto: al cargarlo rompía todas las páginas (busca `$.fn.popover.Constructor` de BS3). Hasta la fase 4, `->editable()` en un grid tira un error JS que corta el resto de los scripts de esa página.
 - Validación: `AdminSmokeTest` y `http-smoke.sh` en verde. `screenshots.mjs`: el layout se ve bien en escritorio y mobile. Las 14 advertencias restantes son del contenido que corresponde a fases posteriores (grid con `editable()` y select2 de tags).
+
+### Fase 2: widgets y contenido (2026-11-04)
+
+- `Box` → `card`. `style('primary')` da una card con borde de color (`card-primary card-outline`), `solid()` colorea el header y `default` no lleva color. `collapsable()`/`removable()` usan el card-widget de AdminLTE 4 (`data-lte-toggle="card-collapse|card-remove"`). `scrollable()` apunta a `.card-body`.
+- `InfoBox` → `small-box text-bg-*`, `Tab` → card con `nav-tabs card-header-tabs`, `Alert` → `alert-dismissible` + `btn-close`, `Collapse` → `accordion`, `Carousel` → markup de BS5. `Callout` no cambia de clase.
+- Nuevo `Encore\Admin\Support\Color::bootstrap()`: traduce los nombres de color de AdminLTE 2 (`aqua`, `light-blue`, `maroon`, `purple`…) a colores de BS5/AdminLTE 4. Lo usan InfoBox, Box, Alert y Callout, y lo van a usar los displayers del grid.
+- `Widget::formatAttributes($append)` acepta clases extra sin mutar los atributos, así `render()` es idempotente.
+- `Layout\Column` con ancho `['xs' => n]` genera `col-n`.
+- Dashboard (environment / extensions / dependencies) y alerts de sesión (`partials/alerts`, `partials/exception`) convertidos.
+- Validación: smoke y HTTP en verde. Página de widgets y dashboard OK en las capturas (`shots/bs5-phase2`).

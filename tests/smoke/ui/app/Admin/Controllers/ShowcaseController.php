@@ -261,16 +261,16 @@ class ShowcaseController extends AdminController
                 $form->datetime('datetime');
                 $row->column(6, new Widgets\Box('Widgets\Form', $form));
                 $row->column(6, new Widgets\Box('Buttons & labels', implode(' ', [
-                    '<button class="btn btn-default">default</button>',
+                    '<button class="btn btn-secondary">secondary</button>',
                     '<button class="btn btn-primary">primary</button>',
                     '<button class="btn btn-success btn-sm">success sm</button>',
-                    '<button class="btn btn-danger btn-xs">danger xs</button>',
-                    '<div class="btn-group"><button class="btn btn-info">group</button><button class="btn btn-info dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button><ul class="dropdown-menu"><li><a href="#">Item</a></li></ul></div>',
+                    '<button class="btn btn-outline-danger btn-sm">outline danger sm</button>',
+                    '<div class="btn-group"><button class="btn btn-info">group</button><button class="btn btn-info dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button><ul class="dropdown-menu"><li><a class="dropdown-item" href="#">Item</a></li></ul></div>',
                     '<br><br>',
-                    '<span class="label label-default">default</span>',
-                    '<span class="label label-primary">primary</span>',
-                    '<span class="label label-success">success</span>',
-                    '<span class="badge bg-red">badge</span>',
+                    '<span class="badge text-bg-secondary">secondary</span>',
+                    '<span class="badge text-bg-primary">primary</span>',
+                    '<span class="badge text-bg-success">success</span>',
+                    '<span class="badge rounded-pill text-bg-danger">pill</span>',
                     '<br><br><div class="progress"><div class="progress-bar progress-bar-striped" style="width:60%"></div></div>',
                 ])));
             });

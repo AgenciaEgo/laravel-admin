@@ -31,10 +31,15 @@ abstract class Widget extends Fluent
      *
      * @return string
      */
-    public function formatAttributes()
+    public function formatAttributes(array $append = [])
     {
+        $attributes = (array) $this->getAttributes();
+        foreach (array_filter($append, 'strlen') as $key => $value) {
+            $attributes[$key] = trim(($attributes[$key] ?? '').' '.$value);
+        }
+
         $html = [];
-        foreach ((array) $this->getAttributes() as $key => $value) {
+        foreach ($attributes as $key => $value) {
             $element = $this->attributeElement($key, $value);
             if (!is_null($element)) {
                 $html[] = $element;

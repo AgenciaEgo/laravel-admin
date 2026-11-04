@@ -30,7 +30,7 @@ class Tab extends Widget implements Renderable
 
     public function __construct()
     {
-        $this->class('nav-tabs-custom');
+        $this->class('card nav-tabs-custom mb-3');
     }
 
     /**

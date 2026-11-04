@@ -1,31 +1,34 @@
 <div {!! $attributes !!}>
-    <ul class="nav nav-tabs nav-tabs">
+    <div class="card-header p-2">
+        <ul class="nav nav-tabs card-header-tabs">
 
-        @foreach($tabs as $id => $tab)
-            @if($tab['type'] == \Encore\Admin\Widgets\Tab::TYPE_CONTENT)
-                <li {{ $id == $active ? 'class=active' : '' }}><a href="#tab_{{ $tab['id'] }}" data-toggle="tab">{{ $tab['title'] }}</a></li>
-            @elseif($tab['type'] == \Encore\Admin\Widgets\Tab::TYPE_LINK)
-                <li {{ $id == $active ? 'class=active' : '' }}><a href="{{ $tab['href'] }}">{{ $tab['title'] }}</a></li>
+            @foreach($tabs as $id => $tab)
+                @if($tab['type'] == \Encore\Admin\Widgets\Tab::TYPE_CONTENT)
+                    <li class="nav-item"><a class="nav-link {{ $id == $active ? 'active' : '' }}" href="#tab_{{ $tab['id'] }}" data-bs-toggle="tab">{{ $tab['title'] }}</a></li>
+                @elseif($tab['type'] == \Encore\Admin\Widgets\Tab::TYPE_LINK)
+                    <li class="nav-item"><a class="nav-link {{ $id == $active ? 'active' : '' }}" href="{{ $tab['href'] }}">{{ $tab['title'] }}</a></li>
+                @endif
+            @endforeach
+
+            @if (!empty($dropDown))
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Dropdown</a>
+                <ul class="dropdown-menu">
+                    @foreach($dropDown as $link)
+                    <li><a class="dropdown-item" href="{{ $link['href'] }}">{{ $link['name'] }}</a></li>
+                    @endforeach
+                </ul>
+            </li>
             @endif
-        @endforeach
 
-        @if (!empty($dropDown))
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                Dropdown <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-                @foreach($dropDown as $link)
-                <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ $link['href'] }}">{{ $link['name'] }}</a></li>
-                @endforeach
-            </ul>
-        </li>
-        @endif
-        <li class="pull-right header">{{ $title }}</li>
-    </ul>
-    <div class="tab-content">
+            @if($title)
+            <li class="nav-item ms-auto"><span class="nav-link disabled fw-semibold">{{ $title }}</span></li>
+            @endif
+        </ul>
+    </div>
+    <div class="card-body tab-content">
         @foreach($tabs as $id => $tab)
-        <div class="tab-pane {{ $id == $active ? 'active' : '' }}" id="tab_{{ $tab['id'] }}">
+        <div class="tab-pane fade {{ $id == $active ? 'show active' : '' }}" id="tab_{{ $tab['id'] }}">
             @php($content = \Illuminate\Support\Arr::get($tab, 'content'))
                 @if($content instanceof \Illuminate\Contracts\Support\Renderable)
                     {!! $content->render() !!}
@@ -34,6 +37,5 @@
                 @endif
         </div>
         @endforeach
-
     </div>
 </div>

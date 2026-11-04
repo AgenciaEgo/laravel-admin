@@ -4,10 +4,8 @@
 
         <p>{{ $name }}</p>
     </div>
-    <div class="icon">
-        <i class="fa fa-{{ $icon }}"></i>
-    </div>
-    <a href="{{ $link }}" class="small-box-footer">
+    <i class="small-box-icon fa fa-{{ $icon }}" aria-hidden="true"></i>
+    <a href="{{ $link }}" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
         {{ trans('admin.more') }}&nbsp;
         <i class="fa fa-arrow-circle-right"></i>
     </a>

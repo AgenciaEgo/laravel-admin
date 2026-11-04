@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Widgets;
 
+use Encore\Admin\Support\Color;
 use Illuminate\Contracts\Support\Renderable;
 
 class Box extends Widget implements Renderable
@@ -37,6 +38,13 @@ class Box extends Widget implements Renderable
     protected $script;
 
     /**
+     * Styles given to style() / solid(), resolved to card classes on render.
+     *
+     * @var array
+     */
+    protected $styles = [];
+
+    /**
      * Box constructor.
      *
      * @param string $title
@@ -56,7 +64,7 @@ class Box extends Widget implements Renderable
             $this->footer($footer);
         }
 
-        $this->class('box');
+        $this->class('card mb-3');
     }
 
     /**
@@ -117,7 +125,8 @@ class Box extends Widget implements Renderable
     public function collapsable()
     {
         $this->tools[] =
-            '<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>';
+            '<button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">'
+            .'<i data-lte-icon="expand" class="fa fa-plus"></i><i data-lte-icon="collapse" class="fa fa-minus"></i></button>';
 
         return $this;
     }
@@ -133,7 +142,7 @@ class Box extends Widget implements Renderable
     {
         $this->id = uniqid('box-slim-scroll-');
         $scrollOptions = json_encode($options);
-        $nodeSelector = $nodeSelector ?: '.box-body';
+        $nodeSelector = $nodeSelector ?: '.card-body';
 
         $this->script = <<<SCRIPT
 $("#{$this->id} {$nodeSelector}").slimScroll({$scrollOptions});
@@ -150,7 +159,7 @@ SCRIPT;
     public function removable()
     {
         $this->tools[] =
-            '<button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
+            '<button type="button" class="btn btn-tool" data-lte-toggle="card-remove"><i class="fa fa-times"></i></button>';
 
         return $this;
     }
@@ -164,24 +173,31 @@ SCRIPT;
      */
     public function style($styles)
     {
-        if (is_string($styles)) {
-            return $this->style([$styles]);
+        foreach ((array) $styles as $style) {
+            $this->styles[] = $style;
         }
-
-        $styles = array_map(function ($style) {
-            return 'box-'.$style;
-        }, $styles);
-
-        $this->class = $this->class.' '.implode(' ', $styles);
 
         return $this;
     }
 
     /**
-     * Add `box-solid` class to box.
+     * Card classes for the styles: a color gives an outlined card ("card-primary card-outline"),
+     * "solid" fills the header with it instead, "default" means no color.
      *
-     * @return $this
+     * @return string
      */
+    protected function styleClasses()
+    {
+        $solid = in_array('solid', $this->styles, true);
+        $colors = array_values(array_diff($this->styles, ['solid', 'default']));
+
+        if (!$color = Color::bootstrap(end($colors) ?: null)) {
+            return '';
+        }
+
+        return $solid ? "card-$color" : "card-$color card-outline";
+    }
+
     public function solid()
     {
         return $this->style('solid');
@@ -199,7 +215,7 @@ SCRIPT;
             'content'    => $this->content,
             'footer'     => $this->footer,
             'tools'      => $this->tools,
-            'attributes' => $this->formatAttributes(),
+            'attributes' => $this->formatAttributes(['class' => $this->styleClasses()]),
             'script'     => $this->script,
         ];
     }

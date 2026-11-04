@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Widgets;
 
+use Encore\Admin\Support\Color;
 use Illuminate\Contracts\Support\Renderable;
 
 class InfoBox extends Widget implements Renderable
@@ -34,7 +35,7 @@ class InfoBox extends Widget implements Renderable
             'info' => $info,
         ];
 
-        $this->class("small-box bg-$color");
+        $this->class('small-box text-bg-'.Color::bootstrap($color));
     }
 
     /**

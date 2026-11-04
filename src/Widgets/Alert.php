@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Widgets;
 
+use Encore\Admin\Support\Color;
 use Illuminate\Contracts\Support\Renderable;
 
 class Alert extends Widget implements Renderable
@@ -80,7 +81,7 @@ class Alert extends Widget implements Renderable
      */
     protected function variables()
     {
-        $this->class("alert alert-{$this->style} alert-dismissable");
+        $this->class('alert alert-'.Color::bootstrap($this->style).' alert-dismissible fade show');
 
         return [
             'title'      => $this->title,
