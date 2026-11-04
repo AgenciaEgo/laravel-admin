@@ -23,7 +23,11 @@ return new class extends Migration {
             $table->string('select')->nullable();
             $table->text('multiple_select')->nullable();
             $table->string('radio')->nullable();
+            $table->string('radio_button')->nullable();
+            $table->string('radio_card')->nullable();
             $table->text('checkbox')->nullable();
+            $table->text('checkbox_button')->nullable();
+            $table->text('checkbox_card')->nullable();
             $table->boolean('switch')->default(false);
             $table->date('date')->nullable();
             $table->dateTime('datetime')->nullable();
@@ -60,6 +64,7 @@ return new class extends Migration {
             $table->foreignId('showcase_id');
             $table->string('name');
             $table->integer('qty')->default(1);
+            $table->string('kind')->nullable();
             $table->timestamps();
         });
     }

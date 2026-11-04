@@ -11,6 +11,8 @@ class Showcase extends Model
     protected $casts = [
         'multiple_select' => 'array',
         'checkbox'        => 'array',
+        'checkbox_button' => 'array',
+        'checkbox_card'   => 'array',
         'tags'            => 'array',
         'listbox'         => 'array',
         'multiple_images' => 'array',
@@ -23,6 +25,12 @@ class Showcase extends Model
     ];
 
     public function items()
+    {
+        return $this->hasMany(ShowcaseItem::class);
+    }
+
+    // same table, separate relation so the table-mode hasMany gets its own DOM ids
+    public function tableItems()
     {
         return $this->hasMany(ShowcaseItem::class);
     }

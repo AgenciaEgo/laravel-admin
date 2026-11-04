@@ -203,8 +203,9 @@ class ShowcaseController extends AdminController
             $form->hasMany('items', 'Has many (default)', function (Form\NestedForm $form) {
                 $form->text('name');
                 $form->number('qty');
+                $form->select('kind')->options(self::OPTIONS);
             });
-            $form->hasMany('items', 'Has many (table)', function (Form\NestedForm $form) {
+            $form->hasMany('tableItems', 'Has many (table)', function (Form\NestedForm $form) {
                 $form->text('name');
                 $form->number('qty');
             })->useTable();
