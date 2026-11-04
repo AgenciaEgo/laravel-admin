@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **análisis terminado, decisiones tomadas (sección 6); próxima: fase 1**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fase 1 hecha (ver sección 9); próxima: fase 2**.
 
 ## 1. Punto de partida
 
@@ -109,3 +109,17 @@ El showcase cubre más código que el smoke test y destapó deprecations de PHP 
 - `Grid\Tools\QuickSearch` (vía `HasQuickSearch::$searchKey`): accede a una propiedad estática de trait a través del trait. Está deprecado desde PHP 8.1.
 
 Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para que cubra estos casos.
+
+## 9. Avance
+
+### Fase 1: assets base + layout (2026-11-04)
+
+- Vendoreados de npm, verificando shasum contra el registry y sin modificar: `AdminLTE4/` (adminlte 4.10.0: `adminlte.min.css`, que ya trae Bootstrap 5.3 compilado, más `adminlte-colors.min.css` para los colores extendidos, `adminlte-select2.min.css` para la fase 3 y `adminlte.min.js`), `bootstrap5/` (`bootstrap.bundle.min.js` 5.3.8, con Popper) y `fontawesome6/` (6.7.2 `all` + `v4-shims` + webfonts). Los assets de Bootstrap 3 siguen en el repo hasta la fase 7.
+- Reescritos `index`, `content`, `login` y `partials/header|sidebar|menu|footer` con las clases de AdminLTE 4 (`app-wrapper`, `app-header`, `app-sidebar`, `app-main`, `app-content-header`, `nav-treeview`). `#pjax-container` pasa a ser el `<main class="app-main">`.
+- `Admin::theme()` traduce `admin.skin` (nombres de AdminLTE 2) y `admin.layout` a clases de AdminLTE 4. Los configs 1.x publicados siguen funcionando: `skin-black` deja el header blanco con sidebar oscuro, `skin-blue-light` usa header azul con sidebar claro, etc.
+- Nuevo `admin.color_mode` (`light` por defecto, `dark` o `auto`). Sin esto AdminLTE 4 sigue la preferencia del sistema operativo y el panel aparecía en oscuro.
+- Buscador del menú: se usa el sidebar-search nativo de AdminLTE 4, que filtra el árbol en el lugar, en vez del dropdown propio.
+- Navbar: los elementos propios (`refresh-btn`, `fullscreen`) ahora son `li.nav-item > a.nav-link`. **Los elementos que agreguen los consumidores con `Admin::navbar()` necesitan esas clases** (va a la guía de upgrade).
+- Login: sin iCheck ni jQuery; `form-check` nativo e `input-group-text`.
+- x-editable salió de los assets base antes de lo previsto: al cargarlo rompía todas las páginas (busca `$.fn.popover.Constructor` de BS3). Hasta la fase 4, `->editable()` en un grid tira un error JS que corta el resto de los scripts de esa página.
+- Validación: `AdminSmokeTest` y `http-smoke.sh` en verde. `screenshots.mjs`: el layout se ve bien en escritorio y mobile. Las 14 advertencias restantes son del contenido que corresponde a fases posteriores (grid con `editable()` y select2 de tags).

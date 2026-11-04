@@ -266,8 +266,9 @@ return [
     | Application Skin
     |--------------------------------------------------------------------------
     |
-    | This value is the skin of admin pages.
-    | @see https://adminlte.io/docs/2.4/layout
+    | This value is the skin of admin pages: "skin-<color>" colors the header
+    | and uses a dark sidebar, "skin-<color>-light" uses a light sidebar and
+    | "black" keeps the header white.
     |
     | Supported:
     |    "skin-blue", "skin-blue-light", "skin-yellow", "skin-yellow-light",
@@ -279,14 +280,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Color mode
+    |--------------------------------------------------------------------------
+    |
+    | Bootstrap color mode of admin pages: "light", "dark", or "auto" to follow
+    | the operating system preference.
+    |
+    */
+    'color_mode' => env('ADMIN_COLOR_MODE', 'light'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application layout
     |--------------------------------------------------------------------------
     |
-    | This value is the layout of admin pages.
-    | @see https://adminlte.io/docs/2.4/layout
+    | Classes added to the <body> of admin pages.
+    | @see https://adminlte.io/themes/v4/docs/layout.html
     |
-    | Supported: "fixed", "layout-boxed", "layout-top-nav", "sidebar-collapse",
-    | "sidebar-mini".
+    | Supported: "sidebar-mini" (collapse the sidebar to icons instead of hiding
+    | it), "sidebar-collapse" (start collapsed), "fixed" (fixed header), plus any
+    | AdminLTE 4 layout class. "layout-boxed" and "layout-top-nav" are ignored.
     |
     */
     'layout' => ['sidebar-mini', 'sidebar-collapse'],

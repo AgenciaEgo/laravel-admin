@@ -274,6 +274,51 @@ class Admin
     }
 
     /**
+     * AdminLTE 4 classes for the body, header and sidebar, derived from `admin.skin`
+     * and `admin.layout`. The AdminLTE 2 names of published 1.x configs keep working:
+     * "skin-<color>" colors the header and darkens the sidebar, "-light" lightens it,
+     * "black" leaves the header white.
+     *
+     * @return array{body: string, header: string, header_theme: string, sidebar: string, sidebar_theme: string}
+     */
+    public function theme()
+    {
+        $colors = [
+            'blue'   => 'primary',
+            'black'  => null,
+            'purple' => 'violet',
+            'green'  => 'success',
+            'red'    => 'danger',
+            'yellow' => 'warning',
+        ];
+
+        preg_match('/^skin-([a-z]+)(-light)?$/', (string) config('admin.skin', 'skin-blue-light'), $match);
+        $color = $colors[$match[1] ?? 'blue'] ?? 'primary';
+        $light = !empty($match[2]);
+
+        $layout = [
+            'fixed'          => 'fixed-header',
+            'layout-boxed'   => null,
+            'layout-top-nav' => null,
+        ];
+        $body = ['layout-fixed', 'sidebar-expand-lg', 'bg-body-tertiary'];
+        foreach ((array) config('admin.layout', []) as $class) {
+            $class = array_key_exists($class, $layout) ? $layout[$class] : $class;
+            if ($class) {
+                $body[] = $class;
+            }
+        }
+
+        return [
+            'body'          => implode(' ', array_unique($body)),
+            'header'        => $color ? "text-bg-$color" : 'bg-body',
+            'header_theme'  => $color && $color !== 'warning' ? 'dark' : 'light',
+            'sidebar'       => $light ? 'bg-body' : 'bg-body-secondary',
+            'sidebar_theme' => $light ? 'light' : 'dark',
+        ];
+    }
+
+    /**
      * Get navbar object.
      *
      * @return \Encore\Admin\Widgets\Navbar

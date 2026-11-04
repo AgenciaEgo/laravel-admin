@@ -66,7 +66,7 @@ const SHOTS = [
     ['01-login', '/admin/auth/login', null, { guest: true }],
     ['02-dashboard', '/admin'],
     ['03-dashboard-sidebar-collapsed', '/admin', (p) => click(p, '.sidebar-toggle')],
-    ['04-navbar-user-menu', '/admin', (p) => click(p, '.navbar-custom-menu .user-menu > a')],
+    ['04-navbar-user-menu', '/admin', (p) => click(p, '.user-menu > a')],
     ['10-users-grid', '/admin/auth/users'],
     ['11-users-create', '/admin/auth/users/create'],
     ['12-users-edit', '/admin/auth/users/1/edit'],
@@ -171,6 +171,7 @@ try {
     for (const [name, uri, interact, opts = {}] of SHOTS) {
         const page = await (opts.guest ? guest : authed).newPage();
         await page.setViewport(opts.viewport || DESKTOP);
+        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
         const log = { uri, jsErrors: [], consoleErrors: [], failedRequests: [], interaction: interact ? 'ok' : null };
         page.on('pageerror', (e) => log.jsErrors.push(String(e.message || e)));
         page.on('console', (m) => m.type() === 'error' && log.consoleErrors.push(m.text()));

@@ -1,5 +1,5 @@
-<li>
-    <a href="javascript:void(0);" class="nav-fullscreen">
+<li class="nav-item">
+    <a href="javascript:void(0);" class="nav-link nav-fullscreen">
         <i class="fa fa-arrows-alt"></i>
     </a>
 </li>

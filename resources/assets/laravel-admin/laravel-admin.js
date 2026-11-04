@@ -1,19 +1,22 @@
-$.fn.editable.defaults.params = function (params) {
-    params._token = LA.token;
-    params._editable = 1;
-    params._method = 'PUT';
-    return params;
-};
+// x-editable (grid ->editable()) is not loaded with Bootstrap 5; it gets replaced in the grid phase
+if ($.fn.editable) {
+    $.fn.editable.defaults.params = function (params) {
+        params._token = LA.token;
+        params._editable = 1;
+        params._method = 'PUT';
+        return params;
+    };
 
-$.fn.editable.defaults.error = function (data) {
-    var msg = '';
-    if (data.responseJSON.errors) {
-        $.each(data.responseJSON.errors, function (k, v) {
-            msg += v + "\n";
-        });
-    }
-    return msg
-};
+    $.fn.editable.defaults.error = function (data) {
+        var msg = '';
+        if (data.responseJSON.errors) {
+            $.each(data.responseJSON.errors, function (k, v) {
+                msg += v + "\n";
+            });
+        }
+        return msg
+    };
+}
 
 toastr.options = {
     closeButton: true,
@@ -68,54 +71,23 @@ $(document).on('pjax:complete', function (xhr) {
     $.admin.grid.selects = {};
 });
 
-$(document).click(function () {
-    $('.sidebar-form .dropdown-menu').hide();
-});
-
 $(function () {
-    $('.sidebar-menu li:not(.treeview) > a').on('click', function () {
-        var $parent = $(this).parent().addClass('active');
-        $parent.siblings('.treeview.active').find('> a').trigger('click');
-        $parent.siblings().removeClass('active').find('li').removeClass('active');
-    });
-    var menu = $('.sidebar-menu li > a[href$="' + (location.pathname + location.search + location.hash) + '"]').parent().addClass('active');
-    menu.parents('ul.treeview-menu').addClass('menu-open');
-    menu.parents('li.treeview').addClass('active');
+    var $menu = $('.sidebar-menu');
 
-    $('[data-toggle="popover"]').popover();
-
-    // Sidebar form autocomplete
-    $('.sidebar-form .autocomplete').on('keyup focus', function () {
-        var $menu = $('.sidebar-form .dropdown-menu');
-        var text = $(this).val();
-
-        if (text === '') {
-            $menu.hide();
-            return;
-        }
-
-        var regex = new RegExp(text, 'i');
-        var matched = false;
-
-        $menu.find('li').each(function () {
-            if (!regex.test($(this).find('a').text())) {
-                $(this).hide();
-            } else {
-                $(this).show();
-                matched = true;
-            }
-        });
-
-        if (matched) {
-            $menu.show();
-        }
-    }).click(function(event){
-        event.stopPropagation();
+    // highlight the clicked entry (pjax keeps the sidebar, so do it by hand)
+    $menu.on('click', '.nav-item > a.nav-link:not([href="#"])', function () {
+        $menu.find('.nav-link.active').removeClass('active');
+        $(this).addClass('active').parents('.nav-treeview').siblings('a.nav-link').addClass('active');
     });
 
-    $('.sidebar-form .dropdown-menu li a').click(function (){
-        $('.sidebar-form .autocomplete').val($(this).text());
+    // open the entry of the current page on full loads
+    var $current = $menu.find('a.nav-link[href$="' + (location.pathname + location.search + location.hash) + '"]').first();
+    $current.addClass('active');
+    $current.parents('.nav-treeview').each(function () {
+        $(this).css('display', 'block').closest('.nav-item').addClass('menu-open').children('a.nav-link').addClass('active');
     });
+
+    $('[data-bs-toggle="popover"], [data-toggle="popover"]').popover();
 });
 
 $(window).scroll(function() {

@@ -88,3 +88,20 @@ a.editable-empty {
 .bootstrap-datetimepicker-widget .datepicker > div {
     display: block;
 }
+
+/* sidebar brand: config('admin.logo-mini') replaces config('admin.logo') while the sidebar is collapsed to icons */
+.brand-link .brand-mini {
+    display: none;
+}
+.brand-link .brand-text {
+    margin-left: 0;
+}
+.sidebar-mini.sidebar-collapse .app-sidebar:not(:hover) .brand-link .brand-mini {
+    display: inline;
+}
+.sidebar-mini.sidebar-collapse .app-sidebar:not(:hover) .brand-link .brand-text {
+    display: none;
+}
+.sidebar-mini.sidebar-collapse .app-sidebar:not(:hover) .sidebar-search {
+    display: none;
+}

@@ -1,5 +1,5 @@
-<li>
-    <a href="javascript:void(0);" class="container-refresh">
+<li class="nav-item">
+    <a href="javascript:void(0);" class="nav-link container-refresh">
         <i class="fa fa-refresh"></i>
     </a>
 </li>
