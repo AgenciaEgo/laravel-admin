@@ -1,23 +1,3 @@
-// x-editable (grid ->editable()) is not loaded with Bootstrap 5; it gets replaced in the grid phase
-if ($.fn.editable) {
-    $.fn.editable.defaults.params = function (params) {
-        params._token = LA.token;
-        params._editable = 1;
-        params._method = 'PUT';
-        return params;
-    };
-
-    $.fn.editable.defaults.error = function (data) {
-        var msg = '';
-        if (data.responseJSON.errors) {
-            $.each(data.responseJSON.errors, function (k, v) {
-                msg += v + "\n";
-            });
-        }
-        return msg
-    };
-}
-
 // native replacements for the iCheck calls of 1.x: set the state and fire 'change'
 $.fn.laCheck = function (checked) {
     return this.each(function () {
@@ -412,6 +392,61 @@ $('#totop').on('click', function (e) {
         $(selector).each(function () {
             swatch(this);
         });
+    };
+
+})(jQuery);
+
+/**
+ * Grid inline edit (2.0): the popovers of ->input(), ->select(), ->datetime(), ->editable()...
+ * on the Bootstrap 5 Popover. The content is built from the field's <template> and holds
+ * form controls, so the sanitizer is off (the template is server-rendered).
+ */
+(function ($) {
+
+    function placement(tip, source) {
+        var position = $(source).position();
+        if (position.left < 100) return 'right';
+        if (position.top < 110) return 'bottom';
+        if ($(window).height() - $(source).offset().top < 370) return 'top';
+        return 'bottom';
+    }
+
+    $.admin.inlineEdit = {
+        popover: function (trigger, fill) {
+            if (bootstrap.Popover.getInstance(trigger)) {
+                return;
+            }
+            new bootstrap.Popover(trigger, {
+                html: true,
+                sanitize: false,
+                container: 'body',
+                trigger: 'manual',
+                placement: placement,
+                content: function () {
+                    var $trigger = $(trigger);
+                    var $template = $($('template#' + $trigger.data('target')).html());
+                    fill($trigger, $template);
+                    return $template.prop('outerHTML');
+                }
+            });
+        },
+
+        hide: function (except) {
+            $('.la-ie-trigger').each(function () {
+                var popover = bootstrap.Popover.getInstance(this);
+                if (popover && this !== except) {
+                    popover.hide();
+                }
+            });
+        },
+
+        toggle: function (trigger) {
+            $.admin.inlineEdit.hide(trigger);
+            var popover = bootstrap.Popover.getInstance(trigger);
+            if (popover) {
+                popover.toggle();
+            }
+        }
     };
 
 })(jQuery);

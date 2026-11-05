@@ -12,7 +12,7 @@ $(document).off('click', '.ie-content .ie-submit').on('click', '.ie-content .ie-
     var original = $trigger.data('original');
 
     if (val == original) {
-        $('[data-toggle="popover"]').popover('hide');
+        $.admin.inlineEdit.hide();
         return;
     }
 
@@ -35,7 +35,7 @@ $(document).off('click', '.ie-content .ie-submit').on('click', '.ie-content .ie-
             $trigger.data('value', val)
                 .data('original', val);
 
-            $('[data-toggle="popover"]').popover('hide');
+            $.admin.inlineEdit.hide();
         },
         statusCode: {
             422: function(xhr) {

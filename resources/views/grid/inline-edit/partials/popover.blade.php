@@ -1,25 +1,10 @@
-$('.{{ $trigger }}').popover({
-    html: true,
-    container: 'body',
-    trigger: 'manual',
-    placement: function (context, source) {
-        var position = $(source).position();
-        if (position.left < 100) return "right";
-        if (position.top < 110) return "bottom";
-        if ($(window).height() - $(source).offset().top < 370) {
-            return 'top';
-        }
-        return "bottom";
-    },
-    content: function () {
-        var $trigger = $(this);
-        var $template = $($('template#'+$(this).data('target')).html());
+$('.{{ $trigger }}').each(function () {
+    $.admin.inlineEdit.popover(this, function ($trigger, $template) {
         {{ $content }}
-        return $template.prop("outerHTML");
-    }
+    });
 }).on('shown.bs.popover', function (e) {
 
-    var $popover = $($(this).data('bs.popover').$tip[0]).find('.ie-content');
+    var $popover = $(bootstrap.Popover.getInstance(this).tip).find('.ie-content');
     var $display = $(this).parents('.ie-wrap').find('.ie-display');
     var $trigger = $(this);
 
@@ -28,7 +13,6 @@ $('.{{ $trigger }}').popover({
 
     {{ $shown ?? '' }}
 
-}).click(function () {
-    $('[data-toggle="popover"]').popover('hide');
-    $(this).popover('toggle');
+}).on('click', function () {
+    $.admin.inlineEdit.toggle(this);
 });

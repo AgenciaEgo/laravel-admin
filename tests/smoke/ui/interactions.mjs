@@ -253,25 +253,7 @@ try {
     check('switch: turned off, saved as the "off" value', off.switch === 0, off.switch);
 
     // grid switch: toggling it in the list saves through the inline-edit endpoint
-    // TODO(phase 4): drop this stub. x-editable is not loaded until the grid phase and the
-    // showcase grid uses ->editable(); its error would abort every page script after it
-    // (they all run inside one $(function () {...})), the switch handler included.
-    const stub = await page.evaluateOnNewDocument(() => {
-        let jq;
-        Object.defineProperty(window, 'jQuery', {
-            configurable: true,
-            get: () => jq,
-            set: (v) => {
-                jq = v;
-                if (v && v.fn && !v.fn.editable) {
-                    v.fn.editable = function () { return this; };
-                    v.fn.editable.defaults = {};
-                }
-            },
-        });
-    });
     await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
-    await page.removeScriptToEvaluateOnNewDocument(stub.identifier);
     const gridSwitch = `input.grid-switch-switch[data-key="${row.id}"]`;
     const toggleInGrid = async () => {
         if (!(await page.$(gridSwitch))) throw new Error(`no grid switch ${gridSwitch}`);
@@ -468,12 +450,7 @@ try {
     sql(`delete from showcases where id = ${d.id}`);
 
     // grid filter between()->date() (like sullair-click's users filter)
-    const stub = await page.evaluateOnNewDocument(() => { // TODO(phase 4): same x-editable stub as the grid switch check
-        let jq;
-        Object.defineProperty(window, 'jQuery', { configurable: true, get: () => jq, set: (v) => { jq = v; if (v && v.fn && !v.fn.editable) { v.fn.editable = function () { return this; }; v.fn.editable.defaults = {}; } } });
-    });
     await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
-    await page.removeScriptToEvaluateOnNewDocument(stub.identifier);
     const filterReady = await page.evaluate(() => ['#date_start', '#date_end'].every((s) => document.querySelector(s)?._flatpickr?.config.dateFormat === 'Y-m-d'));
     check('flatpickr grid filter between()->date(): pickers with Y-m-d', filterReady);
     await page.evaluate(() => {
@@ -554,20 +531,6 @@ try {
     check('checkbox: unchecking everything saves an empty list', same(json(empty.checkbox), []) && empty.radio === 'b', `${empty.checkbox} ${empty.radio}`);
 
     // grid: row selection drives the batch button, select-all, filter with checkboxes
-    const stub = await page.evaluateOnNewDocument(() => { // TODO(phase 4): same x-editable stub as the grid switch check
-        let jq;
-        Object.defineProperty(window, 'jQuery', {
-            configurable: true,
-            get: () => jq,
-            set: (v) => {
-                jq = v;
-                if (v && v.fn && !v.fn.editable) {
-                    v.fn.editable = function () { return this; };
-                    v.fn.editable.defaults = {};
-                }
-            },
-        });
-    });
     await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
     const rowBoxes = await page.$$('input[class$="-checkbox"][data-id]');
     await rowBoxes[0].click();
@@ -590,7 +553,6 @@ try {
         i.checked = true;
         $(i).closest('form').trigger('submit');
     }));
-    await page.removeScriptToEvaluateOnNewDocument(stub.identifier);
     const filtered = await page.evaluate(() => [...document.querySelectorAll('td.column-title')].map((t) => t.textContent.trim()).filter(Boolean));
     check('grid filter in()->checkbox(): filters the rows', filtered.length === 1 && filtered[0] === title, `${page.url()} ${JSON.stringify(filtered)}`);
 
@@ -734,7 +696,76 @@ try {
     check('icon run', false, e.message.split('\n')[0]);
 }
 
-const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));
+// --- grid ->editable() (x-editable in 1.x, now the inline-edit displayers on a BS5 popover) ---
+try {
+    const title = `Editable ${Date.now()}`;
+    sql(`insert into showcases (title, "select", date, created_at, updated_at) values ('${title}', 'a', '2026-10-05', datetime('now'), datetime('now'))`);
+    const [e] = sql(`select id from showcases where title = '${title}'`);
+    const cell = (column) => `tr[data-key="${e.id}"] td.column-${column} .la-ie-trigger`;
+    const openCell = async (column) => {
+        await clickEl(page, cell(column));
+        await page.waitForSelector('.popover.show .ie-content', { visible: true, timeout: 3000 });
+    };
+    const submitPopover = async () => {
+        const saved = page.waitForResponse((r) => r.url().endsWith(`/admin/showcases/${e.id}`) && r.request().method() === 'POST', { timeout: 5000 });
+        await page.click('.popover.show .ie-submit');
+        const res = await saved;
+        await sleep(400);
+        return res.status();
+    };
+    const shownText = (column) => page.evaluate((sel) => document.querySelector(sel).closest('.ie-wrap').querySelector('.ie-display').textContent.trim(), cell(column));
+
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    const hasRow = await page.$(`tr[data-key="${e.id}"]`);
+    if (!hasRow) throw new Error(`row ${e.id} not in the grid`);
+
+    // text
+    await openCell('title');
+    await page.click('.popover.show .ie-input', { clickCount: 3 });
+    await page.keyboard.type(`${title} (edited)`);
+    const textStatus = await submitPopover();
+    const [t] = sql(`select title from showcases where id = ${e.id}`);
+    check('grid editable(): text saved from the popover', textStatus === 200 && t.title === `${title} (edited)` && await shownText('title') === `${title} (edited)`,
+        `${textStatus} ${t.title} | ${await shownText('title')}`);
+    check('grid editable(): popover closes after saving', await page.$('.popover.show') === null);
+
+    // validation error stays in the popover (title is required)
+    await openCell('title');
+    await page.click('.popover.show .ie-input', { clickCount: 3 });
+    await page.keyboard.press('Backspace');
+    const errStatus = await submitPopover();
+    const errText = await page.evaluate(() => document.querySelector('.popover.show .error')?.textContent.trim());
+    const [same1] = sql(`select title from showcases where id = ${e.id}`);
+    check('grid editable(): validation error shown in the popover, nothing saved', errStatus === 422 && /required/i.test(errText || '') && same1.title === `${title} (edited)`,
+        `${errStatus} "${errText}" ${same1.title}`);
+    await page.click('.popover.show .ie-cancel');
+    await sleep(300);
+    check('grid editable(): cancel closes the popover', await page.$('.popover.show') === null);
+
+    // select
+    await openCell('select');
+    await page.select('.popover.show select.ie-input', 'c');
+    const selStatus = await submitPopover();
+    const [sel] = sql(`select "select" as v from showcases where id = ${e.id}`);
+    check('grid editable("select"): saved, label shown', selStatus === 200 && sel.v === 'c' && await shownText('select') === 'Gamma', `${selStatus} ${sel.v} ${await shownText('select')}`);
+
+    // date: flatpickr calendar inside the popover
+    await openCell('date');
+    await page.waitForSelector('.popover.show .flatpickr-calendar', { visible: true, timeout: 3000 });
+    const day = await page.evaluateHandle(() => [...document.querySelectorAll('.popover.show .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)')].find((d) => d.textContent.trim() === '20'));
+    await day.click();
+    await sleep(200);
+    const dateStatus = await submitPopover();
+    const [d] = sql(`select date from showcases where id = ${e.id}`);
+    check('grid editable("date"): day picked in the popover calendar, saved', dateStatus === 200 && d.date === '2026-10-20' && await shownText('date') === '2026-10-20',
+        `${dateStatus} ${d.date} ${await shownText('date')}`);
+
+    sql(`delete from showcases where id = ${e.id}`);
+} catch (err) {
+    check('editable run', false, err.message.split('\n')[0]);
+}
+
+const unexpected = jsErrors;
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 
 await browser.close();

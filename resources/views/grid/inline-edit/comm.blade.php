@@ -3,8 +3,7 @@
 <span class="ie-wrap">
     <a
         href="javascript:void(0);"
-        class="{{ $trigger }}"
-        data-toggle="popover"
+        class="{{ $trigger }} la-ie-trigger"
         data-target="{{ $target }}"
         data-value="{{ $value }}"
         data-original="{{ $value }}"
@@ -26,7 +25,7 @@
             </div>
             <div class="ie-action">
                 <button class="btn btn-primary btn-sm ie-submit">{{ __('admin.submit') }}</button>
-                <button class="btn btn-default btn-sm ie-cancel">{{ __('admin.cancel') }}</button>
+                <button class="btn btn-outline-secondary btn-sm ie-cancel">{{ __('admin.cancel') }}</button>
             </div>
         </div>
     </template>
@@ -45,7 +44,8 @@
         color:#777;
     }
 
-    .ie-wrap>a:hover i {
+    .ie-wrap>a:hover i,
+    .ie-wrap .ie-display:empty + i {
         visibility: visible !important;
     }
 
@@ -66,15 +66,13 @@
 </style>
 
 <script>
-    $(document).on('click', '.ie-action .ie-cancel', function () {
-        $('[data-toggle="popover"]').popover('hide');
+    $(document).off('click.la-ie', '.ie-action .ie-cancel').on('click.la-ie', '.ie-action .ie-cancel', function () {
+        $.admin.inlineEdit.hide();
     });
 
-    $('body').on('click', function (e) {
-        if ($(e.target).data('toggle') !== 'popover'
-            && $(e.target).parents('[data-toggle="popover"]').length === 0
-            && $(e.target).parents('.popover.in').length === 0) {
-            $('[data-toggle="popover"]').popover('hide');
+    $('body').off('click.la-ie').on('click.la-ie', function (e) {
+        if ($(e.target).closest('.la-ie-trigger, .popover.show, .flatpickr-calendar').length === 0) {
+            $.admin.inlineEdit.hide();
         }
     });
 </script>
