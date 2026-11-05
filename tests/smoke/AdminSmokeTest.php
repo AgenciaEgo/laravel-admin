@@ -117,12 +117,13 @@ class AdminSmokeTest extends TestCase
                 return "modal {$this->name}";
             });
             $grid->quickSearch('username');
-            // inline radio on a null value (no such attribute)
+            // inline radio / select on a null value (no such attribute)
             $grid->column('smoke_null')->radio(['a' => 'A', 'b' => 'B']);
+            $grid->column('smoke_null_select')->select(['a' => 'A', 'b' => 'B']);
 
             return $content->body($grid);
         });
-        $this->check('grid expand/modal/quick search/inline radio on null', $this->get("$prefix/smoke-grid?__search__=adm"));
+        $this->check('grid expand/modal/quick search/inline radio+select on null', $this->get("$prefix/smoke-grid?__search__=adm"));
 
         // pjax (symfony/dom-crawler)
         $this->check('pjax users grid', $this->get("$prefix/auth/users", ['X-PJAX' => 'true', 'X-PJAX-Container' => '#pjax-container']));
