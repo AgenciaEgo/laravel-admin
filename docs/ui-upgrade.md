@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 6 hechas (ver sección 9); próxima: fase 7 (limpieza de assets de BS3, guía de upgrade, CI)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 7 hechas (ver sección 9); próxima: fase 8 (rama `ui-upgrade` de sullair-click, con una copia de su base)**.
 
 ## 1. Punto de partida
 
@@ -214,3 +214,17 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 Casi todo se resolvió en las fases anteriores: los `data-bs-*`, `$.fn.button` → `laLoading`, iCheck → `laCheck`/`laToggle`, x-editable → inline-edit, los popovers del inline-edit, el expand y los dropdowns. Lo que queda usa la API que el bridge jQuery de BS5 mantiene (`.tab('show')`, `.modal('show'|'hide'|'toggle')`, `.popover()`, `.tooltip()`, eventos `show.bs.*`/`shown.bs.*`). El init global de popovers ya solo toma `data-bs-toggle="popover"`.
 - Probado en el navegador con una ruta temporal (form con `tab()` y `hasMany(...)->mode('tab')`): cambiar de tab, agregar un tab de hasMany (queda activo) e íconos de error en los tabs con errores de validación. Sin errores de JS.
 - En sullair-click hay que adaptar, en su rama: `data-toggle="modal"` en una columna de AnnualWinners y tres herramientas propias del grid con `data-toggle="buttons"` y `data-toggle="dropdown"`/`btn-default` (`resources/views/admin/tools/*`).
+
+### Fase 7: limpieza, guía de upgrade y CI (2026-11-05)
+
+- **Assets:** se borró todo lo de la era BS3 que ya nadie referenciaba: Bootstrap 3, CSS/JS/skins de AdminLTE 2, Font Awesome 4, moment, eonasdan, x-editable, bootstrap-switch, iCheck, bootstrap-colorpicker, bootstrap-slider y el select2 viejo. El CSS del skin de AdminLTE 2 todavía se agregaba en todas las páginas; ahora el skin son clases (`Admin::theme()`). Quedan en su lugar dentro de `AdminLTE/` jQuery (+migrate), input-mask, ion.rangeSlider, slimScroll y el avatar por defecto, para no mover rutas publicadas. `resources/assets` pasó de 7,5 MB a 3,5 MB. Verificado con un `vendor:publish` desde cero.
+- **[UPGRADE-2.0.md](../UPGRADE-2.0.md):** actualización de assets (borrar lo publicado antes), configuración (`skin`, `layout`, el nuevo `color_mode`), base de datos (nada que migrar), tabla de equivalencias de clases y atributos BS3 → BS5, cambios de JS (`laLoading`, `laCheck`/`laToggle`, fechas sin moment ni `dp.change`, `editable()`, switch, fase de captura de BS5), tabla de plugins y un grep para encontrar lo que hay que adaptar en una app.
+- **CI:** nuevo job `UI interactions` en `tests.yml` (Laravel 13 / PHP 8.3, Node 24, el Chrome del runner). Instala el showcase y corre `interactions.mjs` y `screenshots.mjs` (falla ante cualquier advertencia), y sube las capturas como artefacto. El workflow también corre en pushes a `ui-upgrade`. Los fallos salen como anotaciones `::error::` de GitHub, legibles sin permisos de admin.
+- Dos problemas que aparecieron solo en el runner: el `fetch` de Node 22 (undici) cortaba el proceso con una aserción interna contra `php -S` (ahora se espera con una conexión TCP), y una carrera real en el inline-edit. El popover recibe `.show` antes de disparar `shown.bs.popover`, así que un click rápido en "Guardar" no encontraba el trigger. Ahora el submit lo busca por `aria-describedby`, y el atributo pasó a llamarse `data-ie-trigger`. La misma carrera existía en `master` (927eec23).
+- Estado: el CI completo en verde en `ui-upgrade` (matriz Laravel 9–13, lint y UI).
+
+**Fixes de la 1.x acumulados en `master` desde v1.10.3, para el release:**
+- 83c282f2: `->radio()` del grid con valor `null` tiraba el listado. El smoke test ahora detecta las excepciones que se muestran dentro de una página 200.
+- 6c13dcbc: lo mismo con `->select()` del grid.
+- c3e48f35: el inline-edit con popover abría vacío desde la 1.10.0 (sanitizer de BS 3.4.1), y con dos tipos en el mismo grid solo guardaba el último.
+- 927eec23: carrera en el submit del inline-edit.
