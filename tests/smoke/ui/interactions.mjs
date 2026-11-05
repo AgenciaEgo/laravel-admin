@@ -633,6 +633,54 @@ try {
     check('color run', false, e.message.split('\n')[0]);
 }
 
+// --- listbox (bootstrap4-duallistbox, bootstrap-duallistbox 3 in 1.x) ---
+try {
+    const title = `Listbox ${Date.now()}`;
+    const box = (n) => `.bootstrap-duallistbox-container .box${n}`;
+    const listed = (n) => page.evaluate((sel) => [...document.querySelectorAll(`${sel} select option`)].filter((o) => o.style.display !== 'none').map((o) => o.textContent.trim()), box(n));
+    const moveOption = async (label) => {
+        await page.evaluate((sel, label) => {
+            const option = [...document.querySelectorAll(`${sel} select option`)].find((o) => o.textContent.trim() === label);
+            option.selected = true;
+            $(option).closest('select').trigger('change');
+        }, box(1), label);
+        await sleep(200); // moveOnSelect (default, as in 1.x): selecting an option moves it
+    };
+    const selectedValues = () => page.evaluate(() => $('select.listbox').val());
+
+    await page.goto(`${BASE}/admin/showcases/create`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', title);
+    const buttons = await page.evaluate(() => [...document.querySelectorAll('.bootstrap-duallistbox-container .buttons button')]
+        .map((b) => b.offsetWidth > 0 && b.textContent.trim() !== ''));
+    check('listbox: "move all" / "remove all" buttons are visible (glyphicons in 1.x)', buttons.length === 2 && buttons.every(Boolean), JSON.stringify(buttons));
+    await moveOption('Beta');
+    await moveOption('Gamma');
+    check('listbox: selecting an option moves it to the right', same(await listed(2), ['Beta', 'Gamma']) && same(await listed(1), ['Alpha']), `${await listed(1)} | ${await listed(2)}`);
+    await submit(page, { afterSave: 1 });
+    const [l] = sql(`select id, listbox from showcases where title = '${title}'`);
+    if (!l) throw new Error('listbox showcase was not created');
+    check('listbox: saved', same(json(l.listbox), ['b', 'c']), l.listbox);
+    check('listbox: edit page shows the stored values on the right', same(await listed(2), ['Beta', 'Gamma']), JSON.stringify(await listed(2)));
+
+    await page.evaluate(() => { document.querySelector('input#title').value = ''; });
+    await moveOption('Alpha');
+    await submit(page);
+    check('listbox: old input kept after a validation error', same(await selectedValues(), ['a', 'b', 'c']) && same(await listed(2), ['Alpha', 'Beta', 'Gamma']), JSON.stringify(await selectedValues()));
+
+    await page.type('input#title', title);
+    await clickEl(page, `${box(2)} .removeall`);
+    await submit(page, { afterSave: 1 });
+    const [emptied] = sql(`select listbox from showcases where id = ${l.id}`);
+    check('listbox: removing everything saves an empty list', same(json(emptied.listbox), []), emptied.listbox);
+    sql(`delete from showcases where id = ${l.id}`);
+
+    // the package's own role form uses a listbox for the permissions
+    await page.goto(`${BASE}/admin/auth/roles/create`, { waitUntil: 'networkidle0' });
+    check('listbox: role form (permissions) is initialised', await page.evaluate(() => $('.bootstrap-duallistbox-container').length === 1 && $('.bootstrap-duallistbox-container .box1 option').length > 0));
+} catch (e) {
+    check('listbox run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 
