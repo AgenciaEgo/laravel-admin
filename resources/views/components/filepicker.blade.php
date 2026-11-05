@@ -124,7 +124,7 @@ $('.picker-file-preview').on('click', 'a.remove', function () {
     var preview = $(this).parents('.file-preview-frame');
     var current = preview.data('val');
 
-    preview.addClass('hide');
+    preview.addClass('d-none');
 
     var input = pickInput.val().split(separator);
 
@@ -138,7 +138,7 @@ $('.picker-file-preview').on('click', 'a.remove', function () {
     updateValue();
 
     if (input.length === 0) {
-        $(this).parents('.picker-file-preview').addClass('hide');
+        $(this).parents('.picker-file-preview').addClass('d-none');
     }
 });
 
@@ -168,7 +168,7 @@ refresh = function () {
     });
 
     if (values.length > 0) {
-        preview.removeClass('hide');
+        preview.removeClass('d-none');
     }
 };
 @endif

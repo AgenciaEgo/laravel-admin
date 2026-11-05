@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label>{{ $label }}</label>
+<div class="form-group mb-3">
+    <label class="form-label">{{ $label }}</label>
     <div>
     @foreach($options as $option => $label)
         <div class="form-check form-check-inline">

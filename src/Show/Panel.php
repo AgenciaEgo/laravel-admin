@@ -156,6 +156,12 @@ class Panel implements Renderable
      */
     public function render()
     {
+        // card color: same rule as the Box widget (style('info') = colored outline, 'default' = none)
+        $style = $this->data['style'] ?? '';
+        $this->data['styleClasses'] = ($style && $style !== 'default')
+            ? 'card-'.\Encore\Admin\Support\Color::bootstrap($style).' card-outline'
+            : '';
+
         return view($this->view, $this->data)->render();
     }
 }

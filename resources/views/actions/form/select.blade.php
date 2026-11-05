@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label>{{ $label }}</label>
+<div class="form-group mb-3">
+    <label class="form-label">{{ $label }}</label>
 
     <select class="form-control {{$class}}" style="width: 100%;" name="{{$name}}" {!! $attributes !!} >
 

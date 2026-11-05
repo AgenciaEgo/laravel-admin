@@ -915,6 +915,102 @@ try {
     check('quick create run', false, e.message.split('\n')[0]);
 }
 
+// --- tree (the package's menu editor: nestable) ---
+try {
+    const title = `Tree ${Date.now()}`;
+    sql(`insert into admin_menu (parent_id, "order", title, icon, uri, created_at, updated_at) values (0, 99, '${title}', 'fa-bars', '', datetime('now'), datetime('now'))`);
+    const [m] = sql(`select id from admin_menu where title = '${title}'`);
+    await page.goto(`${BASE}/admin/auth/menu`, { waitUntil: 'networkidle0' });
+
+    await clickEl(page, '[data-action="collapse"]');
+    const collapsed = await page.evaluate(() => document.querySelectorAll('.dd-item.dd-collapsed').length);
+    await clickEl(page, '[data-action="expand"]');
+    const expanded = await page.evaluate(() => document.querySelectorAll('.dd-item.dd-collapsed').length);
+    check('tree: collapse / expand all', collapsed > 0 && expanded === 0, `collapsed=${collapsed} after expand=${expanded}`);
+
+    const saved = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().endsWith('/admin/auth/menu') && (r.request().postData() || '').includes('_order'), { timeout: 5000 });
+    await clickEl(page, '[class$="-save"]');
+    const saveRes = await saved;
+    await page.waitForSelector('.toast-success', { visible: true, timeout: 3000 }).catch(() => {});
+    check('tree: save sends the order', saveRes.status() === 200 && !!(await page.$('.toast-success')), `${saveRes.status()}`);
+
+    const del = await page.$(`.tree_branch_delete[data-id="${m.id}"]`);
+    if (!del) throw new Error('no delete link for the temporary menu item');
+    await del.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await del.click();
+    await page.waitForSelector('.swal2-confirm', { visible: true, timeout: 3000 });
+    const gone = page.waitForResponse((r) => r.url().endsWith(`/admin/auth/menu/${m.id}`), { timeout: 5000 });
+    await page.click('.swal2-confirm');
+    await gone;
+    await sleep(800);
+    check('tree: delete a branch (confirm dialog)', sql(`select count(*) n from admin_menu where id = ${m.id}`)[0].n === 0);
+} catch (e) {
+    check('tree run', false, e.message.split('\n')[0]);
+}
+
+// --- show (detail page) ---
+try {
+    await page.goto(`${BASE}/admin/showcases/1`, { waitUntil: 'networkidle0' });
+    const show = await page.evaluate(() => ({
+        card: !!document.querySelector('.card .card-header .card-title'),
+        fields: document.querySelectorAll('.fields-group .form-group.row').length,
+        badge: !!document.querySelector('.fields-group .badge[class*="text-bg-"]'),
+        file: !!document.querySelector('.show-file a[href]'),
+        tools: [...document.querySelectorAll('.card-tools a')].map((a) => a.textContent.trim()).filter(Boolean),
+    }));
+    check('show: card with fields, badges, file block and tools', show.card && show.fields > 10 && show.badge && show.file && show.tools.length >= 3, JSON.stringify(show));
+} catch (e) {
+    check('show run', false, e.message.split('\n')[0]);
+}
+
+// --- action with a form (Actions\Interactor\Form: modal) ---
+try {
+    await page.goto(`${BASE}/admin/showcases?id=1`, { waitUntil: 'networkidle0' });
+    const openAction = async () => {
+        await clickEl(page, '.grid-dropdown-actions [data-bs-toggle="dropdown"]');
+        await page.waitForSelector('.grid-dropdown-actions .dropdown-menu.show', { visible: true, timeout: 3000 });
+        const item = await page.evaluateHandle(() => [...document.querySelectorAll('.grid-dropdown-actions .dropdown-menu.show a')].find((a) => a.textContent.includes('Row action (form)')));
+        await item.click();
+        await page.waitForSelector('.modal.show form', { visible: true, timeout: 3000 });
+        await sleep(300);
+    };
+    await openAction();
+    const modal = await page.evaluate(() => ({
+        title: document.querySelector('.modal.show .modal-title')?.textContent.trim(),
+        labels: [...document.querySelectorAll('.modal.show .form-label')].map((l) => l.textContent.trim()),
+        select2: !!document.querySelector('.modal.show .select2'),
+        date: !!document.querySelector('.modal.show input[name="when"]')?._flatpickr,
+    }));
+    check('action form: modal with its fields (select2 and date pickers initialised)', modal.title === 'Row action (form)' && modal.labels.length === 4 && modal.select2 && modal.date, JSON.stringify(modal));
+
+    // required field left empty: the browser would block it (required attribute), so skip
+    // HTML5 validation and let the server reject it; the modal stays
+    const required = await page.evaluate(() => document.querySelector('.modal.show input[name="note"]').required);
+    await page.evaluate(() => { document.querySelector('.modal.show form').noValidate = true; });
+    const failed = page.waitForResponse((r) => r.url().includes('_handle_action_'), { timeout: 5000 });
+    await page.click('.modal.show button[type="submit"]');
+    const failedRes = await failed;
+    const failedBody = await failedRes.json().catch(() => ({})); // actions answer validation errors as a toastr (status false)
+    await sleep(600);
+    const stillOpen = !!(await page.$('.modal.show'));
+    const btnEnabled = await page.evaluate(() => !document.querySelector('.modal.show button[type="submit"]')?.disabled);
+    check('action form: validation error shown, modal stays open, submit enabled again',
+        failedBody.status === false && !!(await page.$('.toast-error')) && stillOpen && btnEnabled,
+        `${failedRes.status()} ${JSON.stringify(failedBody).slice(0, 80)} open=${stillOpen} enabled=${btnEnabled} required=${required}`);
+    await page.evaluate(() => { const s = document.querySelector('.swal2-confirm'); if (s) s.click(); });
+    await sleep(300);
+
+    await page.type('.modal.show input[name="note"]', 'hello');
+    const done = page.waitForResponse((r) => r.url().includes('_handle_action_'), { timeout: 5000 });
+    await page.click('.modal.show button[type="submit"]');
+    const res = await done;
+    const body = await res.json().catch(() => ({}));
+    await sleep(800);
+    check('action form: submitted, modal closed', res.status() === 200 && /hello/.test(JSON.stringify(body)) && !(await page.$('.modal.show')), JSON.stringify(body).slice(0, 120));
+} catch (e) {
+    check('action form run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors;
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 

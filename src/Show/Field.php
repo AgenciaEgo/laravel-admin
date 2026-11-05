@@ -232,7 +232,7 @@ class Field implements Renderable
                     }
                 }
 
-                return "<img src='$src' style='max-width:{$width}px;max-height:{$height}px' class='img' />";
+                return "<img src='$src' style='max-width:{$width}px;max-height:{$height}px' class='img img-thumbnail' />";
             })->implode('&nbsp;');
         });
     }
@@ -315,20 +315,14 @@ class Field implements Renderable
             $download = $download ? "download='$name'" : '';
 
             return <<<HTML
-<ul class="mailbox-attachments clearfix">
-    <li style="margin-bottom: 0;">
-      <span class="mailbox-attachment-icon"><i class="fa {$field->getFileIcon($name)}"></i></span>
-      <div class="mailbox-attachment-info">
-        <div class="mailbox-attachment-name">
-            <i class="fa fa-paperclip"></i> {$name}
-            </div>
-            <span class="mailbox-attachment-size">
-              {$size}&nbsp;
-              <a href="{$url}" class="btn btn-default btn-xs pull-right" target="_blank" $download><i class="fa fa-cloud-download"></i></a>
-            </span>
-      </div>
-    </li>
-  </ul>
+<div class="d-inline-flex align-items-center gap-3 border rounded p-2 show-file">
+    <i class="fa {$field->getFileIcon($name)} fa-2x text-body-secondary"></i>
+    <div>
+        <div class="text-break"><i class="fa fa-paperclip"></i> {$name}</div>
+        <small class="text-body-secondary">{$size}</small>
+    </div>
+    <a href="{$url}" class="btn btn-outline-secondary btn-sm" target="_blank" $download><i class="fa fa-cloud-download"></i></a>
+</div>
 HTML;
         });
     }
@@ -365,7 +359,7 @@ HTML;
             }
 
             return collect((array) $value)->map(function ($name) use ($style) {
-                return "<span class='label label-{$style}'>$name</span>";
+                return "<span class='badge text-bg-".\Encore\Admin\Support\Color::bootstrap($style)."'>$name</span>";
             })->implode('&nbsp;');
         });
     }
@@ -385,7 +379,7 @@ HTML;
             }
 
             return collect((array) $value)->map(function ($name) use ($style) {
-                return "<span class='badge bg-{$style}'>$name</span>";
+                return "<span class='badge text-bg-".\Encore\Admin\Support\Color::bootstrap($style)."'>$name</span>";
             })->implode('&nbsp;');
         });
     }

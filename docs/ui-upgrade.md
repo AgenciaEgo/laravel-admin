@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 4 hechas (ver sección 9); próxima: fase 5 (show, tree, modales de acciones, StepForm)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 5 hechas (ver sección 9); próxima: fase 6 (JS restante)**.
 
 ## 1. Punto de partida
 
@@ -199,3 +199,12 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 - Showcase: el seeder es idempotente (`firstOrCreate`), porque cada vez que se recreaban las tablas duplicaba el menú.
 - `interactions.mjs`: 105/105. Suma búsqueda rápida, filtro de columna (el dropdown no se cierra mientras se tipea), panel de filtros, scopes, editar y borrar desde el dropdown de fila (con la confirmación de SweetAlert), acción en lote sobre las filas seleccionadas, expand con carga asíncrona, modal, selector de columnas, cantidad por página, paginación y quick create (texto, select2 y fecha guardados). Los tests que dependen de una fila puntual la filtran por id, para no depender de la paginación. Las 45 capturas, sin advertencias. La tabla con columnas fijas y la vista de imágenes se renderizaron sin excepciones con rutas temporales.
 - **Para la guía de upgrade:** el markup del grid cambió (cards, `.grid-tools`, `.filter-box` sin `box-header`, `.dropdown-item`, badges). El CSS o JS propio que apunte a `.box*`, a `label label-*` o a los botones sociales tiene que adaptarse.
+
+### Fase 5: show, tree, modales de acciones, StepForm (2026-11-05)
+
+- **Show:** el panel es una card con el color de `style()` (la misma regla que el widget Box), los campos son `form-group row` con `col-form-label`, el contenido envuelto va en una card y el contenido sin envolver se alinea con el label. Las herramientas (lista, editar, borrar) usan BS5. `label()`/`badge()` usan `Support\Color`. `file()` dejó de usar `mailbox-attachments` de AdminLTE 2: ahora es un bloque con ícono, nombre, tamaño y botón de descarga (`.show-file`). `image()` usa `img-thumbnail`.
+- **Tree:** card con la barra de botones en flex ("Nuevo" a la derecha) y `float-end` en las acciones de cada rama. Nestable no cambió.
+- **Formularios de acciones** (`Actions\Interactor\Form`): campos con `form-group mb-3`, `form-label` y `form-text`. El modal ya tenía el encabezado de BS5 desde la fase 4 y se abre con el bridge jQuery de BS5. Las acciones devuelven los errores de validación como toastr con `status: false` (el contrato de la 1.x).
+- **StepForm:** botones anterior/siguiente en flex. **Permisos:** `label label-primary` → `badge text-bg-primary`. El filepicker alterna `d-none`.
+- `interactions.mjs`: 112/112. Suma árbol (expandir/colapsar, guardar orden, borrar rama con confirmación), show (card, campos, badges, archivo, herramientas) y acción con formulario (modal con select2 y flatpickr inicializados, error de validación con el modal abierto y el botón habilitado, envío correcto que cierra el modal). Las 45 capturas, sin advertencias.
+- No cubierto por el arnés: `MultipleSteps`/`StepForm`, porque el showcase no tiene uno. Click no lo usa.

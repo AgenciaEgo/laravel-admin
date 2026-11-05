@@ -36,10 +36,6 @@ a.editable-empty {
     color: red;
 }
 
-.mailbox-attachments li {
-    width: 300px !important;
-}
-
 .table-has-many .form-group {
     margin-bottom: 0 !important;
 }
