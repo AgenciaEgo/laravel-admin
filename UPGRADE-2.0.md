@@ -93,7 +93,7 @@ Elementos agregados al navbar con `Admin::navbar()`: tienen que ser `<li class="
 Desde la raíz de la aplicación:
 
 ```bash
-grep -rnE "box-|class=\"box|label label-|pull-(left|right)|btn-default|btn-xs|hidden-xs|sr-only|input-group-addon|control-label|help-block|has-error|class=\"caret|class=\"divider|panel-|glyphicon|data-(toggle|target|dismiss|placement)=|\.button\(|iCheck|ifChecked|ifChanged|bootstrapSwitch|datetimepicker|DateTimePicker|dp\.change|moment\(|\.editable\(" app resources public/js --include=*.php --include=*.js --include=*.blade.php
+grep -rnE "box-|class=\"box|label label-|pull-(left|right)|btn-default|btn-xs|hidden-xs|sr-only|input-group-addon|control-label|help-block|has-error|class=\"caret|class=\"divider|panel-|glyphicon|data-(toggle|target|dismiss|placement)=|\.button\(|iCheck|ifChecked|ifChanged|bootstrapSwitch|datetimepicker|DateTimePicker|dp\.change|moment\(|\.editable\(" app resources public/js --include='*.php' --include='*.js' --include='*.blade.php'
 ```
 
 Después recorré cada pantalla del panel con la consola del navegador abierta. Los scripts de la página corren en un solo bloque, así que un error de JS corta los que vienen después.
