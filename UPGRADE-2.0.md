@@ -22,6 +22,7 @@ Si la aplicación publicó las vistas del paquete (`resources/views/vendor/admin
 - `skin`: se acepta el mismo valor. `skin-<color>` colorea el header y deja el sidebar oscuro; `skin-<color>-light` deja el sidebar claro; `black` deja el header blanco. Los colores se traducen a Bootstrap (`blue` → primary, `purple` → violet, etc.). Ya no se carga ningún CSS de skin.
 - `layout`: `sidebar-mini`, `sidebar-collapse` y `fixed` siguen funcionando. **`layout-boxed` y `layout-top-nav` se ignoran** (AdminLTE 4 no los tiene).
 - Nuevo `color_mode` (`ADMIN_COLOR_MODE`): `light` (por defecto), `dark` o `auto` (sigue al sistema operativo). Agregalo a tu `config/admin.php` publicado si querés cambiarlo.
+- Nuevo `accent_color` (`ADMIN_ACCENT_COLOR`): un color CSS (ej. `'#008657'`) para el logo, los links del breadcrumb, la página activa del paginador, la barra de carga y el título del login. Los botones y demás elementos `primary` siguen con el azul de Bootstrap. Vacío: los colores de Bootstrap. En tu CSS está disponible como `var(--la-accent)`. Si lo ponés en `.env`, va entre comillas (`ADMIN_ACCENT_COLOR="#008657"`): sin comillas el `#` empieza un comentario.
 
 ## 3. Base de datos
 

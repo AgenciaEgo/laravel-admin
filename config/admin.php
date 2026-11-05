@@ -291,6 +291,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Accent color
+    |--------------------------------------------------------------------------
+    |
+    | Brand color for the logo, the breadcrumb links, the active page of the
+    | pagination and the page loading bar (any CSS color, eg "#008657").
+    | Buttons and other "primary" elements keep the Bootstrap primary color.
+    | Empty: the Bootstrap link color. Also available to custom CSS as
+    | var(--la-accent).
+    |
+    */
+    'accent_color' => env('ADMIN_ACCENT_COLOR'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application layout
     |--------------------------------------------------------------------------
     |

@@ -159,3 +159,21 @@ a.editable-empty {
 .popover:has(.ie-content) {
     max-width: none;
 }
+
+/* accent color: config('admin.accent_color') sets --la-accent; without it these keep the Bootstrap defaults */
+.sidebar-brand .brand-link {
+    color: var(--la-accent, var(--bs-link-color));
+}
+.app-main .app-content-header .breadcrumb a {
+    color: var(--la-accent, var(--bs-link-hover-color));
+}
+.pagination {
+    --bs-pagination-active-bg: var(--la-accent, var(--bs-primary));
+    --bs-pagination-active-border-color: var(--la-accent, var(--bs-primary));
+}
+#nprogress .bar {
+    background: var(--la-accent, #dd441f);
+}
+#nprogress .peg {
+    box-shadow: 0 0 10px var(--la-accent, #dd441f), 0 0 5px var(--la-accent, #dd441f);
+}

@@ -11,6 +11,7 @@
     @endif
 
     {!! Admin::css() !!}
+    @include('admin::partials.accent')
 
     <script src="{{ Admin::jQuery() }}"></script>
     @if($jQueryMigrate = Admin::jQueryMigrate())
