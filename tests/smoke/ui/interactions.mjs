@@ -52,6 +52,15 @@ const sql = (query) => JSON.parse(execFileSync('sqlite3', ['-json', DB, query]).
 const json = (v) => (v === null || v === undefined ? v : JSON.parse(v));
 
 let failures = 0;
+if (process.env.GITHUB_ACTIONS) {
+    // anything that kills the run before or between the checks also shows up as an annotation
+    const report = (kind) => (e) => {
+        console.log(`::error title=${kind}::${String((e && e.stack) || e).replace(/\n/g, ' ').slice(0, 900)}`);
+        process.exit(1);
+    };
+    process.on('uncaughtException', report('uncaught exception'));
+    process.on('unhandledRejection', report('unhandled rejection'));
+}
 function check(name, ok, detail = '') {
     if (!ok) failures++;
     console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${!ok && detail ? ` -- ${detail}` : ''}`);
@@ -164,6 +173,7 @@ for (let i = 0; i < 60; i++) {
     try { await fetch(BASE); break; } catch { await sleep(250); }
 }
 
+if (process.env.GITHUB_ACTIONS) console.log(`::notice title=chrome::${findChrome()}`);
 const browser = await puppeteer.launch({ executablePath: findChrome(), headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 await page.setViewport({ width: 1440, height: 900 });
