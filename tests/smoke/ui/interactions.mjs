@@ -55,6 +55,10 @@ let failures = 0;
 function check(name, ok, detail = '') {
     if (!ok) failures++;
     console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${!ok && detail ? ` -- ${detail}` : ''}`);
+    if (!ok && process.env.GITHUB_ACTIONS) {
+        // shows up as an annotation of the run
+        console.log(`::error title=${name.replace(/[:,\n]/g, ' ')}::${String(detail).replace(/\n/g, ' ').slice(0, 500)}`);
+    }
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
