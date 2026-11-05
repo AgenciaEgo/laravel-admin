@@ -1,3 +1,8 @@
+/* base font size: Bootstrap 5 sizes everything in rem (16px by default) */
+html {
+    font-size: 15px;
+}
+
 input.content {
     min-height: 0 !important;
     padding: 6px 12px !important;
