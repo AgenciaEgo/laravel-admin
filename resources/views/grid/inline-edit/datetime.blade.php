@@ -38,7 +38,7 @@
 
     {{--after submit--}}
     <script>
-    @component('admin::grid.inline-edit.partials.submit', compact('resource', 'name'))
+    @component('admin::grid.inline-edit.partials.submit', compact('resource', 'name', 'trigger'))
         $popover.data('display').html(val);
     @endcomponent
     </script>

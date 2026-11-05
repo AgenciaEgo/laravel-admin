@@ -1,5 +1,6 @@
 $('.{{ $trigger }}').popover({
     html: true,
+    sanitize: false, // Bootstrap 3.4.1 would strip the form controls of the template
     container: 'body',
     trigger: 'manual',
     placement: function (context, source) {

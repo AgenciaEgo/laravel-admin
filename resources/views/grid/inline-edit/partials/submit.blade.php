@@ -1,4 +1,5 @@
-$(document).off('click', '.ie-content .ie-submit').on('click', '.ie-content .ie-submit', function () {
+{{-- one handler per column: several inline-edit types can share a grid --}}
+$(document).off('click', '.ie-content[data-trigger="{{ $trigger }}"] .ie-submit').on('click', '.ie-content[data-trigger="{{ $trigger }}"] .ie-submit', function () {
 
     var $popover = $(this).closest('.ie-content');
     var $trigger = $popover.data('trigger');
