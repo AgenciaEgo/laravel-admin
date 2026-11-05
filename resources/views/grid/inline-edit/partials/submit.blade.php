@@ -1,8 +1,11 @@
 {{-- one handler per column: several inline-edit types can share a grid --}}
-$(document).off('click', '.ie-content[data-trigger="{{ $trigger }}"] .ie-submit').on('click', '.ie-content[data-trigger="{{ $trigger }}"] .ie-submit', function () {
+$(document).off('click', '.ie-content[data-ie-trigger="{{ $trigger }}"] .ie-submit').on('click', '.ie-content[data-ie-trigger="{{ $trigger }}"] .ie-submit', function () {
 
     var $popover = $(this).closest('.ie-content');
-    var $trigger = $popover.data('trigger');
+    // the element that opened this popover (Bootstrap links it with aria-describedby): do not
+    // depend on the shown.bs.popover handler having run, a quick click can come before it
+    var $trigger = $('[aria-describedby="' + $popover.closest('.popover').attr('id') + '"]');
+    $popover.data('trigger', $trigger).data('display', $trigger.closest('.ie-wrap').find('.ie-display'));
 
     @isset($val)
         {{ $val }}

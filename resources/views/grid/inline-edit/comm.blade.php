@@ -19,7 +19,7 @@
 
 <template>
     <template id="{{ $target }}">
-        <div class="ie-content ie-content-{{ $name }}" data-trigger="{{ $trigger }}">
+        <div class="ie-content ie-content-{{ $name }}" data-ie-trigger="{{ $trigger }}">
             <div class="ie-container">
                 @yield('field')
                 <div class="error"></div>
