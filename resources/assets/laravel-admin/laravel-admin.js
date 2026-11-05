@@ -105,7 +105,7 @@ $(function () {
         $(this).css('display', 'block').closest('.nav-item').addClass('menu-open').children('a.nav-link').addClass('active');
     });
 
-    $('[data-bs-toggle="popover"], [data-toggle="popover"]').popover();
+    $('[data-bs-toggle="popover"]').popover();
 });
 
 $(window).scroll(function() {

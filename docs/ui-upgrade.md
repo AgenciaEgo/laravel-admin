@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 5 hechas (ver sección 9); próxima: fase 6 (JS restante)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 6 hechas (ver sección 9); próxima: fase 7 (limpieza de assets de BS3, guía de upgrade, CI)**.
 
 ## 1. Punto de partida
 
@@ -208,3 +208,9 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 - **StepForm:** botones anterior/siguiente en flex. **Permisos:** `label label-primary` → `badge text-bg-primary`. El filepicker alterna `d-none`.
 - `interactions.mjs`: 112/112. Suma árbol (expandir/colapsar, guardar orden, borrar rama con confirmación), show (card, campos, badges, archivo, herramientas) y acción con formulario (modal con select2 y flatpickr inicializados, error de validación con el modal abierto y el botón habilitado, envío correcto que cierra el modal). Las 45 capturas, sin advertencias.
 - No cubierto por el arnés: `MultipleSteps`/`StepForm`, porque el showcase no tiene uno. Click no lo usa.
+
+### Fase 6: JS restante (2026-11-05)
+
+Casi todo se resolvió en las fases anteriores: los `data-bs-*`, `$.fn.button` → `laLoading`, iCheck → `laCheck`/`laToggle`, x-editable → inline-edit, los popovers del inline-edit, el expand y los dropdowns. Lo que queda usa la API que el bridge jQuery de BS5 mantiene (`.tab('show')`, `.modal('show'|'hide'|'toggle')`, `.popover()`, `.tooltip()`, eventos `show.bs.*`/`shown.bs.*`). El init global de popovers ya solo toma `data-bs-toggle="popover"`.
+- Probado en el navegador con una ruta temporal (form con `tab()` y `hasMany(...)->mode('tab')`): cambiar de tab, agregar un tab de hasMany (queda activo) e íconos de error en los tabs con errores de validación. Sin errores de JS.
+- En sullair-click hay que adaptar, en su rama: `data-toggle="modal"` en una columna de AnnualWinners y tres herramientas propias del grid con `data-toggle="buttons"` y `data-toggle="dropdown"`/`btn-default` (`resources/views/admin/tools/*`).
