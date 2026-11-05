@@ -238,7 +238,7 @@ class QuickCreate implements Renderable
 ;(function () {
 
     $('.quick-create .create').click(function () {
-        $('.quick-create .create-form').show();
+        $('.quick-create .create-form').css('display', 'flex');
         $(this).hide();
     });
     

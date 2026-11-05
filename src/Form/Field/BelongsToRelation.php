@@ -111,7 +111,7 @@ HTML;
 .belongsto.modal tr {
     cursor: pointer;
 }
-.belongsto.modal .box {
+.belongsto.modal .card {
     border-top: none;
     margin-bottom: 0;
     box-shadow: none;
@@ -130,7 +130,7 @@ HTML;
     height: 60px !important;
 }
 
-.belongsto.modal .grid-box .box-footer {
+.belongsto.modal .grid-box .card-footer {
     border-top: none !important;
 }
 STYLE;

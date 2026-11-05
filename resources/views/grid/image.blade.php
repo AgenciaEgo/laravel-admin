@@ -1,5 +1,4 @@
-<div class="card">
-    <div class="card-header"></div>
+<div class="card grid-box mb-3">
 
     {!! $grid->renderFilter() !!}
 
@@ -16,10 +15,9 @@
         </ul>
     </div>
 
-    <div class="card-footer clearfix">
+    <div class="card-footer d-flex flex-wrap align-items-center gap-2">
         {!! $grid->paginator() !!}
     </div>
-    <!-- /.box-body -->
 </div>
 
 <style>

@@ -1,22 +1,23 @@
-<div class="card">
+<div class="card grid-box mb-3">
     @if(isset($title))
-    <div class="card-header ">
+    <div class="card-header">
         <h3 class="card-title"> {{ $title }}</h3>
     </div>
     @endif
 
     @if ( $grid->showTools() || $grid->showExportBtn() || $grid->showCreateBtn() )
-    <div class="card-header ">
-        <div class="float-end">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 grid-tools">
+        @if ( $grid->showTools() )
+        <div class="d-flex flex-wrap align-items-center gap-1">
+            {!! $grid->renderHeaderTools() !!}
+        </div>
+        @endif
+        {{-- flex-row-reverse keeps the order of the 1.x right floats --}}
+        <div class="ms-auto d-flex flex-row-reverse flex-wrap align-items-center gap-1">
             {!! $grid->renderColumnSelector() !!}
             {!! $grid->renderExportButton() !!}
             {!! $grid->renderCreateButton() !!}
         </div>
-        @if ( $grid->showTools() )
-        <div class="float-start">
-            {!! $grid->renderHeaderTools() !!}
-        </div>
-        @endif
     </div>
     @endif
 
@@ -24,7 +25,6 @@
 
     {!! $grid->renderHeader() !!}
 
-    <!-- /.box-header -->
     <div class="card-body table-responsive p-0">
         <div class="tables-container">
             <div class="table-wrap table-main">
@@ -124,10 +124,9 @@
 
     {!! $grid->renderFooter() !!}
 
-    <div class="card-footer clearfix">
+    <div class="card-footer d-flex flex-wrap align-items-center gap-2">
         {!! $grid->paginator() !!}
     </div>
-    <!-- /.box-body -->
 </div>
 
 

@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 3 hechas, fase 4 (grid) en curso (ver sección 9)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 4 hechas (ver sección 9); próxima: fase 5 (show, tree, modales de acciones, StepForm)**.
 
 ## 1. Punto de partida
 
@@ -179,8 +179,23 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 
 **Fin de la fase 3.** `interactions.mjs` da 82/82. Suma los chequeos de color (rgba/hex, cuadradito, guardado y edición), listbox (mover, guardar, edición, old input, vaciar y el form de roles) e iconpicker (popover visible, nombre FA4 guardado, menú con un ícono renombrado que se ve en el sidebar). Smoke y HTTP en verde. Las capturas (`shots/bs5-phase3`) solo muestran advertencias por `->editable()` del grid, que es de la fase 4.
 
-### Fase 4: grid (en curso)
+### Fase 4: grid
 
 **4a, `->editable()` (2026-11-05).** x-editable (solo BS3) se fue. `->editable()` mantiene la firma de la 1.x y dibuja el displayer de inline-edit que corresponde: `Input`, `Textarea`, `Select` (las opciones pueden ser un closure que recibe la fila) o `Datetime` con el formato del tipo (`date`, `datetime`, `year`, `month`, `day`, `time`, `combodate` con formato). Guarda por el mismo PUT (`_edit_inline`). El popover del inline-edit corre sobre el `Popover` de BS5 a través de `$.admin.inlineEdit`, con el sanitizer apagado (el template se arma en el servidor), sin `data-toggle="popover"` para que el init global no lo inicialice dos veces, y con "cerrar todos" sin crear popovers en otros elementos. Si la celda está vacía se muestra el lápiz (como el `emptytext` de x-editable). El popover toma el ancho de su campo, por ejemplo el calendario.
 - `interactions.mjs`: 90/90, ya sin el stub de `editable`. Prueba texto, select y fecha (calendario en el popover) guardados, el error de validación dentro del popover, cancelar y que radio y checkbox inline en el mismo grid guarden cada uno con su handler. Las 45 capturas, por primera vez, sin errores de JS.
 - **Para la guía de upgrade:** `->editable()` ya no genera `<a class="grid-editable-...">` de x-editable. Si hay JS o CSS propio sobre esas clases, hay que adaptarlo.
+
+**4b, layout y herramientas del grid (2026-11-05).**
+- Card con barra de herramientas flex. El orden de los botones de la derecha (crear, exportar, columnas) es el mismo que daban los floats de la 1.x. Lo mismo en la tabla con columnas fijas y en la vista de imágenes.
+- Panel de filtros (`.filter-box`, se muestra y oculta con `d-none`), botón de filtro (ahora un botón común; antes era un checkbox con el plugin "buttons" de BS3), scopes, filas del filtro como `form-group row` y dropdown de operador dentro del `input-group`. El filtro en modal tiene markup de BS5.
+- Filtros de columna (input, rango, checkboxes): dropdowns con `data-bs-auto-close="outside"`, para que no se cierren al tipear o elegir, sin el posicionamiento a mano.
+- Acciones de fila: `RowAction::asDropdownItem()` agrega `.dropdown-item` solo dentro del dropdown, porque la clase de la acción también es su selector de JS. El menú se alinea a la derecha con `dropdown-menu-end`. Acciones en lote, exportar y selector de columnas con items y divisores de BS5.
+- Paginación en un footer flex: rango a la izquierda; cantidad por página y links a la derecha. Búsqueda rápida y quick create (formulario flex) adaptados.
+- Displayers: `label()`, `badge()`, `progressBar()` y `button()` usan `Support\Color` (`label label-x` → `badge text-bg-x`). El QR usa los atributos de popover de BS5.
+- AdminLTE 4 ya no trae los colores de redes sociales que usaban los botones del grid. Quedaron así: filtro `btn-dropbox` → `btn-primary`, exportar `btn-twitter` → `btn-info`, selector de columnas `btn-instagram` → `btn-secondary`, reset del filtro en modal `btn-facebook` → `btn-outline-secondary`.
+- `$.fn.laLoading(bool)` reemplaza `$.fn.button('loading'|'reset')` de BS3, que no existe en BS5 y rompía el quick create, los formularios de acciones y el `pjax:send` de los formularios.
+- **Bootstrap 5 maneja `data-bs-toggle` en la fase de captura**, antes que los handlers propios. El expand insertaba la fila después de que Bootstrap buscara el collapse, así que ahora abre el collapse él mismo. El handler que evita que la tabla corte el dropdown buscaba el menú desde `e.target`, que en BS5 es el botón y no el contenedor.
+- Los grids dentro de modales (belongsTo, filepicker, `->modal()`) y las hotkeys usaban selectores `.box`/`.box-header`, ya actualizados. `->limit()` usa `d-none`. Las celdas editables vuelven a tener el subrayado punteado de x-editable.
+- Showcase: el seeder es idempotente (`firstOrCreate`), porque cada vez que se recreaban las tablas duplicaba el menú.
+- `interactions.mjs`: 105/105. Suma búsqueda rápida, filtro de columna (el dropdown no se cierra mientras se tipea), panel de filtros, scopes, editar y borrar desde el dropdown de fila (con la confirmación de SweetAlert), acción en lote sobre las filas seleccionadas, expand con carga asíncrona, modal, selector de columnas, cantidad por página, paginación y quick create (texto, select2 y fecha guardados). Los tests que dependen de una fila puntual la filtran por id, para no depender de la paginación. Las 45 capturas, sin advertencias. La tabla con columnas fijas y la vista de imágenes se renderizaron sin excepciones con rutas temporales.
+- **Para la guía de upgrade:** el markup del grid cambió (cards, `.grid-tools`, `.filter-box` sin `box-header`, `.dropdown-item`, badges). El CSS o JS propio que apunte a `.box*`, a `label label-*` o a los botones sociales tiene que adaptarse.

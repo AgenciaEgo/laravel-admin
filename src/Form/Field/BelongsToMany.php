@@ -53,7 +53,7 @@ class BelongsToMany extends MultipleSelect
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), selected) >=0 ) {
@@ -99,7 +99,7 @@ class BelongsToMany extends MultipleSelect
         if ($(e.target).is('input.select')) return; // the checkbox toggles itself
         $(this).find('input.select').laToggle();
         e.preventDefault();
-    }).on('submit', '.box-header form', function (e) {
+    }).on('submit', '.grid-tools form, .filter-box form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         e.preventDefault();
         return false;

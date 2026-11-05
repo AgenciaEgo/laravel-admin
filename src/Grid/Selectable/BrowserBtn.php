@@ -12,7 +12,7 @@ class BrowserBtn implements Renderable
 
         $html = <<<HTML
 <a href="javascript:void(0)" class="btn btn-primary btn-sm float-start select-relation">
-    <i class="glyphicon glyphicon-folder-open"></i>
+    <i class="fa fa-folder-open"></i>
     &nbsp;&nbsp;{$text}
 </a>
 HTML;

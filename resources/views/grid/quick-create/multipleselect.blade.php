@@ -7,7 +7,7 @@
     }
 </style>
 
-<div class="input-group input-group-sm">
+<div class="input-group input-group-sm w-auto">
     <select class="form-control {{$class}}" style="width: 100%;" name="{{$name}}" {!! $attributes !!} multiple data-placeholder="{{ $label }}">
 
         <option value=""></option>

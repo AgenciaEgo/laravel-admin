@@ -38,7 +38,7 @@ modal.on('show.bs.modal', function (e) {
     if ($(e.target).is('input.select')) return; // the checkbox toggles itself
     $(this).find('input.select').laToggle();
     e.preventDefault();
-}).on('submit', '.box-header form', function (e) {
+}).on('submit', '.grid-tools form, .filter-box form', function (e) {
     load($(this).attr('action')+'&'+$(this).serialize());
     return false;
 })
@@ -54,7 +54,7 @@ modal.on('show.bs.modal', function (e) {
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), value) >=0 ) {
@@ -96,7 +96,7 @@ modal.on('show.bs.modal', function (e) {
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($(el).val() == value) {
@@ -180,7 +180,7 @@ refresh = function () {
         cursor: pointer;
     }
 
-    .picker.modal .box {
+    .picker.modal .card {
         border-top: none;
         margin-bottom: 0;
         box-shadow: none;

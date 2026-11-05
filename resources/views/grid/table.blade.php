@@ -25,7 +25,6 @@
 
     {!! $grid->renderHeader() !!}
 
-    <!-- /.box-header -->
     <div class="card-body table-responsive p-0">
         <table class="table table-hover grid-table" id="{{ $grid->tableID }}">
             <thead>
@@ -68,5 +67,4 @@
     <div class="card-footer d-flex flex-wrap align-items-center gap-2">
         {!! $grid->paginator() !!}
     </div>
-    <!-- /.box-body -->
 </div>

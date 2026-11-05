@@ -10,7 +10,7 @@ trait CanFixHeader
     {
         Admin::style(
             <<<'STYLE'
-.wrapper, .grid-box .box-body {
+.wrapper, .grid-box .card-body {
     overflow: visible;
 }
 

@@ -18,12 +18,12 @@
 
 @if($grid)
 <style>
-    .box.grid-box {
+    .card.grid-box {
         box-shadow: none;
         border-top: none;
     }
 
-    .grid-box .box-header:first-child {
+    .grid-box .card-header:first-child {
         display: none;
     }
 </style>
@@ -51,7 +51,7 @@
     }).on('click', '.page-item a, .filter-box a', function (e) {
         load($(this).attr('href'));
         e.preventDefault();
-    }).on('submit', '.box-header form', function (e) {
+    }).on('submit', '.grid-tools form, .filter-box form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         return false;
     });

@@ -253,7 +253,7 @@ try {
     check('switch: turned off, saved as the "off" value', off.switch === 0, off.switch);
 
     // grid switch: toggling it in the list saves through the inline-edit endpoint
-    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await page.goto(`${BASE}/admin/showcases?id=${row.id}`, { waitUntil: 'networkidle0' });
     const gridSwitch = `input.grid-switch-switch[data-key="${row.id}"]`;
     const toggleInGrid = async () => {
         if (!(await page.$(gridSwitch))) throw new Error(`no grid switch ${gridSwitch}`);
@@ -715,7 +715,7 @@ try {
     };
     const shownText = (column) => page.evaluate((sel) => document.querySelector(sel).closest('.ie-wrap').querySelector('.ie-display').textContent.trim(), cell(column));
 
-    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await page.goto(`${BASE}/admin/showcases?id=${e.id}`, { waitUntil: 'networkidle0' }); // independent of pagination
     const hasRow = await page.$(`tr[data-key="${e.id}"]`);
     if (!hasRow) throw new Error(`row ${e.id} not in the grid`);
 
@@ -890,6 +890,29 @@ try {
     sql(`delete from showcases where title like 'Grid % ${stamp}%' or title like 'Grid page ${stamp}%'`);
 } catch (e) {
     check('grid run', false, e.message.split('\n')[0]);
+}
+
+// --- grid quick create (inline form in the table head) ---
+try {
+    const title = `Quick ${Date.now()}`;
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await clickEl(page, '.quick-create .create');
+    const shown = await page.evaluate(() => getComputedStyle(document.querySelector('.quick-create .create-form')).display);
+    check('grid quick create: the inline form opens', shown === 'flex', shown);
+    await page.type('.quick-create input[name="title"]', title);
+    await select2Pick(page, '.quick-create select.select', 'Beta');
+    await openPicker(page, '.quick-create input[name="date"]');
+    await pickDay(page, 12);
+    await page.evaluate(() => document.querySelector('.app-content-header h3').click());
+    const saved = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().endsWith('/admin/showcases'), { timeout: 5000 });
+    await page.evaluate(() => $('.quick-create .create-form').trigger('submit'));
+    await saved;
+    await sleep(1200);
+    const [q] = sql(`select id, "select" as s, date from showcases where title = '${title}'`);
+    check('grid quick create: text, select2 and date saved', !!q && q.s === 'b' && /-12$/.test(q.date || ''), JSON.stringify(q));
+    if (q) sql(`delete from showcases where id = ${q.id}`);
+} catch (e) {
+    check('quick create run', false, e.message.split('\n')[0]);
 }
 
 const unexpected = jsErrors;

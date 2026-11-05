@@ -21,7 +21,7 @@ $(document).off('keydown').keydown(function(e) {
         return;
     }
 
-    var \$box = $("#{$this->tableID}").closest('.box');
+    var \$box = $("#{$this->tableID}").closest('.grid-box');
     var \$current_page = \$box.find('.pagination .page-item.active');
 
     switch(e.which) {
