@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [master]
+    branches: [master, ui-upgrade]
   pull_request:
   workflow_dispatch:
   workflow_call:
@@ -86,3 +86,50 @@ jobs:
 
       - name: HTTP smoke test (real server and session)
         run: tests/smoke/http-smoke.sh "$RUNNER_TEMP/app"
+
+  ui:
+    # drives the showcase like a user (tests/smoke/ui): plugins, grid, forms, db round trips
+    name: UI interactions (Laravel 13 / PHP 8.3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: sqlite3, pdo_sqlite, gd, fileinfo
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Create Laravel 13 app with this package and the UI showcase
+        run: |
+          tests/smoke/setup-app.sh 13 "$RUNNER_TEMP/app"
+          tests/smoke/ui/setup-ui.sh "$RUNNER_TEMP/app"
+
+      - name: Install the harness (puppeteer-core; Chrome comes with the runner)
+        working-directory: tests/smoke/ui
+        run: npm install --no-audit --no-fund
+
+      - name: Interactions
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node tests/smoke/ui/interactions.mjs "$RUNNER_TEMP/app"
+
+      - name: Screenshots (fail on JS errors, failed requests or interactions)
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node tests/smoke/ui/screenshots.mjs "$RUNNER_TEMP/app" "$RUNNER_TEMP/shots" | tee "$RUNNER_TEMP/shots.log"
+          ! grep -q '^WARN' "$RUNNER_TEMP/shots.log"
+
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: ignore
