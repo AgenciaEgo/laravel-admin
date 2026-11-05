@@ -22,7 +22,7 @@
     </script>
 
     <script>
-    @component('admin::grid.inline-edit.partials.submit', compact('resource', 'name'))
+    @component('admin::grid.inline-edit.partials.submit', compact('resource', 'name', 'trigger'))
 
         @slot('val')
             var val = [];
