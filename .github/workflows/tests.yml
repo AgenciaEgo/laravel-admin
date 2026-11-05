@@ -103,7 +103,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Create Laravel 13 app with this package and the UI showcase
         run: |

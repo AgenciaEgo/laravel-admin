@@ -13,6 +13,7 @@
 //
 import { execFileSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
+import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
@@ -169,8 +170,14 @@ const server = spawn('php', ['-S', `127.0.0.1:${PORT}`, '../vendor/laravel/frame
 });
 process.on('exit', () => server.kill());
 
-for (let i = 0; i < 60; i++) {
-    try { await fetch(BASE); break; } catch { await sleep(250); }
+// TCP check instead of fetch(): undici (Node 22) can hit an internal assertion against php -S
+const portOpen = (port) => new Promise((resolve) => {
+    const socket = net.connect(port, '127.0.0.1');
+    socket.once('connect', () => { socket.destroy(); resolve(true); });
+    socket.once('error', () => resolve(false));
+});
+for (let i = 0; i < 60 && !(await portOpen(PORT)); i++) {
+    await sleep(250);
 }
 
 if (process.env.GITHUB_ACTIONS) console.log(`::notice title=chrome::${findChrome()}`);

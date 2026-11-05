@@ -12,6 +12,7 @@
 //
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
@@ -130,14 +131,17 @@ const SHOTS = [
     ['74-mobile-showcase-form', '/admin/showcases/create', null, { viewport: MOBILE }],
 ];
 
+// TCP check instead of fetch(): undici (Node 22) can hit an internal assertion against php -S
+const portOpen = (port) => new Promise((resolve) => {
+    const socket = net.connect(port, '127.0.0.1');
+    socket.once('connect', () => { socket.destroy(); resolve(true); });
+    socket.once('error', () => resolve(false));
+});
+
 async function waitForServer() {
     for (let i = 0; i < 60; i++) {
-        try {
-            await fetch(BASE);
-            return;
-        } catch {
-            await sleep(250);
-        }
+        if (await portOpen(PORT)) return;
+        await sleep(250);
     }
     throw new Error(`server did not start on ${BASE}`);
 }
