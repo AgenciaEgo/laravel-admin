@@ -144,10 +144,7 @@ trait HasAssets
             return static::$baseCss = $css;
         }
 
-        $skin = config('admin.skin', 'skin-blue-light');
-
-        array_unshift(static::$baseCss, "vendor/laravel-admin/AdminLTE/dist/css/skins/{$skin}.min.css");
-
+        // the skin is no longer a stylesheet: Admin::theme() maps config('admin.skin') to classes
         return static::$baseCss;
     }
 
