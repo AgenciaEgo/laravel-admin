@@ -11,7 +11,7 @@ class Limit extends AbstractDisplayer
     {
         $script = <<<'JS'
 $('.limit-more').click(function () {
-    $(this).parent('.limit-text').toggleClass('hide').siblings().toggleClass('hide');
+    $(this).parent('.limit-text').toggleClass('d-none').siblings().toggleClass('d-none');
 });
 JS;
 
@@ -35,7 +35,7 @@ JS;
     <span class="text">{$value}</span>
     &nbsp;<a href="javascript:void(0);" class="limit-more">&nbsp;<i class="fa fa-angle-double-down"></i></a>
 </div>
-<div class="limit-text hide">
+<div class="limit-text d-none">
     <span class="text">{$original}</span>
     &nbsp;<a href="javascript:void(0);" class="limit-more">&nbsp;<i class="fa fa-angle-double-up"></i></a>
 </div>

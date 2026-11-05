@@ -35,13 +35,14 @@
     .ie-wrap>a {
         padding: 3px;
         border-radius: 3px;
-        color:#777;
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px dashed currentColor; /* the editable cue of 1.x (x-editable) */
     }
 
     .ie-wrap>a:hover {
         text-decoration: none;
-        background-color: #ddd;
-        color:#777;
+        background-color: var(--bs-tertiary-bg);
     }
 
     .ie-wrap>a:hover i,

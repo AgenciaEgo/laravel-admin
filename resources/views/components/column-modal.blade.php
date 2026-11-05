@@ -1,4 +1,4 @@
-<span data-toggle="modal" data-target="#grid-modal-{{ $name }}" data-key="{{ $key }}">
+<span data-bs-toggle="modal" data-bs-target="#grid-modal-{{ $name }}" data-key="{{ $key }}">
    <a href="javascript:void(0)"><i class="fa fa-clone"></i>&nbsp;&nbsp;{{ $value }}</a>
 </span>
 
@@ -6,8 +6,8 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content" style="border-radius: 5px;">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">{{ $title }}</h4>
+                <h5 class="modal-title">{{ $title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 {!! $html !!}

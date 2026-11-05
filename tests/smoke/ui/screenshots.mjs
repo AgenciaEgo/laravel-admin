@@ -80,20 +80,20 @@ const SHOTS = [
     ['20-logs-grid', '/admin/auth/logs'],
     ['21-setting', '/admin/auth/setting'],
     ['30-showcase-grid', '/admin/showcases'],
-    ['31-showcase-grid-row-dropdown', '/admin/showcases', (p) => click(p, '.grid-dropdown-actions .dropdown-toggle')],
+    ['31-showcase-grid-row-dropdown', '/admin/showcases', (p) => click(p, '.grid-dropdown-actions [data-bs-toggle="dropdown"], .grid-dropdown-actions .dropdown-toggle')],
     ['32-showcase-grid-row-action-modal', '/admin/showcases', async (p) => {
-        await click(p, '.grid-dropdown-actions .dropdown-toggle');
+        await click(p, '.grid-dropdown-actions [data-bs-toggle="dropdown"], .grid-dropdown-actions .dropdown-toggle');
         await p.evaluate(() => [...document.querySelectorAll('.grid-dropdown-actions .dropdown-menu a')].find((a) => a.textContent.includes('Row action'))?.click());
         await sleep(800);
     }],
     ['33-showcase-grid-inline-edit', '/admin/showcases', (p) => click(p, 'td.column-title > a, td.column-title .ie-wrap > a')],
     ['34-showcase-grid-inline-date', '/admin/showcases', (p) => click(p, 'td.column-date > a, td.column-date .ie-wrap > a')],
-    ['35-showcase-grid-column-filter', '/admin/showcases', (p) => click(p, 'th.column-title .dropdown-toggle')],
+    ['35-showcase-grid-column-filter', '/admin/showcases', (p) => click(p, 'th.column-title [data-bs-toggle="dropdown"], th.column-title .dropdown-toggle')],
     ['36-showcase-grid-quick-create', '/admin/showcases', (p) => click(p, '.quick-create .create')],
-    ['37-showcase-grid-modal', '/admin/showcases', (p) => click(p, 'td.column-color [data-toggle="modal"]')],
-    ['38-showcase-grid-expand', '/admin/showcases', async (p) => { await click(p, 'td.column-mobile [data-toggle="collapse"]'); await sleep(600); }],
+    ['37-showcase-grid-modal', '/admin/showcases', (p) => click(p, 'td.column-color [data-bs-toggle="modal"], td.column-color [data-toggle="modal"]')],
+    ['38-showcase-grid-expand', '/admin/showcases', async (p) => { await click(p, 'td.column-mobile span[data-inserted], td.column-mobile [data-toggle="collapse"]'); await sleep(600); }],
     ['39-showcase-grid-delete-confirm', '/admin/showcases', async (p) => {
-        await click(p, '.grid-dropdown-actions .dropdown-toggle');
+        await click(p, '.grid-dropdown-actions [data-bs-toggle="dropdown"], .grid-dropdown-actions .dropdown-toggle');
         await p.evaluate(() => [...document.querySelectorAll('.grid-dropdown-actions .dropdown-menu a')].find((a) => /delete/i.test(a.textContent))?.click());
         await sleep(800);
     }],

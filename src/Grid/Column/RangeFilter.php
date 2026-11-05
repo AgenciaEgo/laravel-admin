@@ -89,26 +89,26 @@ SCRIPT;
         $this->addScript();
 
         $value = array_merge(['start' => '', 'end' => ''], $this->getFilterValue([]));
-        $active = empty(array_filter($value)) ? '' : 'text-yellow';
+        $active = empty(array_filter($value)) ? '' : 'text-warning';
 
         return <<<EOT
 <span class="dropdown">
 <form action="{$this->getFormAction()}" pjax-container style="display: inline-block;">
-    <a href="javascript:void(0);" class="dropdown-toggle {$active}" data-toggle="dropdown">
+    <a href="javascript:void(0);" class="{$active}" data-bs-toggle="dropdown" data-bs-auto-close="outside">
         <i class="fa fa-filter"></i>
     </a>
-    <ul class="dropdown-menu" role="menu" style="padding: 10px;box-shadow: 0 2px 3px 0 rgba(0,0,0,.2);left: -70px;border-radius: 0;">
+    <ul class="dropdown-menu" role="menu" style="padding: 10px;">
         <li>
-            <input type="text" class="form-control input-sm {$this->class['start']}" name="{$this->getColumnName()}[start]" value="{$value['start']}" autocomplete="off"/>
+            <input type="text" class="form-control form-control-sm {$this->class['start']}" name="{$this->getColumnName()}[start]" value="{$value['start']}" autocomplete="off"/>
         </li>
         <li style="margin: 5px;"></li>
         <li>
-            <input type="text" class="form-control input-sm {$this->class['start']}" name="{$this->getColumnName()}[end]"  value="{$value['end']}" autocomplete="off"/>
+            <input type="text" class="form-control form-control-sm {$this->class['start']}" name="{$this->getColumnName()}[end]"  value="{$value['end']}" autocomplete="off"/>
         </li>
-        <li class="divider"></li>
-        <li class="text-right">
-            <button class="btn btn-sm btn-primary btn-flat column-filter-submit pull-left" data-loading-text="{$this->trans('search')}..."><i class="fa fa-search"></i>&nbsp;&nbsp;{$this->trans('search')}</button>
-            <span><a href="{$this->getFormAction()}" class="btn btn-sm btn-default btn-flat column-filter-all"><i class="fa fa-undo"></i></a></span>
+        <li><hr class="dropdown-divider"></li>
+        <li class="text-end">
+            <button class="btn btn-sm btn-primary column-filter-submit float-start" data-loading-text="{$this->trans('search')}..."><i class="fa fa-search"></i>&nbsp;&nbsp;{$this->trans('search')}</button>
+            <span><a href="{$this->getFormAction()}" class="btn btn-sm btn-outline-secondary column-filter-all"><i class="fa fa-undo"></i></a></span>
         </li>
     </ul>
     </form>

@@ -8,6 +8,25 @@ use Illuminate\Http\Request;
 abstract class RowAction extends GridAction
 {
     /**
+     * Rendered as an item of a dropdown menu (Bootstrap 5 needs .dropdown-item on the link).
+     *
+     * @var bool
+     */
+    protected $dropdownItem = false;
+
+    /**
+     * @param bool $dropdownItem
+     *
+     * @return $this
+     */
+    public function asDropdownItem(bool $dropdownItem = true)
+    {
+        $this->dropdownItem = $dropdownItem;
+
+        return $this;
+    }
+
+    /**
      * @var \Illuminate\Database\Eloquent\Model
      */
     protected $row;
@@ -134,8 +153,10 @@ abstract class RowAction extends GridAction
      */
     public function render()
     {
+        $item = $this->dropdownItem ? 'dropdown-item' : '';
+
         if ($href = $this->href()) {
-            return "<a href='{$href}'>{$this->name()}</a>";
+            return "<a href='{$href}' class='{$item}'>{$this->name()}</a>";
         }
 
         $this->addScript();
@@ -145,7 +166,7 @@ abstract class RowAction extends GridAction
         return sprintf(
             "<a data-_key='%s' href='javascript:void(0);' class='%s' {$attributes}>%s</a>",
             $this->getKey(),
-            $this->getElementClass(),
+            trim($this->getElementClass().' '.$item),
             $this->asColumn ? $this->display($this->row($this->column->getName())) : $this->name()
         );
     }

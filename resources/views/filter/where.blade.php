@@ -1,5 +1,5 @@
-<div class="form-group">
-    <label class="col-sm-2 control-label"> {{$label}}</label>
+<div class="form-group row mb-2">
+    <label class="col-sm-2 col-form-label col-form-label-sm text-sm-end"> {{$label}}</label>
     <div class="col-sm-8">
         @include($presenter->view())
     </div>

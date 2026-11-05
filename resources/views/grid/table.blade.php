@@ -1,22 +1,23 @@
-<div class="box grid-box">
+<div class="card grid-box mb-3">
     @if(isset($title))
-    <div class="box-header with-border">
-        <h3 class="box-title"> {{ $title }}</h3>
+    <div class="card-header">
+        <h3 class="card-title"> {{ $title }}</h3>
     </div>
     @endif
 
     @if ( $grid->showTools() || $grid->showExportBtn() || $grid->showCreateBtn() )
-    <div class="box-header with-border">
-        <div class="pull-right">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2 grid-tools">
+        @if ( $grid->showTools() )
+        <div class="d-flex flex-wrap align-items-center gap-1">
+            {!! $grid->renderHeaderTools() !!}
+        </div>
+        @endif
+        {{-- flex-row-reverse keeps the order of the 1.x right floats --}}
+        <div class="ms-auto d-flex flex-row-reverse flex-wrap align-items-center gap-1">
             {!! $grid->renderColumnSelector() !!}
             {!! $grid->renderExportButton() !!}
             {!! $grid->renderCreateButton() !!}
         </div>
-        @if ( $grid->showTools() )
-        <div class="pull-left">
-            {!! $grid->renderHeaderTools() !!}
-        </div>
-        @endif
     </div>
     @endif
 
@@ -25,7 +26,7 @@
     {!! $grid->renderHeader() !!}
 
     <!-- /.box-header -->
-    <div class="box-body table-responsive no-padding">
+    <div class="card-body table-responsive p-0">
         <table class="table table-hover grid-table" id="{{ $grid->tableID }}">
             <thead>
                 <tr>
@@ -64,7 +65,7 @@
 
     {!! $grid->renderFooter() !!}
 
-    <div class="box-footer clearfix">
+    <div class="card-footer d-flex flex-wrap align-items-center gap-2">
         {!! $grid->paginator() !!}
     </div>
     <!-- /.box-body -->

@@ -58,7 +58,7 @@ class Footer extends AbstractTool
         }
 
         return <<<HTML
-    <div class="box-footer clearfix">
+    <div class="card-footer clearfix">
         {$content}
     </div>
 HTML;

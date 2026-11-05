@@ -780,6 +780,118 @@ try {
     check('editable run', false, err.message.split('\n')[0]);
 }
 
+// --- grid: tools, row actions, filters and displayers ---
+try {
+    const stamp = Date.now();
+    const titles = [`Grid A ${stamp}`, `Grid B ${stamp}`];
+    for (const t of titles) {
+        sql(`insert into showcases (title, mobile, color, created_at, updated_at) values ('${t}', '555', '#ff0000', datetime('now'), datetime('now'))`);
+    }
+    const ids = sql(`select id from showcases where title like 'Grid % ${stamp}' order by id`).map((r) => r.id);
+    const visibleTitles = () => page.evaluate(() => [...document.querySelectorAll('td.column-title')].map((t) => t.textContent.trim()).filter(Boolean));
+    const openMenu = async (selector) => {
+        await clickEl(page, selector);
+        await page.waitForFunction((sel) => document.querySelector(sel)?.closest('.dropdown, .btn-group')?.querySelector('.dropdown-menu.show'), { timeout: 3000 }, selector);
+    };
+    const swalConfirm = async () => {
+        await page.waitForSelector('.swal2-confirm', { visible: true, timeout: 3000 });
+        await page.click('.swal2-confirm');
+    };
+
+    // quick search
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await page.type('input.grid-quick-search', `Grid A ${stamp}`);
+    await waitPjax(page, () => page.evaluate(() => $('input.grid-quick-search').closest('form').trigger('submit')));
+    check('grid quick search', same(await visibleTitles(), [titles[0]]), JSON.stringify(await visibleTitles()));
+
+    // column filter (dropdown holding a form: must stay open while typing)
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await openMenu('th.column-title [data-bs-toggle="dropdown"]');
+    await page.type('th.column-title .dropdown-menu.show input[type="text"]', `Grid B ${stamp}`);
+    const stillOpen = await page.$('th.column-title .dropdown-menu.show');
+    await waitPjax(page, () => page.click('th.column-title .dropdown-menu.show .column-filter-submit'));
+    check('grid column filter: dropdown stays open while typing, filters', !!stillOpen && same(await visibleTitles(), [titles[1]]), `${!!stillOpen} ${JSON.stringify(await visibleTitles())}`);
+
+    // filter panel button + scope dropdown
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    const panel = () => page.evaluate(() => { const f = document.querySelector('.filter-box'); return f && !f.classList.contains('d-none'); });
+    const before = await panel();
+    await clickEl(page, '.grid-tools .btn-group > .btn.btn-primary:not(.dropdown-toggle)');
+    const after = await panel();
+    check('grid filter button toggles the filter panel', before !== after, `${before} -> ${after}`);
+    await openMenu('.grid-tools .btn-group > .dropdown-toggle.btn-primary');
+    const scope = await page.$('.dropdown-menu.show a.dropdown-item');
+    await waitPjax(page, () => scope.click());
+    check('grid filter scopes dropdown', page.url().includes('_scope_=switched'), page.url());
+
+    // row actions dropdown -> edit
+    await page.goto(`${BASE}/admin/showcases?id=${ids[0]}`, { waitUntil: 'networkidle0' });
+    await openMenu('.grid-dropdown-actions [data-bs-toggle="dropdown"]');
+    const items = await page.evaluate(() => [...document.querySelectorAll('.grid-dropdown-actions .dropdown-menu.show a.dropdown-item')].map((a) => a.textContent.trim()));
+    check('grid row actions: dropdown items', items.length >= 3, JSON.stringify(items));
+    const edit = await page.evaluateHandle(() => [...document.querySelectorAll('.grid-dropdown-actions .dropdown-menu.show a')].find((a) => /\/edit$/.test(a.getAttribute('href') || '')));
+    await waitPjax(page, () => edit.click());
+    check('grid row action edit opens the form', page.url().endsWith(`/admin/showcases/${ids[0]}/edit`), page.url());
+
+    // row action delete (sweetalert confirm)
+    await page.goto(`${BASE}/admin/showcases?id=${ids[0]}`, { waitUntil: 'networkidle0' });
+    await openMenu('.grid-dropdown-actions [data-bs-toggle="dropdown"]');
+    const del = await page.evaluateHandle(() => [...document.querySelectorAll('.grid-dropdown-actions .dropdown-menu.show a')].find((a) => /delete/i.test(a.textContent)));
+    await del.click();
+    const deleted = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('_handle_action_'), { timeout: 5000 });
+    await swalConfirm();
+    await deleted;
+    await sleep(800);
+    check('grid row action delete (confirm dialog)', sql(`select count(*) n from showcases where id = ${ids[0]}`)[0].n === 0);
+
+    // batch action on the selected rows
+    await page.goto(`${BASE}/admin/showcases?title=${encodeURIComponent(`Grid B ${stamp}`)}`, { waitUntil: 'networkidle0' });
+    await clickEl(page, `input[class$="-checkbox"][data-id="${ids[1]}"]`);
+    await openMenu('[class$="-btn"] > .dropdown-toggle');
+    const batch = await page.evaluateHandle(() => [...document.querySelectorAll('.dropdown-menu.show a.dropdown-item')].find((a) => a.textContent.includes('Batch action')));
+    const batchDone = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('_handle_action_'), { timeout: 5000 });
+    await batch.click();
+    await swalConfirm();
+    const batchRes = await batchDone;
+    const batchBody = await batchRes.json().catch(() => ({}));
+    check('grid batch action on the selected rows', batchRes.status() === 200 && /1 rows/.test(JSON.stringify(batchBody)), JSON.stringify(batchBody).slice(0, 120));
+
+    // expand and modal displayers
+    await page.goto(`${BASE}/admin/showcases?title=${encodeURIComponent(`Grid B ${stamp}`)}`, { waitUntil: 'networkidle0' });
+    await clickEl(page, 'td.column-mobile span[data-inserted]');
+    // opened, and the async load replaced the spinner (the content comes from the row's key_value)
+    const expanded = () => page.evaluate(() => { const c = document.querySelector('[id^="grid-collapse-"].show'); return !!c && !c.querySelector('.fa-spinner'); });
+    await page.waitForFunction(() => { const c = document.querySelector('[id^="grid-collapse-"].show'); return !!c && !c.querySelector('.fa-spinner'); }, { timeout: 5000 }).catch(() => {});
+    check('grid expand(): row opens with its async content', await expanded());
+    await clickEl(page, 'td.column-color [data-bs-toggle="modal"]');
+    await page.waitForSelector('.modal.show', { visible: true, timeout: 3000 }).catch(() => {});
+    await sleep(800);
+    check('grid modal(): opens with its content', await page.evaluate(() => (document.querySelector('.modal.show .modal-body')?.innerText || '').trim().length > 0));
+    await page.keyboard.press('Escape');
+    await sleep(400);
+
+    // column selector: hide a column
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await openMenu('.column-selector [data-bs-toggle="dropdown"]');
+    await page.evaluate(() => { document.querySelector('.column-select-item[value="email"]').checked = false; });
+    await waitPjax(page, () => page.click('.column-select-submit'));
+    check('grid column selector hides a column', page.url().includes('_columns_=') && !(await page.$('th.column-email')), page.url());
+
+    // per page + pagination
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await waitPjax(page, () => page.evaluate(() => { const s = document.querySelector('select[name="per-page"]'); s.value = [...s.options].find((o) => o.text.trim() === '10').value; $(s).trigger('change'); }));
+    check('grid per page selector', /per_page=10/.test(page.url()), page.url());
+    for (let i = 0; i < 9; i++) sql(`insert into showcases (title, created_at, updated_at) values ('Grid page ${stamp} ${i}', datetime('now'), datetime('now'))`);
+    await page.goto(`${BASE}/admin/showcases?per_page=10`, { waitUntil: 'networkidle0' });
+    const next = await page.$('.pagination a.page-link[rel="next"]');
+    if (next) await waitPjax(page, () => next.click());
+    check('grid pagination: next page', !!next && /page=2/.test(page.url()), page.url());
+
+    sql(`delete from showcases where title like 'Grid % ${stamp}%' or title like 'Grid page ${stamp}%'`);
+} catch (e) {
+    check('grid run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors;
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 

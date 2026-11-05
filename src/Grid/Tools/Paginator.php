@@ -99,8 +99,9 @@ class Paginator extends AbstractTool
             return '';
         }
 
-        return $this->paginationRanger().
-            $this->paginationLinks().
-            $this->perPageSelector();
+        // range on the left; per-page selector and links on the right (the order of the 1.x floats)
+        return '<span class="me-auto">'.$this->paginationRanger().'</span>'.
+            $this->perPageSelector().
+            $this->paginationLinks();
     }
 }

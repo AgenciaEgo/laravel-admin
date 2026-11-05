@@ -1,5 +1,5 @@
-<span class="grid-selector" data-toggle="modal" data-target="#{{ $modal }}" key="{{ $key }}" data-val="{{ $original }}">
-   <a href="javascript:void(0)" class="text-muted">
+<span class="grid-selector" data-bs-toggle="modal" data-bs-target="#{{ $modal }}" key="{{ $key }}" data-val="{{ $original }}">
+   <a href="javascript:void(0)" class="text-body-secondary">
        <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;
        <span class="text">{{ $value }}</span>
    </a>
@@ -25,10 +25,8 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="border-radius: 5px;">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title">{{ admin_trans('admin.choose') }}</h4>
+                    <h5 class="modal-title">{{ admin_trans('admin.choose') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="loading text-center">
@@ -36,7 +34,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ admin_trans('admin.cancel') }}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ admin_trans('admin.cancel') }}</button>
                     <button type="button" class="btn btn-primary submit">{{ admin_trans('admin.submit') }}</button>
                 </div>
             </div>

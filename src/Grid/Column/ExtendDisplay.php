@@ -216,7 +216,7 @@ trait ExtendDisplay
                 $size
             );
 
-            return "<img src='$src' class='img img-circle'/>";
+            return "<img src='$src' class='img rounded-circle'/>";
         });
     }
 
@@ -295,7 +295,7 @@ trait ExtendDisplay
         return $this->display(function ($value) use ($map, $default) {
             $bool = empty($map) ? boolval($value) : Arr::get($map, $value, $default);
 
-            return $bool ? '<i class="fa fa-check text-green"></i>' : '<i class="fa fa-close text-red"></i>';
+            return $bool ? '<i class="fa fa-check text-success"></i>' : '<i class="fa fa-close text-danger"></i>';
         });
     }
 

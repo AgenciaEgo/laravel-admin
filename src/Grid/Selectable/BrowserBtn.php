@@ -11,7 +11,7 @@ class BrowserBtn implements Renderable
         $text = admin_trans('admin.choose');
 
         $html = <<<HTML
-<a href="javascript:void(0)" class="btn btn-primary btn-sm pull-left select-relation">
+<a href="javascript:void(0)" class="btn btn-primary btn-sm float-start select-relation">
     <i class="glyphicon glyphicon-folder-open"></i>
     &nbsp;&nbsp;{$text}
 </a>

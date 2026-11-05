@@ -1,6 +1,7 @@
 <div>
-    <span class="{{ $elementClass }}" data-inserted="0" data-key="{{ $key }}" data-name="{{ $name }}"
-          data-toggle="collapse" data-target="#grid-collapse-{{ $name }}">
+    {{-- toggled from the click handler below: Bootstrap 5 handles data-bs-toggle in the capture phase,
+         before the handler has inserted the collapsible row --}}
+    <span class="{{ $elementClass }}" data-inserted="0" data-key="{{ $key }}" data-name="{{ $name }}">
         <a href="javascript:void(0)"><i class="fa fa-angle-double-down"></i>&nbsp;&nbsp;{{ $value }}</a>
     </span>
     <template class="grid-expand-{{ $name }}">
@@ -47,15 +48,16 @@
             load('{{ $url }}'+'&key='+key, $('#grid-collapse-'+name));
         }
 
+        bootstrap.Collapse.getOrCreateInstance($('#grid-collapse-' + $(this).data('name'))[0], {toggle: false}).toggle();
+
         $("i", this).toggleClass("fa-angle-double-down fa-angle-double-up");
     });
 
     $(document).on('pjax:click', '.collapse a.pjax, .collapse a.pjax', function (e) {
-        console.log(11111);
         // load($(this).attr('href'), $(this).parent('.collapse'));
         e.preventDefault();
         return false;
-    }).on('pjax:submit', '.collapse .box-header form', function (e) {
+    }).on('pjax:submit', '.collapse .card-header form', function (e) {
         // load($(this).attr('action')+'&'+$(this).serialize(), $(this).parent('.collapse'));
         return false;
     });
@@ -74,6 +76,8 @@
             $(this).data('inserted', 1);
         }
 
+        bootstrap.Collapse.getOrCreateInstance($('#grid-collapse-' + $(this).data('name'))[0], {toggle: false}).toggle();
+
         $("i", this).toggleClass("fa-angle-double-down fa-angle-double-up");
     });
 
@@ -86,7 +90,7 @@
 
 @if($loadGrid)
 <style>
-    .collapse .grid-box .box-header:first-child {
+    .collapse .grid-box .card-header:first-child {
         display: none;
     }
 </style>

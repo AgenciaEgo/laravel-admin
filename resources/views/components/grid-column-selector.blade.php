@@ -1,8 +1,7 @@
-<div class="dropdown pull-right column-selector">
-    <button type="button" class="btn btn-sm btn-instagram dropdown-toggle" data-toggle="dropdown">
+<div class="dropdown column-selector">
+    <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">
         <i class="fa fa-table"></i>
         &nbsp;
-        <span class="caret"></span>
     </button>
     <ul class="dropdown-menu" role="menu">
         <li>
@@ -24,19 +23,15 @@
                 @endforeach
             </ul>
         </li>
-        <li class="divider"></li>
-        <li class="text-right">
-            <button class="btn btn-sm btn-default column-select-all">{{ __('admin.all') }}</button>&nbsp;&nbsp;
+        <li><hr class="dropdown-divider"></li>
+        <li class="text-end">
+            <button class="btn btn-sm btn-outline-secondary column-select-all">{{ __('admin.all') }}</button>&nbsp;&nbsp;
             <button class="btn btn-sm btn-primary column-select-submit">{{ __('admin.submit') }}</button>
         </li>
     </ul>
 </div>
 
 <style>
-.column-selector {
-    margin-right: 10px;
-}
-
 .column-selector .dropdown-menu {
     padding: 10px;
     height: auto;

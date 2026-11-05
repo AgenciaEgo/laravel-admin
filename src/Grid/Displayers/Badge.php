@@ -3,6 +3,7 @@
 namespace Encore\Admin\Grid\Displayers;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Encore\Admin\Support\Color;
 use Illuminate\Support\Arr;
 
 class Badge extends AbstractDisplayer
@@ -18,7 +19,9 @@ class Badge extends AbstractDisplayer
                 $style = Arr::get($style, $this->getColumn()->getOriginal(), 'red');
             }
 
-            return "<span class='badge bg-{$style}'>$name</span>";
+            $color = Color::bootstrap($style);
+
+            return "<span class='badge text-bg-{$color}'>$name</span>";
         })->implode('&nbsp;');
     }
 }

@@ -58,8 +58,9 @@ class ShowcaseSeeder extends Seeder
             $showcase->items()->createMany([['name' => 'Item A', 'qty' => 1], ['name' => 'Item B', 'qty' => 2]]);
         }
 
-        $parent = Menu::create(['parent_id' => 0, 'order' => 10, 'title' => 'UI showcase', 'icon' => 'fa-paint-brush', 'uri' => '']);
-        Menu::create(['parent_id' => $parent->id, 'order' => 11, 'title' => 'Showcase CRUD', 'icon' => 'fa-table', 'uri' => 'showcases']);
-        Menu::create(['parent_id' => $parent->id, 'order' => 12, 'title' => 'Widgets', 'icon' => 'fa-th', 'uri' => 'showcase-widgets']);
+        // idempotent: the seeder runs again whenever the showcase tables are recreated
+        $parent = Menu::firstOrCreate(['parent_id' => 0, 'title' => 'UI showcase'], ['order' => 10, 'icon' => 'fa-paint-brush', 'uri' => '']);
+        Menu::firstOrCreate(['parent_id' => $parent->id, 'title' => 'Showcase CRUD'], ['order' => 11, 'icon' => 'fa-table', 'uri' => 'showcases']);
+        Menu::firstOrCreate(['parent_id' => $parent->id, 'title' => 'Widgets'], ['order' => 12, 'icon' => 'fa-th', 'uri' => 'showcase-widgets']);
     }
 }

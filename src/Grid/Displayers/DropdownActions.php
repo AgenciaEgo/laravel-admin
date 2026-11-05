@@ -137,6 +137,10 @@ class DropdownActions extends Actions
 
         $this->prependDefaultActions();
 
+        foreach (array_merge($this->default, $this->custom) as $action) {
+            $action->asDropdownItem();
+        }
+
         $variables = [
             'default' => $this->default,
             'custom'  => $this->custom,

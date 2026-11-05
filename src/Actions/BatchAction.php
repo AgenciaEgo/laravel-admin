@@ -124,7 +124,7 @@ SCRIPT;
         }
 
         return sprintf(
-            "<a href='javascript:void(0);' class='%s %s' %s>%s</a>",
+            "<a href='javascript:void(0);' class='dropdown-item %s %s' %s>%s</a>",
             $this->getElementClass(),
             (!empty($this->cssClasses)) ? implode(' ', $this->cssClasses) : '',
             $modalId ? "modal='{$modalId}'" : '',

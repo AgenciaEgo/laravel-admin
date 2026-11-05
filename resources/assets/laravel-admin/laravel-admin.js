@@ -8,6 +8,28 @@ $.fn.laCheck = function (checked) {
     });
 };
 
+// replaces Bootstrap 3's $.fn.button('loading' | 'reset'): disable the button and show its data-loading-text
+$.fn.laLoading = function (loading) {
+    return this.each(function () {
+        var $btn = $(this);
+        if (loading) {
+            if ($btn.data('la-html') === undefined) {
+                $btn.data('la-html', $btn.html());
+            }
+            $btn.prop('disabled', true);
+            if ($btn.data('loading-text')) {
+                $btn.html($btn.data('loading-text'));
+            }
+        } else {
+            $btn.prop('disabled', false);
+            if ($btn.data('la-html') !== undefined) {
+                $btn.html($btn.data('la-html'));
+                $btn.removeData('la-html');
+            }
+        }
+    });
+};
+
 $.fn.laToggle = function () {
     return this.each(function () {
         $(this).laCheck(this.type === 'radio' ? true : !this.checked);
@@ -50,7 +72,7 @@ $(document).on('pjax:send', function (xhr) {
     if (xhr.relatedTarget && xhr.relatedTarget.tagName && xhr.relatedTarget.tagName.toLowerCase() === 'form') {
         $submit_btn = $('form[pjax-container] :submit');
         if ($submit_btn) {
-            $submit_btn.button('loading')
+            $submit_btn.laLoading(true)
         }
     }
     NProgress.start();
@@ -60,7 +82,7 @@ $(document).on('pjax:complete', function (xhr) {
     if (xhr.relatedTarget && xhr.relatedTarget.tagName && xhr.relatedTarget.tagName.toLowerCase() === 'form') {
         $submit_btn = $('form[pjax-container] :submit');
         if ($submit_btn) {
-            $submit_btn.button('reset')
+            $submit_btn.laLoading(false)
         }
     }
     NProgress.done();

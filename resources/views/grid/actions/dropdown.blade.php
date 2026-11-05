@@ -1,8 +1,8 @@
 <div class="grid-dropdown-actions dropdown">
-    <a href="#" style="padding: 0 10px;" class="dropdown-toggle" data-toggle="dropdown">
+    <a href="#" style="padding: 0 10px;" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fa fa-ellipsis-v"></i>
     </a>
-    <ul class="dropdown-menu" style="min-width: 70px !important;box-shadow: 0 2px 3px 0 rgba(0,0,0,.2);border-radius:0;left: -65px;top: 5px;">
+    <ul class="dropdown-menu dropdown-menu-end">
 
         @foreach($default as $action)
             <li>{!! $action->render() !!}</li>
@@ -11,7 +11,7 @@
         @if(!empty($custom))
 
             @if(!empty($default))
-                <li class="divider"></li>
+                <li><hr class="dropdown-divider"></li>
             @endif
 
             @foreach($custom as $action)
@@ -24,7 +24,7 @@
 <script>
     $('.table-responsive').on('shown.bs.dropdown', function(e) {
         var t = $(this),
-            m = $(e.target).find('.dropdown-menu'),
+            m = $(e.target).closest('.dropdown').find('.dropdown-menu'), // BS5: the event target is the toggle
             tb = t.offset().top + t.height(),
             mb = m.offset().top + m.outerHeight(true),
             d = 20;

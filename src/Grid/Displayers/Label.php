@@ -3,6 +3,7 @@
 namespace Encore\Admin\Grid\Displayers;
 
 use Illuminate\Contracts\Support\Arrayable;
+use Encore\Admin\Support\Color;
 use Illuminate\Support\Arr;
 
 class Label extends AbstractDisplayer
@@ -26,7 +27,9 @@ class Label extends AbstractDisplayer
                 }
             }
 
-            return "<span class='label label-{$style}'>$item</span>";
+            $color = Color::bootstrap($style);
+
+            return "<span class='badge text-bg-{$color}'>$item</span>";
         })->implode('&nbsp;');
     }
 }
