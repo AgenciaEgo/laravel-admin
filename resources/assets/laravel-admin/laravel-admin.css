@@ -1,4 +1,9 @@
-/* base font size: Bootstrap 5 sizes everything in rem (16px by default) */
+/* base font: Nunito (google-fonts/fonts.css) at 15px; Bootstrap 5 sizes everything in rem (16px by default) */
+/* [data-bs-theme] too: AdminLTE defines it on [data-bs-theme=light], which the sidebar, header and dropdowns carry */
+:root,
+[data-bs-theme] {
+    --bs-font-sans-serif: "Nunito Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
 html {
     font-size: 15px;
 }

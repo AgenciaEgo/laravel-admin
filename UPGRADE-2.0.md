@@ -4,6 +4,8 @@ La 2.0 cambia la interfaz de Bootstrap 3 + AdminLTE 2 a **Bootstrap 5.3 + AdminL
 
 Requisitos: los mismos que la 1.10 (PHP ^8.0.2, Laravel 9 a 13).
 
+Tipografía: la 2.0 usa **Nunito** (vendoreada en `google-fonts/`, ya no se incluye Source Sans Pro) con un tamaño base de **15px**. Bootstrap mide casi todo en `rem`, así que espaciados, inputs y botones escalan en la misma proporción. Para cambiarla, redefiní `--bs-font-sans-serif` en `:root, [data-bs-theme]` y `font-size` en `html` desde tu CSS.
+
 ## 1. Actualizar el paquete y los assets
 
 ```bash

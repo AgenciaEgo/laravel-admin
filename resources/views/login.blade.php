@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="{{ admin_asset("vendor/laravel-admin/fontawesome6/css/v4-shims.min.css") }}">
   <link rel="stylesheet" href="{{ admin_asset("vendor/laravel-admin/google-fonts/fonts.css") }}">
   @include('admin::partials.accent')
-  <style>html { font-size: 15px; } .login-logo a { color: var(--la-accent, var(--bs-link-color)); }</style>
+  <style>:root, [data-bs-theme] { --bs-font-sans-serif: "Nunito Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; } html { font-size: 15px; } .login-logo a { color: var(--la-accent, var(--bs-link-color)); }</style>
 </head>
 <body class="login-page bg-body-secondary" @if(config('admin.login_background_image'))style="background: url({{config('admin.login_background_image')}}) no-repeat;background-size: cover;"@endif>
 <div class="login-box">
