@@ -7,7 +7,7 @@
 @section('assert')
     <style>
         .ie-content-{{ $name }} .ie-container  {
-            height: 290px;
+            width: auto;
         }
 
         .ie-content-{{ $name }} .ie-input {

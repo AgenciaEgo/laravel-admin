@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 3 hechas (ver sección 9); próxima: fase 4 (grid)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 3 hechas, fase 4 (grid) en curso (ver sección 9)**.
 
 ## 1. Punto de partida
 
@@ -110,6 +110,8 @@ El showcase cubre más código que el smoke test y destapó deprecations de PHP 
 
 Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para que cubra estos casos. (Hecho en 1.10.2.)
 
+- **Inline-edit del grid con popover** (desde 1.10.0; arreglado en `master` en c3e48f35): Bootstrap 3.4.1 sanitiza el contenido de los popovers y borraba sus `<input>`/`<select>`/`<textarea>`, así que `->input()`, `->select()`, `->radio()`, `->checkbox()`, `->textarea()` y `->datetime()` abrían vacíos. Además, cada tipo registraba el handler de "Guardar" con el mismo selector, así que solo funcionaba el último tipo dibujado en el grid. sullair-click no usa inline-edit con popover.
+- **`Grid\Displayers\Select` con valor `null`** (6c13dcbc): el mismo bug que el radio (83c282f2). `Arr::get()` con clave null tiraba el grid entero.
 - **pjax con jQuery 3** (desde 1.10.0, arreglado en `master` en 9de59ee3): jQuery 3 eliminó `$.fn.selector`, así que jquery-pjax mandaba `X-PJAX-Container: undefined`, el middleware `Pjax` no podía recortar la respuesta (`abort(422)`, tragado por el `catch`) y pjax caía a una recarga completa de la URL del request. Consecuencias: cada click era una recarga completa, y los submits de formularios se repetían como GET del action. Un form con errores de validación terminaba en el listado sin errores ni input, y "continuar editando" terminaba en la vista de detalle. Lo detectó la captura de validación del showcase.
 
 ## 9. Avance
@@ -176,3 +178,9 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 **3i, iconpicker: se mantiene fontawesome-iconpicker (2026-11-05).** Funciona con BS5 con una sola regla CSS: el popover usa `.fade.in` de BS3 y BS5 lo deja con opacidad 0. Sigue guardando nombres de FA4 (`fa-star`) en `admin_menu.icon` y en los campos `icon()`, y FA6 los muestra con los v4-shims; están verificados los 730 íconos del picker, incluidos los renombrados como `fa-area-chart`. **Consecuencia: una base editada desde la 2.0 sigue siendo compatible con la 1.x en producción.** Ya no hay riesgo de íconos FA6 que FA4 no muestre.
 
 **Fin de la fase 3.** `interactions.mjs` da 82/82. Suma los chequeos de color (rgba/hex, cuadradito, guardado y edición), listbox (mover, guardar, edición, old input, vaciar y el form de roles) e iconpicker (popover visible, nombre FA4 guardado, menú con un ícono renombrado que se ve en el sidebar). Smoke y HTTP en verde. Las capturas (`shots/bs5-phase3`) solo muestran advertencias por `->editable()` del grid, que es de la fase 4.
+
+### Fase 4: grid (en curso)
+
+**4a, `->editable()` (2026-11-05).** x-editable (solo BS3) se fue. `->editable()` mantiene la firma de la 1.x y dibuja el displayer de inline-edit que corresponde: `Input`, `Textarea`, `Select` (las opciones pueden ser un closure que recibe la fila) o `Datetime` con el formato del tipo (`date`, `datetime`, `year`, `month`, `day`, `time`, `combodate` con formato). Guarda por el mismo PUT (`_edit_inline`). El popover del inline-edit corre sobre el `Popover` de BS5 a través de `$.admin.inlineEdit`, con el sanitizer apagado (el template se arma en el servidor), sin `data-toggle="popover"` para que el init global no lo inicialice dos veces, y con "cerrar todos" sin crear popovers en otros elementos. Si la celda está vacía se muestra el lápiz (como el `emptytext` de x-editable). El popover toma el ancho de su campo, por ejemplo el calendario.
+- `interactions.mjs`: 90/90, ya sin el stub de `editable`. Prueba texto, select y fecha (calendario en el popover) guardados, el error de validación dentro del popover, cancelar y que radio y checkbox inline en el mismo grid guarden cada uno con su handler. Las 45 capturas, por primera vez, sin errores de JS.
+- **Para la guía de upgrade:** `->editable()` ya no genera `<a class="grid-editable-...">` de x-editable. Si hay JS o CSS propio sobre esas clases, hay que adaptarlo.

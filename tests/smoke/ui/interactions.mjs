@@ -760,6 +760,21 @@ try {
     check('grid editable("date"): day picked in the popover calendar, saved', dateStatus === 200 && d.date === '2026-10-20' && await shownText('date') === '2026-10-20',
         `${dateStatus} ${d.date} ${await shownText('date')}`);
 
+    // inline ->radio() and ->checkbox() in the same grid (each column keeps its own submit handler)
+    await openCell('radio');
+    await page.evaluate(() => { const r = [...document.querySelectorAll('.popover.show input[type="radio"]')].find((i) => i.value === 'c'); r.checked = true; });
+    const radioStatus = await submitPopover();
+    const [r] = sql(`select radio from showcases where id = ${e.id}`);
+    check('grid inline radio(): saved through its own handler', radioStatus === 200 && r.radio === 'c' && await shownText('radio') === 'Gamma', `${radioStatus} ${r.radio} ${await shownText('radio')}`);
+
+    await openCell('checkbox');
+    await page.evaluate(() => {
+        document.querySelectorAll('.popover.show input[type="checkbox"]').forEach((c) => { c.checked = c.value === 'a' || c.value === 'b'; });
+    });
+    const boxStatus = await submitPopover();
+    const [cb] = sql(`select checkbox from showcases where id = ${e.id}`);
+    check('grid inline checkbox(): saved', boxStatus === 200 && same(json(cb.checkbox), ['a', 'b']) && await shownText('checkbox') === 'Alpha;Beta', `${boxStatus} ${cb.checkbox} ${await shownText('checkbox')}`);
+
     sql(`delete from showcases where id = ${e.id}`);
 } catch (err) {
     check('editable run', false, err.message.split('\n')[0]);

@@ -158,3 +158,8 @@ a.editable-empty {
 .iconpicker-popover.popover.fade.in {
     opacity: 1;
 }
+
+/* grid inline edit: the popover takes the width of its field (e.g. the inline calendar) */
+.popover:has(.ie-content) {
+    max-width: none;
+}
