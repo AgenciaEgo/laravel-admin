@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 y 2 hechas, fase 3 en curso: markup base del form hecho; siguen los plugins, uno por commit (ver sección 9)**.
+Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 3 hechas (ver sección 9); próxima: fase 4 (grid)**.
 
 ## 1. Punto de partida
 
@@ -75,7 +75,7 @@ Lo que tiene sullair-click propio y habrá que adaptar:
 | **bootstrap-duallistbox** (`listbox`, permisos de roles) | `bootstrap4-duallistbox`, `dual-listbox` (vanilla) | Probar `bootstrap4-duallistbox`; si se ve mal, `dual-listbox`. | Bajo: sullair-click no lo usa. |
 | **bootstrap-fileinput 4** (`file`, `image`, `multiple*`) | v5.5.4 con tema BS5 | **v5.** | Hay que revisar las opciones que se pasan con `->options()`. |
 | **bootstrap-colorpicker 2** (`color`) | `@melloware/coloris`, `<input type=color>` | **Coloris.** | `->options()` cambia. |
-| **fontawesome-iconpicker** (`icon`, menú) | v3.2 (FA5) con lista FA6, picker propio | Decidirlo cuando esté elegido FA6 o FA7. | Bajo. |
+| **fontawesome-iconpicker** (`icon`, menú) | **Se mantiene** (decidido en la fase 3) | Guarda nombres FA4, que FA6 muestra con los v4-shims: la DB sigue siendo compatible con la 1.x. Solo hizo falta una regla CSS para el `.in` de BS3. | Ninguno. |
 | **slimScroll** | OverlayScrollbars (lo usa AdminLTE 4), CSS nativo | Lo que traiga AdminLTE 4. | Ninguno. |
 | `bootstrap-slider` (vendoreado, sin uso) | – | Borrar. | – |
 
@@ -169,4 +169,10 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 - Modales de belongsTo y filepicker: si el click cae directo en el checkbox, ya no lo vuelve a togglear el handler de la fila. Se prueban con los modales en la fase 5.
 - **Para la guía de upgrade:** ya no hay `$.fn.iCheck` ni eventos `if*`. El JS propio tiene que escuchar `change`.
 - `interactions.mjs`: 65/65. Prueba cascade de `->when()`, radio, checkbox y las variantes de botones y tarjetas guardadas, la edición, old input después de un error, check-all, desmarcar todo (lista vacía en la DB), selección de filas con el contador del botón de lote, seleccionar todo y el filtro `in()->checkbox()`.
-- Pendiente para los plugins: colorpicker, duallistbox, iconpicker. Plan de prueba por plugin: render, alta, edición, error de validación (old input), pjax y filas dinámicas de hasMany, más un chequeo de ida y vuelta contra la DB en el smoke.
+**3g, bootstrap-colorpicker → Coloris 0.25.0 (2026-11-05).** Adaptador `$.admin.colorpicker(selector, {format})`: `hex()`, `rgb()` y `rgba()` se mapean a los formatos de Coloris. Por defecto escribe hex si el color es opaco y rgba si tiene transparencia (el "auto" del plugin viejo). El cuadradito sigue en el addon (`.la-color-swatch`). Cada selector se engancha una sola vez, porque Coloris escucha en `document` y pjax duplicaría los listeners. Se usó la 0.25.0 y no la 0.25.1, que tenía menos de dos semanas de publicada. Detalle conocido: si el usuario tipea un color con transparencia en el campo del picker y aprieta Enter, Coloris lo escribe como `#rrggbbaa`, que también es un color CSS válido.
+
+**3h, bootstrap-duallistbox 3.0.6 → bootstrap4-duallistbox 4.0.2 (2026-11-05).** Mismo API jQuery y mismas opciones. Los botones ahora se dibujan con texto; antes eran glyphicons, que en BS5 no se veían. `moveOnSelect` sigue por defecto, como en la 1.x. Lo usa también el formulario de roles del paquete (permisos).
+
+**3i, iconpicker: se mantiene fontawesome-iconpicker (2026-11-05).** Funciona con BS5 con una sola regla CSS: el popover usa `.fade.in` de BS3 y BS5 lo deja con opacidad 0. Sigue guardando nombres de FA4 (`fa-star`) en `admin_menu.icon` y en los campos `icon()`, y FA6 los muestra con los v4-shims; están verificados los 730 íconos del picker, incluidos los renombrados como `fa-area-chart`. **Consecuencia: una base editada desde la 2.0 sigue siendo compatible con la 1.x en producción.** Ya no hay riesgo de íconos FA6 que FA4 no muestre.
+
+**Fin de la fase 3.** `interactions.mjs` da 82/82. Suma los chequeos de color (rgba/hex, cuadradito, guardado y edición), listbox (mover, guardar, edición, old input, vaciar y el form de roles) e iconpicker (popover visible, nombre FA4 guardado, menú con un ícono renombrado que se ve en el sidebar). Smoke y HTTP en verde. Las capturas (`shots/bs5-phase3`) solo muestran advertencias por `->editable()` del grid, que es de la fase 4.

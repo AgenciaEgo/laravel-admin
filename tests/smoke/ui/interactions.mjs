@@ -681,6 +681,59 @@ try {
     check('listbox run', false, e.message.split('\n')[0]);
 }
 
+// --- icon (fontawesome-iconpicker kept: it stores Font Awesome 4 names, shown through the FA6 v4-shims) ---
+try {
+    const pickIcon = async (filter, icon) => {
+        await clickEl(page, 'input.icon');
+        await page.waitForSelector('.iconpicker-popover', { visible: true, timeout: 3000 });
+        await page.type('.iconpicker-popover .iconpicker-search', filter);
+        await sleep(300);
+        const item = await page.$(`.iconpicker-popover .iconpicker-item[title=".${icon}"]`);
+        if (!item) throw new Error(`no ${icon} in the iconpicker`);
+        await item.click();
+        await sleep(300);
+    };
+    const rendered = (selector) => page.evaluate((sel) => {
+        const i = document.querySelector(sel);
+        const content = i && getComputedStyle(i, '::before').content;
+        return !!content && content !== 'none' && content !== 'normal' && content !== '""';
+    }, selector);
+
+    const title = `Icon ${Date.now()}`;
+    await page.goto(`${BASE}/admin/showcases/create`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', title);
+    const opacity = await page.evaluate(async () => {
+        $('input.icon').trigger('focus').trigger('click');
+        await new Promise((r) => setTimeout(r, 400));
+        return getComputedStyle(document.querySelector('.iconpicker-popover')).opacity;
+    });
+    check('iconpicker: popover visible (Bootstrap 3 .in state class)', opacity === '1', opacity);
+    await page.evaluate(() => document.querySelector('.app-content-header h3').click());
+    await pickIcon('star', 'fa-star');
+    check('iconpicker: picked icon written as a Font Awesome 4 name', await value(page, 'input.icon') === 'fa-star', await value(page, 'input.icon'));
+    await submit(page, { afterSave: 1 });
+    const [i] = sql(`select id, icon from showcases where title = '${title}'`);
+    if (!i) throw new Error('icon showcase was not created');
+    check('iconpicker: saved', i.icon === 'fa-star', i.icon);
+    sql(`delete from showcases where id = ${i.id}`);
+
+    // the package's menu editor: the stored name must render in the sidebar
+    const menuTitle = `Menu ${Date.now()}`;
+    await page.goto(`${BASE}/admin/auth/menu`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', menuTitle);
+    await page.evaluate(() => { document.querySelector('input.icon').value = ''; });
+    await pickIcon('area', 'fa-area-chart'); // renamed in FA5/6 (chart-area): needs the v4-shims
+    await page.type('input#uri', 'showcases');
+    await waitPjax(page, () => page.evaluate(() => [...document.querySelectorAll('button[type="submit"]')].find((b) => b.offsetParent).click()));
+    const [m] = sql(`select id, icon from admin_menu where title = '${menuTitle}'`);
+    check('menu editor: icon saved as a Font Awesome 4 name (compatible with 1.x databases)', !!m && m.icon === 'fa-area-chart', m && m.icon);
+    await page.goto(`${BASE}/admin`, { waitUntil: 'networkidle0' });
+    check('menu: a renamed FA4 icon renders in the sidebar through the v4-shims', await rendered('.sidebar-menu i.fa-area-chart'));
+    if (m) sql(`delete from admin_menu where id = ${m.id}`);
+} catch (e) {
+    check('icon run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 
