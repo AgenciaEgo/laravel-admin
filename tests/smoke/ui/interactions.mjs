@@ -599,6 +599,40 @@ try {
     check('checks run', false, e.message.split('\n')[0]);
 }
 
+// --- color (Coloris, bootstrap-colorpicker in 1.x) ---
+try {
+    const title = `Color ${Date.now()}`;
+    const pickColor = async (text) => {
+        await clickEl(page, 'input.color');
+        await page.waitForSelector('#clr-picker.clr-open', { visible: true, timeout: 3000 });
+        await page.click('#clr-color-value', { clickCount: 3 });
+        await page.keyboard.type(text);
+        // commit the typed value, then close by clicking elsewhere (Enter closes the picker
+        // first, with Coloris' global format, so a translucent color would end up as #rrggbbaa)
+        await page.evaluate(() => document.querySelector('#clr-color-value').dispatchEvent(new Event('change')));
+        await page.evaluate(() => document.querySelector('.app-content-header h3').click());
+        await sleep(300);
+    };
+    const swatchColor = () => page.evaluate(() => getComputedStyle(document.querySelector('input.color').closest('.input-group').querySelector('.la-color-swatch')).backgroundColor);
+
+    await page.goto(`${BASE}/admin/showcases/create`, { waitUntil: 'networkidle0' });
+    await page.type('input#title', title);
+    await pickColor('rgba(0, 0, 255, 0.5)');
+    const translucent = await value(page, 'input.color');
+    check('color: a translucent color is written as rgba (bootstrap-colorpicker "auto")', /^rgba\(0, ?0, ?255, ?0?\.5\)$/.test(translucent), translucent);
+    await pickColor('#ff0000');
+    check('color: an opaque color is written as hex', await value(page, 'input.color') === '#ff0000', await value(page, 'input.color'));
+    check('color: the addon swatch follows the value', await swatchColor() === 'rgb(255, 0, 0)', await swatchColor());
+    await submit(page, { afterSave: 1 });
+    const [c] = sql(`select id, color from showcases where title = '${title}'`);
+    if (!c) throw new Error('color showcase was not created');
+    check('color: saved', c.color === '#ff0000', c.color);
+    check('color: edit page shows the value and its swatch', await value(page, 'input.color') === '#ff0000' && await swatchColor() === 'rgb(255, 0, 0)', `${await value(page, 'input.color')} ${await swatchColor()}`);
+    sql(`delete from showcases where id = ${c.id}`);
+} catch (e) {
+    check('color run', false, e.message.split('\n')[0]);
+}
+
 const unexpected = jsErrors.filter((e) => !e.includes('editable is not a function'));
 check('no JS errors', unexpected.length === 0, unexpected.join(' | '));
 

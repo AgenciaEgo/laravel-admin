@@ -142,3 +142,13 @@ a.editable-empty {
 .col-form-label ~ div .la-checks:first-child {
     padding-top: calc(.375rem + 1px);
 }
+
+/* color field: the current color in the input group addon */
+.la-color-swatch {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 3px;
+    border: 1px solid var(--bs-border-color);
+    vertical-align: middle;
+}

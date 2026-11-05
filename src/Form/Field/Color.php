@@ -5,11 +5,11 @@ namespace Encore\Admin\Form\Field;
 class Color extends Text
 {
     protected static $css = [
-        '/vendor/laravel-admin/AdminLTE/plugins/colorpicker/bootstrap-colorpicker.min.css',
+        '/vendor/laravel-admin/coloris/coloris.min.css',
     ];
 
     protected static $js = [
-        '/vendor/laravel-admin/AdminLTE/plugins/colorpicker/bootstrap-colorpicker.min.js',
+        '/vendor/laravel-admin/coloris/coloris.min.js',
     ];
 
     /**
@@ -51,9 +51,10 @@ class Color extends Text
     {
         $options = json_encode($this->options);
 
-        $this->script = "$('{$this->getElementClassSelector()}').parent().colorpicker($options);";
+        // Coloris through the adapter in laravel-admin.js (bootstrap-colorpicker in 1.x)
+        $this->script = "$.admin.colorpicker('{$this->getElementClassSelector()}', $options);";
 
-        $this->prepend('<i></i>')
+        $this->prepend('<i class="la-color-swatch"></i>')
             ->defaultAttribute('style', 'width: 140px');
 
         return parent::render();

@@ -365,3 +365,53 @@ $('#totop').on('click', function (e) {
     };
 
 })(jQuery);
+
+/**
+ * Color picker (2.0): Coloris behind the formats of the bootstrap-colorpicker used in 1.x.
+ *
+ *   $.admin.colorpicker(selector, {format: 'hex' | 'rgb' | 'rgba'})
+ *
+ * Without a format the value is hex while opaque and rgba with transparency (the
+ * "auto" of bootstrap-colorpicker). The swatch is the .la-color-swatch in the input group.
+ */
+(function ($) {
+
+    var bound = {};
+
+    function swatch(input) {
+        $(input).closest('.input-group').find('.la-color-swatch').css('background-color', input.value || 'transparent');
+    }
+
+    $.admin.colorpicker = function (selector, options) {
+        if (typeof Coloris === 'undefined') {
+            return;
+        }
+
+        var format = (options || {}).format;
+        var config = {format: 'mixed', alpha: true};
+
+        if (format === 'hex') {
+            config = {format: 'hex', alpha: false};
+        } else if (format === 'rgb') {
+            config = {format: 'rgb', alpha: false};
+        } else if (format === 'rgba') {
+            config = {format: 'rgb', alpha: true, forceAlpha: true};
+        }
+
+        // Coloris listens on the document per selector: bind each selector once (pjax reloads)
+        if (!bound[selector]) {
+            bound[selector] = true;
+            Coloris({el: selector, wrap: false});
+            $(document).on('input change', selector, function () {
+                swatch(this);
+            });
+        }
+
+        Coloris.setInstance(selector, config);
+
+        $(selector).each(function () {
+            swatch(this);
+        });
+    };
+
+})(jQuery);
