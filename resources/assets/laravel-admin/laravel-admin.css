@@ -2,188 +2,243 @@
 /* [data-bs-theme] too: AdminLTE defines it on [data-bs-theme=light], which the sidebar, header and dropdowns carry */
 :root,
 [data-bs-theme] {
-    --bs-font-sans-serif: "Nunito Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--bs-font-sans-serif:
+		"Nunito Variable", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 html {
-    font-size: 15px;
+	font-size: 15px;
 }
 
 input.content {
-    min-height: 0 !important;
-    padding: 6px 12px !important;
-    margin: 0 !important;
+	min-height: 0 !important;
+	padding: 6px 12px !important;
+	margin: 0 !important;
 }
 
 input.label:empty {
-    display: inherit !important;
+	display: inherit !important;
 }
 
 input.label {
-    display: inherit !important;
-    padding: 6px 12px !important;
-    font-size: 14px !important;
-    font-weight: inherit !important;
-    line-height: 1.42857143 !important;
-    color: #555 !important;
-    text-align: inherit !important;
-    white-space: inherit !important;
-    vertical-align: inherit !important;
-    border-radius: inherit !important;
+	display: inherit !important;
+	padding: 6px 12px !important;
+	font-size: 14px !important;
+	font-weight: inherit !important;
+	line-height: 1.42857143 !important;
+	color: #555 !important;
+	text-align: inherit !important;
+	white-space: inherit !important;
+	vertical-align: inherit !important;
+	border-radius: inherit !important;
 }
 
 .box-show {
-    border-radius: 0 !important;
-    box-shadow: none !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
 }
 
 a.editable-empty {
-    color: #3c8dbc;
-    border-bottom: none !important;
+	color: #3c8dbc;
+	border-bottom: none !important;
 }
 
 .form-group > label.asterisk:before {
-    content: "* ";
-    color: red;
+	content: "* ";
+	color: red;
 }
 
 .table-has-many .form-group {
-    margin-bottom: 0 !important;
+	margin-bottom: 0 !important;
 }
 
-
 .table-has-many .invalid-feedback {
-    position: absolute;
-    z-index: 100;
-    background-color: var(--bs-body-bg);
-    border: 1px solid var(--bs-form-invalid-border-color);
-    border-radius: 5px;
-    text-align: left;
-    width: auto;
-    padding: 8px;
-    line-height: 1.2;
+	position: absolute;
+	z-index: 100;
+	background-color: var(--bs-body-bg);
+	border: 1px solid var(--bs-form-invalid-border-color);
+	border-radius: 5px;
+	text-align: left;
+	width: auto;
+	padding: 8px;
+	line-height: 1.2;
 }
 
 /* fields with validation errors (the group keeps the .has-error hook used by the tab scripts) */
 .has-error .col-form-label,
 .has-error .form-label {
-    color: var(--bs-form-invalid-color);
+	color: var(--bs-form-invalid-color);
 }
 
 .has-error .form-control,
 .has-error .form-select,
 .has-error .select2-container .select2-selection {
-    border-color: var(--bs-form-invalid-border-color);
+	border-color: var(--bs-form-invalid-border-color);
 }
 
 #totop {
-    display: none;
-    position: fixed;
-    bottom: 40px;
-    right: 20px;
-    z-index: 99999;
-    outline: none;
-    background-color: rgb(34, 45, 50);
-    color: rgb(238, 238, 238);
-    cursor: pointer;
-    padding: 10px 15px;
-    border-radius: 4px;
-    opacity: 0.5;
+	display: none;
+	position: fixed;
+	bottom: 40px;
+	right: 20px;
+	z-index: 99999;
+	outline: none;
+	background-color: rgb(34, 45, 50);
+	color: rgb(238, 238, 238);
+	cursor: pointer;
+	padding: 10px 15px;
+	border-radius: 4px;
+	opacity: 0.5;
 }
 
 #totop:hover {
-    opacity: 1;
+	opacity: 1;
 }
 
 .file-input .glyphicon-folder-open {
-    display: inline;
+	display: inline;
 }
 
 /* bootstrap-editable.css hides ".datepicker > div"; with jQuery 3 the picker's .show() only clears the inline display */
 .bootstrap-datetimepicker-widget .datepicker > div {
-    display: block;
+	display: block;
 }
 
 /* sidebar brand: config('admin.logo-mini') replaces config('admin.logo') while the sidebar is collapsed to icons */
 .brand-link .brand-mini {
-    display: none;
+	display: none;
 }
 .brand-link .brand-text {
-    margin-left: 0;
+	margin-left: 0;
 }
-.sidebar-mini.sidebar-collapse .app-sidebar:not(:hover) .brand-link .brand-mini {
-    display: inline;
+.sidebar-mini.sidebar-collapse
+	.app-sidebar:not(:hover)
+	.brand-link
+	.brand-mini {
+	display: inline;
 }
-.sidebar-mini.sidebar-collapse .app-sidebar:not(:hover) .brand-link .brand-text {
-    display: none;
+.sidebar-mini.sidebar-collapse
+	.app-sidebar:not(:hover)
+	.brand-link
+	.brand-text {
+	display: none;
 }
 .sidebar-mini.sidebar-collapse .app-sidebar:not(:hover) .sidebar-search {
-    display: none;
+	display: none;
 }
 
 /* form switch (native BS5 form-switch): vertical alignment with the label and the colors of ->states() */
 .la-switch {
-    min-height: calc(1.5em + .75rem + 2px);
-    display: flex;
-    align-items: center;
+	min-height: calc(1.5em + 0.75rem + 2px);
+	display: flex;
+	align-items: center;
 }
 
 .la-switch .form-check-input {
-    font-size: 1.25rem;
-    margin-top: 0;
+	font-size: 1.25rem;
+	margin-top: 0;
 }
-.form-switch .form-check-input.la-switch-success:checked { background-color: var(--bs-success); border-color: var(--bs-success); }
-.form-switch .form-check-input.la-switch-danger:checked { background-color: var(--bs-danger); border-color: var(--bs-danger); }
-.form-switch .form-check-input.la-switch-warning:checked { background-color: var(--bs-warning); border-color: var(--bs-warning); }
-.form-switch .form-check-input.la-switch-info:checked { background-color: var(--bs-info); border-color: var(--bs-info); }
-.form-switch .form-check-input.la-switch-dark:checked { background-color: var(--bs-dark); border-color: var(--bs-dark); }
-.form-switch .form-check-input.la-switch-off-success:not(:checked) { border-color: var(--bs-success); box-shadow: inset 0 0 0 1px var(--bs-success); }
-.form-switch .form-check-input.la-switch-off-danger:not(:checked) { border-color: var(--bs-danger); box-shadow: inset 0 0 0 1px var(--bs-danger); }
-.form-switch .form-check-input.la-switch-off-warning:not(:checked) { border-color: var(--bs-warning); box-shadow: inset 0 0 0 1px var(--bs-warning); }
-.form-switch .form-check-input.la-switch-off-info:not(:checked) { border-color: var(--bs-info); box-shadow: inset 0 0 0 1px var(--bs-info); }
-.form-switch .form-check-input.la-switch-off-dark:not(:checked) { border-color: var(--bs-dark); box-shadow: inset 0 0 0 1px var(--bs-dark); }
-.form-switch .form-check-input.la-switch-off-primary:not(:checked) { border-color: var(--bs-primary); box-shadow: inset 0 0 0 1px var(--bs-primary); }
+.form-switch .form-check-input.la-switch-success:checked {
+	background-color: var(--bs-success);
+	border-color: var(--bs-success);
+}
+.form-switch .form-check-input.la-switch-danger:checked {
+	background-color: var(--bs-danger);
+	border-color: var(--bs-danger);
+}
+.form-switch .form-check-input.la-switch-warning:checked {
+	background-color: var(--bs-warning);
+	border-color: var(--bs-warning);
+}
+.form-switch .form-check-input.la-switch-info:checked {
+	background-color: var(--bs-info);
+	border-color: var(--bs-info);
+}
+.form-switch .form-check-input.la-switch-dark:checked {
+	background-color: var(--bs-dark);
+	border-color: var(--bs-dark);
+}
+.form-switch .form-check-input.la-switch-off-success:not(:checked) {
+	border-color: var(--bs-success);
+	box-shadow: inset 0 0 0 1px var(--bs-success);
+}
+.form-switch .form-check-input.la-switch-off-danger:not(:checked) {
+	border-color: var(--bs-danger);
+	box-shadow: inset 0 0 0 1px var(--bs-danger);
+}
+.form-switch .form-check-input.la-switch-off-warning:not(:checked) {
+	border-color: var(--bs-warning);
+	box-shadow: inset 0 0 0 1px var(--bs-warning);
+}
+.form-switch .form-check-input.la-switch-off-info:not(:checked) {
+	border-color: var(--bs-info);
+	box-shadow: inset 0 0 0 1px var(--bs-info);
+}
+.form-switch .form-check-input.la-switch-off-dark:not(:checked) {
+	border-color: var(--bs-dark);
+	box-shadow: inset 0 0 0 1px var(--bs-dark);
+}
+.form-switch .form-check-input.la-switch-off-primary:not(:checked) {
+	border-color: var(--bs-primary);
+	box-shadow: inset 0 0 0 1px var(--bs-primary);
+}
 
 /* radio / checkbox groups (native form-check): line up with the label of a horizontal form */
 .col-form-label ~ div > .la-checks,
 .col-form-label ~ div .la-checks:first-child {
-    padding-top: calc(.375rem + 1px);
+	padding-top: calc(0.375rem + 1px);
 }
 
 /* color field: the current color in the input group addon */
 .la-color-swatch {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 3px;
-    border: 1px solid var(--bs-border-color);
-    vertical-align: middle;
+	display: inline-block;
+	width: 1rem;
+	height: 1rem;
+	border-radius: 3px;
+	border: 1px solid var(--bs-border-color);
+	vertical-align: middle;
 }
 
 /* fontawesome-iconpicker opens its popover with the Bootstrap 3 state class (.in);
    Bootstrap 5 keeps .fade at opacity 0 until .show */
 .iconpicker-popover.popover.fade.in {
-    opacity: 1;
+	opacity: 1;
 }
 
 /* grid inline edit: the popover takes the width of its field (e.g. the inline calendar) */
 .popover:has(.ie-content) {
-    max-width: none;
+	max-width: none;
 }
 
 /* accent color: config('admin.accent_color') sets --la-accent; without it these keep the Bootstrap defaults */
 .sidebar-brand .brand-link {
-    color: var(--la-accent, var(--bs-link-color));
+	color: var(--la-accent, var(--bs-link-color));
 }
 .app-main .app-content-header .breadcrumb a {
-    color: var(--la-accent, var(--bs-link-hover-color));
+	color: var(--la-accent, var(--bs-link-hover-color));
 }
 .pagination {
-    --bs-pagination-active-bg: var(--la-accent, var(--bs-primary));
-    --bs-pagination-active-border-color: var(--la-accent, var(--bs-primary));
+	--bs-pagination-active-bg: var(--la-accent, var(--bs-primary));
+	--bs-pagination-active-border-color: var(--la-accent, var(--bs-primary));
 }
 #nprogress .bar {
-    background: var(--la-accent, #dd441f);
+	background: var(--la-accent, #dd441f);
 }
 #nprogress .peg {
-    box-shadow: 0 0 10px var(--la-accent, #dd441f), 0 0 5px var(--la-accent, #dd441f);
+	box-shadow:
+		0 0 10px var(--la-accent, #dd441f),
+		0 0 5px var(--la-accent, #dd441f);
+}
+
+/* grid filter form as the dropdown menu of the filter button */
+.filter-dropdown {
+    width: min(60rem, calc(100vw - 2rem));
+}
+/* narrower than the page: labels 1/4 and fields 3/4 instead of 2/12 + 8/12 */
+@media (min-width: 576px) {
+    .filter-dropdown .row > .col-sm-2 {
+        width: 25%;
+    }
+    .filter-dropdown .row > .col-sm-8 {
+        width: 75%;
+    }
 }

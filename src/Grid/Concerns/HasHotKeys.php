@@ -33,7 +33,12 @@ $(document).off('keydown').keydown(function(e) {
             \$box.find('input.grid-quick-search').trigger('focus');
             break; 
         case 70: // `f` for open filter
-            \$box.find('#{$filterID}').toggleClass('d-none');
+            var \$filter = \$box.find('#{$filterID}');
+            if (\$filter.hasClass('dropdown-menu')) {
+                bootstrap.Dropdown.getOrCreateInstance(\$filter.prev()[0]).toggle();
+            } else {
+                \$filter.toggleClass('d-none');
+            }
             break;
         case 67: // `c` go to create page 
             \$box.find('.grid-create-btn>a').trigger('click');

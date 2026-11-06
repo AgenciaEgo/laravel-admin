@@ -1,4 +1,5 @@
-<div class="filter-box border-bottom {{ $expand ? '' : 'd-none' }}" id="{{ $filterID }}">
+{{-- $dropdown: the menu of the filter button (filter/button.blade.php); otherwise a panel above the table --}}
+<div class="filter-box {{ ($dropdown ?? false) ? 'dropdown-menu filter-dropdown p-0' : 'border-bottom'.($expand ? '' : ' d-none') }}" id="{{ $filterID }}">
     <form action="{!! $action !!}" class="p-3" pjax-container method="get">
 
         <div class="row">

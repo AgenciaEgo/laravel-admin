@@ -79,6 +79,7 @@ class ShowcaseController extends AdminController
         });
 
         $grid->expandFilter();
+        $grid->enableHotKeys();
         $grid->filter(function (Grid\Filter $filter) {
             $filter->column(1 / 2, function (Grid\Filter $filter) {
                 $filter->like('title');

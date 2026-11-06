@@ -114,6 +114,14 @@ class Filter implements Renderable
     public $expand = false;
 
     /**
+     * Where the filter form was rendered: null (not yet), "inline" (above the table,
+     * by Grid::renderFilter()) or "dropdown" (inside the filter button). It is rendered once.
+     *
+     * @var string|null
+     */
+    protected $renderedAs = null;
+
+    /**
      * @var Collection
      */
     protected $scopes;
@@ -544,17 +552,42 @@ class Filter implements Renderable
      */
     public function render()
     {
+        return $this->renderAs('inline');
+    }
+
+    /**
+     * Render the filter form as the dropdown menu of the filter button (Tools\FilterButton).
+     * Grid::renderFilter() then renders nothing; if it already rendered the form inline,
+     * this returns an empty string and the button keeps toggling the inline panel.
+     *
+     * @return string
+     */
+    public function renderDropdown()
+    {
+        return $this->renderAs('dropdown');
+    }
+
+    /**
+     * @param string $mode "inline" or "dropdown"
+     *
+     * @return string
+     */
+    protected function renderAs($mode)
+    {
         $this->removeIDFilterIfNeeded();
 
-        if (empty($this->filters)) {
+        if (empty($this->filters) || $this->renderedAs !== null) {
             return '';
         }
+
+        $this->renderedAs = $mode;
 
         return view($this->view)->with([
             'action'   => $this->action ?: $this->urlWithoutFilters(),
             'layout'   => $this->layout,
             'filterID' => $this->filterID,
             'expand'   => $this->expand,
+            'dropdown' => $mode === 'dropdown',
         ])->render();
     }
 

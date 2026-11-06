@@ -317,8 +317,9 @@ $('#totop').on('click', function (e) {
         }
 
         // inside a dropdown, popover or modal keep the calendar next to the input, so clicking
-        // it does not close the container
-        if ($(input).closest('.dropdown-menu, .popover, .modal').length && !options.inline) {
+        // it does not close the container (the grid filter dropdown handles that itself and its
+        // date ranges are input groups, which the static wrapper would break)
+        if ($(input).closest('.dropdown-menu:not(.filter-dropdown), .popover, .modal').length && !options.inline) {
             cfg['static'] = true;
         }
 
@@ -471,4 +472,28 @@ $('#totop').on('click', function (e) {
         }
     };
 
+})(jQuery);
+
+/*
+ * Grid filter dropdown (filter/button.blade.php): it closes on clicks outside the menu, but
+ * the date pickers, select2 and the color picker open outside it (in <body>), and flatpickr
+ * opens on mousedown with an animation that slides the calendar under the mouse, so the click
+ * on a date input ends in <body>. Keep it open for clicks that start or end in the menu or a picker.
+ */
+(function ($) {
+    var mousedownTarget = null;
+    var keep = '.filter-dropdown, .flatpickr-calendar, .select2-container, .clr-picker, .iconpicker-popover';
+
+    document.addEventListener('mousedown', function (e) {
+        mousedownTarget = e.target;
+    }, true);
+
+    $(document).on('hide.bs.dropdown', function (e) {
+        if (!e.clickEvent || !$(e.target).next('.filter-dropdown').length) {
+            return;
+        }
+        if ($(e.clickEvent.target).closest(keep).length || $(mousedownTarget).closest(keep).length) {
+            e.preventDefault();
+        }
+    });
 })(jQuery);

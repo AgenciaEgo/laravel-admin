@@ -833,13 +833,33 @@ try {
     await waitPjax(page, () => page.click('th.column-title .dropdown-menu.show .column-filter-submit'));
     check('grid column filter: dropdown stays open while typing, filters', !!stillOpen && same(await visibleTitles(), [titles[1]]), `${!!stillOpen} ${JSON.stringify(await visibleTitles())}`);
 
-    // filter panel button + scope dropdown
+    // filter form as the filter button's dropdown: stays open while picking a date (calendar outside the menu)
     await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
-    const panel = () => page.evaluate(() => { const f = document.querySelector('.filter-box'); return f && !f.classList.contains('d-none'); });
-    const before = await panel();
-    await clickEl(page, '.grid-tools .btn-group > .btn.btn-primary:not(.dropdown-toggle)');
-    const after = await panel();
-    check('grid filter button toggles the filter panel', before !== after, `${before} -> ${after}`);
+    const filterOpen = () => page.evaluate(() => !!document.querySelector('.grid-tools .filter-box.dropdown-menu.show'));
+    const closedAtLoad = !(await filterOpen()) && !(await page.$('.grid-box > .filter-box'));
+    await clickEl(page, '.grid-tools .btn-group > .btn.btn-primary[data-bs-toggle="dropdown"]:not(.dropdown-toggle)');
+    await page.waitForFunction(() => document.querySelector('.grid-tools .filter-box.dropdown-menu.show'), { timeout: 3000 });
+    await page.type('.filter-box.show input[name="title"]', `Grid B ${stamp}`);
+    await clickEl(page, '.filter-box.show #date_start');
+    await page.waitForSelector('.flatpickr-calendar.open', { visible: true, timeout: 3000 });
+    await page.click('.flatpickr-calendar.open .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)');
+    await sleep(200);
+    const openAfterPick = await filterOpen();
+    const picked = await page.evaluate(() => document.querySelector('#date_start').value);
+    await page.evaluate(() => document.querySelector('#date_start')._flatpickr.clear());
+    await clickEl(page, '.filter-box.show .card-title, .filter-box.show form'); // inside the menu
+    const openAfterInside = await filterOpen();
+    await waitPjax(page, () => page.click('.filter-box.show button.submit'));
+    const activeAfter = await page.evaluate(() => !!document.querySelector('.grid-tools .btn-group > .btn.btn-primary.active[data-bs-toggle="dropdown"]'));
+    check('grid filter dropdown: closed at load, stays open picking a date, filters, button active',
+        closedAtLoad && openAfterPick && !!picked && openAfterInside && same(await visibleTitles(), [titles[1]]) && activeAfter && !(await filterOpen()),
+        JSON.stringify({ closedAtLoad, openAfterPick, picked, openAfterInside, activeAfter, rows: await visibleTitles() }));
+    await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });
+    await page.keyboard.press('f');
+    await sleep(300);
+    const byHotkey = await filterOpen();
+    await clickEl(page, '.app-content-header h3, .app-content-header h1');
+    check('grid filter dropdown: `f` hotkey opens it, a click outside closes it', byHotkey && !(await filterOpen()), `${byHotkey}`);
     await openMenu('.grid-tools .btn-group > .dropdown-toggle.btn-primary');
     const scope = await page.$('.dropdown-menu.show a.dropdown-item');
     await waitPjax(page, () => scope.click());

@@ -25,6 +25,7 @@ class FilterButton extends AbstractTool
             'btn_class' => uniqid().'-filter-btn',
             'expand'    => $filter->expand,
             'filter_id' => $filter->getFilterID(),
+            'dropdown'  => $filter->renderDropdown(),
         ]);
     }
 }
