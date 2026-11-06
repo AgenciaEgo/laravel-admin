@@ -1,15 +1,9 @@
 <div class="btn-group">
-    @if($dropdown)
-    {{-- the filter form is this button's dropdown menu; "active" while filters are applied --}}
-    <button type="button" class="btn btn-sm btn-primary {{ $btn_class }} {{ $expand ? 'active' : '' }}" title="{{ trans('admin.filter') }}" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+    {{-- with $offcanvas the button opens the filter drawer; "active" while filters are applied --}}
+    <button type="button" class="btn btn-sm btn-primary {{ $btn_class }} {{ $expand ? 'active' : '' }}" title="{{ trans('admin.filter') }}"
+        @if($offcanvas) data-bs-toggle="offcanvas" data-bs-target="#{{ $filter_id }}" aria-controls="{{ $filter_id }}" @endif>
         <i class="fa fa-filter"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;{{ trans('admin.filter') }}</span>
     </button>
-    {!! $dropdown !!}
-    @else
-    <button type="button" class="btn btn-sm btn-primary {{ $btn_class }} {{ $expand ? 'active' : '' }}" title="{{ trans('admin.filter') }}">
-        <i class="fa fa-filter"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;{{ trans('admin.filter') }}</span>
-    </button>
-    @endif
 
     @if($scopes->isNotEmpty())
     <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
@@ -25,7 +19,9 @@
     @endif
 </div>
 
-@unless($dropdown)
+@if($offcanvas)
+{!! $offcanvas !!}
+@else
 <script>
 var $btn = $('.{{ $btn_class }}');
 var $filter = $('#{{ $filter_id }}');
@@ -35,4 +31,4 @@ $btn.off('click').on('click', function (e) {
     $btn.toggleClass('active', !$filter.hasClass('d-none'));
 });
 </script>
-@endunless
+@endif

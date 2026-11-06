@@ -81,7 +81,7 @@ const SHOTS = [
     ['20-logs-grid', '/admin/auth/logs'],
     ['21-setting', '/admin/auth/setting'],
     ['30-showcase-grid', '/admin/showcases'],
-    ['30b-showcase-grid-filter-dropdown', '/admin/showcases', (p) => click(p, '.grid-tools .btn-group > .btn-primary[data-bs-toggle="dropdown"]:not(.dropdown-toggle)')],
+    ['30b-showcase-grid-filter-drawer', '/admin/showcases', async (p) => { await click(p, '.grid-tools .btn-group > .btn-primary[data-bs-toggle="offcanvas"]'); await sleep(500); }],
     ['31-showcase-grid-row-dropdown', '/admin/showcases', (p) => click(p, '.grid-dropdown-actions [data-bs-toggle="dropdown"], .grid-dropdown-actions .dropdown-toggle')],
     ['32-showcase-grid-row-action-modal', '/admin/showcases', async (p) => {
         await click(p, '.grid-dropdown-actions [data-bs-toggle="dropdown"], .grid-dropdown-actions .dropdown-toggle');

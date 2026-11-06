@@ -34,8 +34,8 @@ $(document).off('keydown').keydown(function(e) {
             break; 
         case 70: // `f` for open filter
             var \$filter = \$box.find('#{$filterID}');
-            if (\$filter.hasClass('dropdown-menu')) {
-                bootstrap.Dropdown.getOrCreateInstance(\$filter.prev()[0]).toggle();
+            if (\$filter.hasClass('offcanvas')) {
+                bootstrap.Offcanvas.getOrCreateInstance(\$filter[0]).toggle();
             } else {
                 \$filter.toggleClass('d-none');
             }

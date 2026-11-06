@@ -76,7 +76,7 @@ Elementos agregados al navbar con `Admin::navbar()`: tienen que ser `<li class="
 - **Grid `->editable()`:** la firma es la misma, pero ya no usa x-editable. Dibuja el inline-edit del paquete (texto, textarea, select, fechas) en un popover de BS5. No hay `<a class="grid-editable-…">` ni `$.fn.editable`.
 - bootstrap-switch se fue: `->switch()` (form y grid) usa el switch nativo de BS5 y conserva los valores de `states()`. Los textos ON/OFF no se muestran. El color de "on" llena el switch y el de "off" tiñe el borde.
 - El init global de popovers solo toma `data-bs-toggle="popover"`.
-- **Filtro del grid:** el formulario se abre como dropdown del botón "Filtro" (antes era un panel arriba de la tabla). `expandFilter()` y los filtros aplicados ya no lo abren al cargar: marcan el botón como activo. Si una vista propia del grid no dibuja las herramientas del header (`renderHeaderTools()`) antes de `renderFilter()`, el filtro sigue saliendo como panel.
+- **Filtro del grid:** el formulario se abre en un panel lateral (offcanvas de BS5) desde el botón "Filtro", con los campos en una columna y el label arriba (antes era un panel arriba de la tabla). `expandFilter()` y los filtros aplicados ya no lo abren al cargar: marcan el botón como activo. Si una vista propia del grid no dibuja las herramientas del header (`renderHeaderTools()`) antes de `renderFilter()`, el filtro sigue saliendo como panel arriba de la tabla. `$filter->column(...)` sigue funcionando, pero en el panel lateral las columnas se apilan.
 
 ## 6. Plugins
 

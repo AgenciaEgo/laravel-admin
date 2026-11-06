@@ -115,7 +115,7 @@ class Filter implements Renderable
 
     /**
      * Where the filter form was rendered: null (not yet), "inline" (above the table,
-     * by Grid::renderFilter()) or "dropdown" (inside the filter button). It is rendered once.
+     * by Grid::renderFilter()) or "offcanvas" (the drawer of the filter button). It is rendered once.
      *
      * @var string|null
      */
@@ -556,19 +556,19 @@ class Filter implements Renderable
     }
 
     /**
-     * Render the filter form as the dropdown menu of the filter button (Tools\FilterButton).
+     * Render the filter form as the drawer (offcanvas) of the filter button (Tools\FilterButton).
      * Grid::renderFilter() then renders nothing; if it already rendered the form inline,
      * this returns an empty string and the button keeps toggling the inline panel.
      *
      * @return string
      */
-    public function renderDropdown()
+    public function renderOffcanvas()
     {
-        return $this->renderAs('dropdown');
+        return $this->renderAs('offcanvas');
     }
 
     /**
-     * @param string $mode "inline" or "dropdown"
+     * @param string $mode "inline" or "offcanvas"
      *
      * @return string
      */
@@ -587,7 +587,7 @@ class Filter implements Renderable
             'layout'   => $this->layout,
             'filterID' => $this->filterID,
             'expand'   => $this->expand,
-            'dropdown' => $mode === 'dropdown',
+            'offcanvas' => $mode === 'offcanvas',
         ])->render();
     }
 

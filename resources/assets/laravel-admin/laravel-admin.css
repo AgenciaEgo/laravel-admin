@@ -229,16 +229,20 @@ a.editable-empty {
 		0 0 5px var(--la-accent, #dd441f);
 }
 
-/* grid filter form as the dropdown menu of the filter button */
-.filter-dropdown {
-    width: min(60rem, calc(100vw - 2rem));
+/* grid filter drawer: one column, labels above the fields (the filter views are horizontal rows) */
+.filter-offcanvas.offcanvas-end {
+	--bs-offcanvas-width: 24rem;
 }
-/* narrower than the page: labels 1/4 and fields 3/4 instead of 2/12 + 8/12 */
-@media (min-width: 576px) {
-    .filter-dropdown .row > .col-sm-2 {
-        width: 25%;
-    }
-    .filter-dropdown .row > .col-sm-8 {
-        width: 75%;
-    }
+.filter-offcanvas .form-group.row {
+	margin-bottom: 1rem !important;
+}
+.filter-offcanvas .form-group.row > [class*="col-sm-"] {
+	flex: 0 0 auto;
+	width: 100%;
+}
+.filter-offcanvas .form-group.row > .col-form-label {
+	text-align: start !important;
+	padding-top: 0;
+	padding-bottom: .25rem;
+	font-weight: 600;
 }
