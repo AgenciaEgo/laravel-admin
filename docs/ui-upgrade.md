@@ -1,6 +1,6 @@
 # UI upgrade: Bootstrap 3 + AdminLTE 2 → Bootstrap 5 + AdminLTE 4
 
-Rama: `ui-upgrade` (separada de `master` a propósito). Estado: **fases 1 a 7 hechas (ver sección 9); próxima: fase 8 (rama `ui-upgrade` de sullair-click, con una copia de su base)**.
+Estado: **terminado, publicado como v2.0.0 (2026-11-10)**. Se desarrolló en la rama `ui-upgrade`, mergeada a `master`; la 1.x sigue en la rama `1.x` (último release al salir la 2.0: v1.10.4). Este documento queda como registro de decisiones.
 
 ## 1. Punto de partida
 
@@ -233,7 +233,7 @@ Revisión de click contra el working copy del fork (path repository con symlink 
 - Header blanco y claro, sin el "Menu" del sidebar y sin sombras en los avatares. El submit del form es success.
 - El arnés queda en 113/113.
 
-**Fixes de la 1.x acumulados en `master` desde v1.10.3, para el release:**
+**Fixes de la 1.x acumulados en `master` desde v1.10.3, publicados en v1.10.4 (y en la 2.0):**
 - 83c282f2: `->radio()` del grid con valor `null` tiraba el listado. El smoke test ahora detecta las excepciones que se muestran dentro de una página 200.
 - 6c13dcbc: lo mismo con `->select()` del grid.
 - c3e48f35: el inline-edit con popover abría vacío desde la 1.10.0 (sanitizer de BS 3.4.1), y con dos tipos en el mismo grid solo guardaba el último.

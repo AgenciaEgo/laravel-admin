@@ -1,6 +1,6 @@
 name: Release
 
-# Pushing a tag like v1.9.0 runs the full test matrix and, if it passes,
+# Pushing a tag like v2.0.0 (from master) or v1.10.5 (from the 1.x branch) runs the full test matrix and, if it passes,
 # publishes the GitHub release. Composer installs straight from the tag.
 
 on:
@@ -19,7 +19,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Tag is semver, matches Admin::VERSION and is on master
+      # 1.x releases come from the 1.x branch (Bootstrap 3), 2.0 onwards from master
+      - name: Tag is semver, matches Admin::VERSION and is on its release branch
         run: |
           tag="$GITHUB_REF_NAME"
           if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -33,8 +34,10 @@ jobs:
             exit 1
           fi
 
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
-            echo "::error::Tag $tag points to a commit that is not on master"
+          major="${tag#v}"; major="${major%%.*}"
+          if [ "$major" = "1" ]; then branch=1.x; else branch=master; fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/$branch"; then
+            echo "::error::Tag $tag points to a commit that is not on $branch"
             exit 1
           fi
 
