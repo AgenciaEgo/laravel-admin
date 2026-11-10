@@ -150,7 +150,7 @@ Conviene arreglarlas en `master` (patch 1.10.1) y extender `AdminSmokeTest` para
 - Nuevo `tests/smoke/ui/interactions.mjs <app>`: maneja el showcase como un usuario, usando la UI de cada plugin, y verifica la DB. Cubre pjax (navegación sin recarga, submit con "continuar editando", errores de validación) y select2 (select, multipleSelect, tags nuevos, select en una fila de hasMany agregada después, valores en la edición, old input después de un error). Da **13/13 en `master` y en `ui-upgrade`**. Cada plugin va a sumar sus chequeos acá.
 - Showcase: se agregaron las columnas que faltaban (`radio_button`, `radio_card`, `checkbox_button`, `checkbox_card`), porque el form nunca se había podido guardar. El hasMany en modo tabla usa su propia relación (`tableItems`), porque dos hasMany sobre `items` duplicaban `#has-many-items`. Los items tienen un `select('kind')`.
 **3c, bootstrap-switch → `form-switch` nativo (2026-11-04).**
-- Form: el checkbox visible sigue alimentando el input oculto con `on`/`off` y `prepare()` los mapea a los valores de `states()`, así que el contrato con el backend no cambia. El color de "on" llena el switch encendido y el de "off", si no es el gris por defecto, tiñe el borde del apagado. Por ejemplo, sullair-click usa `on = primary` y `off = danger` en los 18 switches. Los textos (SI/NO) no se muestran, como se decidió. `setSize()` se mantiene en la API, pero no tiene efecto.
+- Form: el checkbox visible sigue alimentando el input oculto con `on`/`off` y `prepare()` los mapea a los valores de `states()`, así que el contrato con el backend no cambia. El color de "on" llena el switch encendido y el de "off", si no es el gris por defecto, llena el apagado (con el knob blanco). Por ejemplo, sullair-click usa `on = primary` y `off = danger` en los 18 switches. Los textos (SI/NO) no se muestran, como se decidió. `setSize()` se mantiene en la API, pero no tiene efecto.
 - Grid (`->switch()`, `->switchGroup()`): switch nativo que guarda con el mismo PUT inline. Si el guardado falla, vuelve al estado anterior; antes usaba un AJAX síncrono para cancelar el cambio.
 - `SwitchField::colorClasses($states)` lo comparten form y grid.
 - `interactions.mjs`: 20/20. Cubre switch encendido/apagado en alta y edición, old input después de un error, switch en una fila de hasMany agregada después y switch del grid en los dos sentidos. Hasta la fase 4, el script reemplaza `$.fn.editable` por una función vacía en la página del grid, porque todos los scripts de una página corren dentro de un solo `$(function(){})` y el error de `editable()` cortaba los demás.
@@ -222,6 +222,16 @@ Casi todo se resolvió en las fases anteriores: los `data-bs-*`, `$.fn.button` �
 - **CI:** nuevo job `UI interactions` en `tests.yml` (Laravel 13 / PHP 8.3, Node 24, el Chrome del runner). Instala el showcase y corre `interactions.mjs` y `screenshots.mjs` (falla ante cualquier advertencia), y sube las capturas como artefacto. El workflow también corre en pushes a `ui-upgrade`. Los fallos salen como anotaciones `::error::` de GitHub, legibles sin permisos de admin.
 - Dos problemas que aparecieron solo en el runner: el `fetch` de Node 22 (undici) cortaba el proceso con una aserción interna contra `php -S` (ahora se espera con una conexión TCP), y una carrera real en el inline-edit. El popover recibe `.show` antes de disparar `shown.bs.popover`, así que un click rápido en "Guardar" no encontraba el trigger. Ahora el submit lo busca por `aria-describedby`, y el atributo pasó a llamarse `data-ie-trigger`. La misma carrera existía en `master` (927eec23).
 - Estado: el CI completo en verde en `ui-upgrade` (matriz Laravel 9–13, lint y UI).
+
+### Fase 8 (en curso): sullair-click, revisión visual (2026-11-10)
+
+Revisión de click contra el working copy del fork (path repository con symlink en `composer.json` de click, sin commitear). Ajustes estéticos que se hicieron en el paquete:
+- `admin.accent_color` (`--la-accent`) para el logo, el breadcrumb, la paginación y la barra de carga. El primario de Bootstrap sigue siendo azul.
+- Nunito vendoreada como fuente base, a 15px.
+- Filtro del grid en un drawer lateral (offcanvas) con los labels arriba. El botón "Aplicar" es success y el botón del filtro muestra un contador de filtros aplicados. La vista inline se mantiene para los grids sin header tools.
+- Sorter gris (tertiary) hasta que la columna se ordena. Las columnas `->switch()` van centradas y el color de off del switch rellena el fondo.
+- Header blanco y claro, sin el "Menu" del sidebar y sin sombras en los avatares. El submit del form es success.
+- El arnés queda en 113/113.
 
 **Fixes de la 1.x acumulados en `master` desde v1.10.3, para el release:**
 - 83c282f2: `->radio()` del grid con valor `null` tiraba el listado. El smoke test ahora detecta las excepciones que se muestran dentro de una página 200.
