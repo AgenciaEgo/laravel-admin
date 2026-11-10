@@ -1,5 +1,7 @@
 # laravel-admin (fork de AgenciaEgo)
 
+> **Rama `1.x`:** línea 1.x en mantenimiento (Bootstrap 3 / AdminLTE 2). Desde la 2.0 (Bootstrap 5 + AdminLTE 4), `master` es la 2.x. Acá van solo fixes de la 1.x, y los tags `v1.*` salen de esta rama: el release workflow exige que un tag `v1.*` esté en `1.x` y uno `v2+` en `master`. Lo que sigue describe la 1.x.
+
 Fork de `z-song/laravel-admin` (`encore/laravel-admin`), el paquete de CMS admin abandonado por su autor original — sin updates, sin soporte para versiones nuevas de Laravel o PHP.
 
 ## Por qué existe este fork
