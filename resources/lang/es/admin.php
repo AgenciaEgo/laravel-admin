@@ -32,6 +32,8 @@ return [
     'expand'                => 'Expandir',
     'collapse'              => 'Colapsar',
     'filter'                => 'Filtrar',
+    'filters'               => 'Filtros',
+    'apply'                 => 'Aplicar',
     'search'                => 'Buscar',
     'close'                 => 'Cerrar',
     'show'                  => 'Mostrar',

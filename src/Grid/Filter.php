@@ -122,6 +122,11 @@ class Filter implements Renderable
     protected $renderedAs = null;
 
     /**
+     * @var int
+     */
+    protected $appliedCount = 0;
+
+    /**
      * @var Collection
      */
     protected $scopes;
@@ -336,10 +341,22 @@ class Filter implements Renderable
         }
 
         return tap(array_filter($conditions), function ($conditions) {
+            $this->appliedCount = count($conditions);
             if (!empty($conditions)) {
                 $this->expand();
             }
         });
+    }
+
+    /**
+     * Number of filters applied to the current request (set by conditions(); scopes and
+     * column header filters are not counted).
+     *
+     * @return int
+     */
+    public function appliedCount()
+    {
+        return $this->appliedCount;
     }
 
     /**

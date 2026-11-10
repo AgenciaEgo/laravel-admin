@@ -3,7 +3,7 @@
 <div class="offcanvas offcanvas-end filter-box filter-offcanvas" tabindex="-1" id="{{ $filterID }}" aria-labelledby="{{ $filterID }}-title">
     <form action="{!! $action !!}" class="d-flex flex-column h-100" pjax-container method="get">
         <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title" id="{{ $filterID }}-title"><i class="fa fa-filter me-2"></i>{{ trans('admin.filter') }}</h5>
+            <h5 class="offcanvas-title" id="{{ $filterID }}-title">{{ trans('admin.filters') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ trans('admin.close') }}"></button>
         </div>
 
@@ -16,7 +16,7 @@
         </div>
 
         <div class="border-top p-3 d-flex gap-2">
-            <button class="btn btn-info submit"><i class="fa fa-search"></i>&nbsp;&nbsp;{{ trans('admin.search') }}</button>
+            <button class="btn btn-success submit">{{ trans('admin.apply') }}</button>
             <a href="{!! $action !!}" class="btn btn-outline-secondary"><i class="fa fa-undo"></i>&nbsp;&nbsp;{{ trans('admin.reset') }}</a>
         </div>
     </form>

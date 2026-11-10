@@ -840,7 +840,7 @@ try {
     const waitDrawer = (open) => page.waitForFunction((o) => (o
         ? !!document.querySelector('.filter-offcanvas.show:not(.showing)')
         : !document.querySelector('.filter-offcanvas.show, .filter-offcanvas.hiding, .offcanvas-backdrop')), { timeout: 3000 }, open);
-    const closedAtLoad = !(await drawerOpen()) && !(await page.$('.grid-box > .filter-box'));
+    const closedAtLoad = !(await drawerOpen()) && !(await page.$('.grid-box > .filter-box')) && !(await page.$('.grid-tools .filter-count'));
     await clickEl(page, '.grid-tools .btn-group > .btn-primary[data-bs-toggle="offcanvas"]');
     await waitDrawer(true);
     await page.type('.filter-offcanvas input[name="title"]', `Grid B ${stamp}`);
@@ -863,9 +863,9 @@ try {
     const openAfterWidgets = await drawerOpen();
     await waitPjax(page, () => page.click('.filter-offcanvas button.submit'));
     await waitDrawer(false);
-    const activeAfter = await page.evaluate(() => !!document.querySelector('.grid-tools .btn-group > .btn-primary.active[data-bs-toggle="offcanvas"]'));
+    const activeAfter = await page.evaluate(() => document.querySelector('.grid-tools .btn-group > .btn-primary.active[data-bs-toggle="offcanvas"] .filter-count')?.textContent.trim() === '(1)');
     const unlocked = await page.evaluate(() => !document.querySelector('.offcanvas-backdrop') && document.body.style.overflow !== 'hidden');
-    check('grid filter drawer: closed at load, date picker + select2 inside, filters, closes, button active',
+    check('grid filter drawer: closed at load, date picker + select2 inside, filters, closes, button active with the count',
         closedAtLoad && !!picked && s2Focus === true && openAfterWidgets && same(await visibleTitles(), [titles[1]]) && activeAfter && unlocked,
         JSON.stringify({ closedAtLoad, picked, s2Focus, openAfterWidgets, activeAfter, unlocked, rows: await visibleTitles() }));
     await page.goto(`${BASE}/admin/showcases`, { waitUntil: 'networkidle0' });

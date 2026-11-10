@@ -2,7 +2,7 @@
     {{-- with $offcanvas the button opens the filter drawer; "active" while filters are applied --}}
     <button type="button" class="btn btn-sm btn-primary {{ $btn_class }} {{ $expand ? 'active' : '' }}" title="{{ trans('admin.filter') }}"
         @if($offcanvas) data-bs-toggle="offcanvas" data-bs-target="#{{ $filter_id }}" aria-controls="{{ $filter_id }}" @endif>
-        <i class="fa fa-filter"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;{{ trans('admin.filter') }}</span>
+        <i class="fa fa-filter"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;{{ trans('admin.filter') }}</span>@if($count)<span class="filter-count">&nbsp;({{ $count }})</span>@endif
     </button>
 
     @if($scopes->isNotEmpty())

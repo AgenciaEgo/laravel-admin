@@ -24,6 +24,7 @@ class FilterButton extends AbstractTool
             'cancel'    => $filter->urlWithoutScopes(),
             'btn_class' => uniqid().'-filter-btn',
             'expand'    => $filter->expand,
+            'count'     => $filter->appliedCount(),
             'filter_id' => $filter->getFilterID(),
             'offcanvas' => $filter->renderOffcanvas(),
         ]);
