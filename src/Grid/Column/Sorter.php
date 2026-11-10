@@ -67,10 +67,12 @@ class Sorter implements Renderable
     {
         $icon = 'fa-sort';
         $type = 'desc';
+        $class = 'grid-sorter';
 
         if ($this->isSorted()) {
             $type = $this->sort['type'] == 'desc' ? 'asc' : 'desc';
             $icon .= "-amount-{$this->sort['type']}";
+            $class .= ' active';
         }
 
         // set sort value
@@ -85,6 +87,6 @@ class Sorter implements Renderable
 
         $url = url()->current().'?'.http_build_query($query);
 
-        return "<a class=\"fa fa-fw $icon\" href=\"$url\"></a>";
+        return "<a class=\"fa fa-fw $icon $class\" href=\"$url\"></a>";
     }
 }

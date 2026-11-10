@@ -19,6 +19,13 @@ Si la aplicación commitea `public/vendor/laravel-admin`, commiteá el resultado
 
 Si la aplicación publicó las vistas del paquete (`resources/views/vendor/admin`), hay que rehacerlas a partir de las nuevas. Las vistas de la 1.x no funcionan con la 2.0.
 
+Si la aplicación publicó las traducciones (`lang/<idioma>/admin.php` o `resources/lang/<idioma>/admin.php`), agregá las claves nuevas de la 2.0 en cada idioma que uses; si no, se ve la clave en vez del texto:
+
+```php
+'filters' => 'Filtros',   // título del panel de filtros
+'apply'   => 'Aplicar',   // botón del panel de filtros
+```
+
 ## 2. Configuración (`config/admin.php`)
 
 - `skin`: se acepta el mismo valor. `skin-<color>` colorea el header y deja el sidebar oscuro; `skin-<color>-light` deja el sidebar claro; `black` deja el header blanco. Los colores se traducen a Bootstrap (`blue` → primary, `purple` → violet, etc.). Ya no se carga ningún CSS de skin.
@@ -74,7 +81,7 @@ Elementos agregados al navbar con `Admin::navbar()`: tienen que ser `<li class="
 - iCheck se fue: no hay `$.fn.iCheck` ni eventos `ifChecked`/`ifChanged`/`ifClicked`. Los checkbox y radio son nativos: escuchá `change`. Para marcar desde JS disparando `change`: **`$(input).laCheck(true | false)`** y **`$(input).laToggle()`**.
 - **Fechas:** el datetimepicker de eonasdan y **moment** ya no se cargan. Los campos de fecha usan flatpickr detrás de `$.admin.datetimepicker(selector, opciones)` y `$.admin.datetimeRange(inicio, fin, opciones)`, que aceptan las opciones de la 1.x (`format` de moment, `locale`, `minDate`, `maxDate`, `stepping`, `daysOfWeekDisabled`, `disabledDates`, `enabledDates`). No hay `dp.change` ni `data('DateTimePicker')`: usá `input._flatpickr` o el evento `change`. Al abrir un campo vacío ya no se completa la fecha de hoy. Si tu JS usa moment, cargalo vos.
 - **Grid `->editable()`:** la firma es la misma, pero ya no usa x-editable. Dibuja el inline-edit del paquete (texto, textarea, select, fechas) en un popover de BS5. No hay `<a class="grid-editable-…">` ni `$.fn.editable`.
-- bootstrap-switch se fue: `->switch()` (form y grid) usa el switch nativo de BS5 y conserva los valores de `states()`. Los textos ON/OFF no se muestran. El color de "on" llena el switch y el de "off" tiñe el borde.
+- bootstrap-switch se fue: `->switch()` (form y grid) usa el switch nativo de BS5 y conserva los valores de `states()`. Los textos ON/OFF no se muestran. Los colores de "on" y "off" llenan el switch (con el knob blanco); un "off" sin color (`default`) queda como el switch apagado de Bootstrap.
 - El init global de popovers solo toma `data-bs-toggle="popover"`.
 - **Filtro del grid:** el formulario se abre en un panel lateral (offcanvas de BS5) desde el botón "Filtro", con los campos en una columna y el label arriba (antes era un panel arriba de la tabla). `expandFilter()` y los filtros aplicados ya no lo abren al cargar: marcan el botón como activo. Si una vista propia del grid no dibuja las herramientas del header (`renderHeaderTools()`) antes de `renderFilter()`, el filtro sigue saliendo como panel arriba de la tabla. `$filter->column(...)` sigue funcionando, pero en el panel lateral las columnas se apilan.
 

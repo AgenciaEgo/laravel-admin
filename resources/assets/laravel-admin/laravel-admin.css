@@ -157,29 +157,39 @@ a.editable-empty {
 	background-color: var(--bs-dark);
 	border-color: var(--bs-dark);
 }
+/* off color of ->states(): filled like the on state, with the white knob (on a light background the knob is gray) */
+.form-switch .form-check-input.la-switch-off-success:not(:checked),
+.form-switch .form-check-input.la-switch-off-danger:not(:checked),
+.form-switch .form-check-input.la-switch-off-warning:not(:checked),
+.form-switch .form-check-input.la-switch-off-info:not(:checked),
+.form-switch .form-check-input.la-switch-off-dark:not(:checked),
+.form-switch .form-check-input.la-switch-off-primary:not(:checked) {
+	background-position: left center;
+	--bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
 .form-switch .form-check-input.la-switch-off-success:not(:checked) {
+	background-color: var(--bs-success);
 	border-color: var(--bs-success);
-	box-shadow: inset 0 0 0 1px var(--bs-success);
 }
 .form-switch .form-check-input.la-switch-off-danger:not(:checked) {
+	background-color: var(--bs-danger);
 	border-color: var(--bs-danger);
-	box-shadow: inset 0 0 0 1px var(--bs-danger);
 }
 .form-switch .form-check-input.la-switch-off-warning:not(:checked) {
+	background-color: var(--bs-warning);
 	border-color: var(--bs-warning);
-	box-shadow: inset 0 0 0 1px var(--bs-warning);
 }
 .form-switch .form-check-input.la-switch-off-info:not(:checked) {
+	background-color: var(--bs-info);
 	border-color: var(--bs-info);
-	box-shadow: inset 0 0 0 1px var(--bs-info);
 }
 .form-switch .form-check-input.la-switch-off-dark:not(:checked) {
+	background-color: var(--bs-dark);
 	border-color: var(--bs-dark);
-	box-shadow: inset 0 0 0 1px var(--bs-dark);
 }
 .form-switch .form-check-input.la-switch-off-primary:not(:checked) {
+	background-color: var(--bs-primary);
 	border-color: var(--bs-primary);
-	box-shadow: inset 0 0 0 1px var(--bs-primary);
 }
 
 /* radio / checkbox groups (native form-check): line up with the label of a horizontal form */
@@ -245,4 +255,22 @@ a.editable-empty {
 	padding-top: 0;
 	padding-bottom: .25rem;
 	font-weight: 600;
+}
+
+/* grid column sorter (Grid\Column\Sorter): gray until the column is sorted */
+.grid-sorter {
+	font-size: 13px;
+	text-decoration: none;
+	width: 1.5rem;
+	color: var(--bs-tertiary-color);
+}
+.grid-sorter:hover,
+.grid-sorter.active {
+	color: var(--bs-link-color);
+}
+
+/* grid ->switch(): inline so the column alignment (centered by default) applies to it */
+.la-grid-switch {
+	display: inline-block;
+	vertical-align: middle;
 }

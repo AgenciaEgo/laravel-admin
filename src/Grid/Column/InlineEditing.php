@@ -295,6 +295,10 @@ trait InlineEditing
      */
     public function switch(array $states = [])
     {
+        // centered by default (header and cells), next to the "column-<name>" class
+        $class = static::getAttributes($this->name)['class'] ?? '';
+        $this->setAttributes(['class' => trim("{$class} text-center")]);
+
         return $this->displayUsing(Displayers\SwitchDisplay::class, [$states]);
     }
 
