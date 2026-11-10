@@ -20,10 +20,7 @@
 
         <nav class="mt-2">
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" data-accordion="false">
-                <li class="nav-header">{{ trans('admin.menu') }}</li>
-
                 @each('admin::partials.menu', Admin::menu(), 'item')
-
             </ul>
         </nav>
     </div>

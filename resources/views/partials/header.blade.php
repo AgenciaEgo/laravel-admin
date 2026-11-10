@@ -20,12 +20,12 @@
             <!-- User Account Menu -->
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                    <img src="{{ Admin::user()->avatar }}" class="user-image rounded-circle shadow" alt="User Image">
+                    <img src="{{ Admin::user()->avatar }}" class="user-image rounded-circle" alt="User Image">
                     <span class="d-none d-md-inline">{{ Admin::user()->name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end" data-bs-theme="light">
                     <li class="user-header text-bg-primary">
-                        <img src="{{ Admin::user()->avatar }}" class="rounded-circle shadow" alt="User Image">
+                        <img src="{{ Admin::user()->avatar }}" class="rounded-circle" alt="User Image">
                         <p>
                             {{ Admin::user()->name }}
                             <small>Member since admin {{ Admin::user()->created_at }}</small>
