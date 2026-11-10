@@ -311,8 +311,8 @@ class Admin
 
         return [
             'body'          => implode(' ', array_unique($body)),
-            'header'        => $color ? "text-bg-$color" : 'bg-body',
-            'header_theme'  => $color && $color !== 'warning' ? 'dark' : 'light',
+            'header'        => 'bg-white',
+            'header_theme'  => 'light',
             'sidebar'       => $light ? 'bg-body' : 'bg-body-secondary',
             'sidebar_theme' => $light ? 'light' : 'dark',
         ];
