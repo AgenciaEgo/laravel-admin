@@ -274,3 +274,38 @@ a.editable-empty {
 	display: inline-block;
 	vertical-align: middle;
 }
+
+/* year-only date picker (yearSelectPlugin in laravel-admin.js): hides the day calendar */
+.flatpickr-calendar.la-yearselect .flatpickr-innerContainer,
+.flatpickr-calendar.la-yearselect > .flatpickr-months,
+.flatpickr-calendar.la-yearselect .flatpickr-time {
+    display: none;
+}
+.flatpickr-calendar.la-yearselect .la-yearselect-body {
+    width: 100%;
+    padding-bottom: 6px;
+}
+.la-yearselect-body .flatpickr-months {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    position: relative;
+}
+.la-yearselect-body .flatpickr-prev-month,
+.la-yearselect-body .flatpickr-next-month {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+.la-yearselect-body .la-yearselect-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.la-yearselect-body .flatpickr-monthSelect-months {
+    display: flex;
+}

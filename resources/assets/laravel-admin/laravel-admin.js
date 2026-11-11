@@ -265,6 +265,77 @@ $('#totop').on('click', function (e) {
         return l10ns[key] ? key : 'default';
     }
 
+    // flatpickr has no year view: a plugin that swaps the calendar for a grid of 12 years
+    // (paged with the arrows), styled with the classes of the monthSelect plugin
+    function yearSelectPlugin() {
+        return function (fp) {
+            var PAGE = 12, first, label, grid, root;
+
+            function render() {
+                var selected = fp.selectedDates[0] ? fp.selectedDates[0].getFullYear() : null;
+                var today = new Date().getFullYear();
+
+                label.textContent = first + ' \u2013 ' + (first + PAGE - 1);
+                grid.innerHTML = '';
+
+                for (var y = first; y < first + PAGE; y++) {
+                    var b = document.createElement('span');
+                    b.className = 'flatpickr-monthSelect-month' + (y === selected ? ' selected' : '') + (y === today ? ' today' : '');
+                    b.tabIndex = 0;
+                    b.dataset.year = y;
+                    b.textContent = y;
+                    grid.appendChild(b);
+                }
+            }
+
+            function pick(e) {
+                var y = e.target && e.target.dataset && e.target.dataset.year;
+                if (y) {
+                    fp.setDate(new Date(+y, 0, 1), true, fp.config.dateFormat);
+                    fp.close();
+                }
+            }
+
+            function page(step) {
+                return function (e) { e.preventDefault(); first += step * PAGE; render(); };
+            }
+
+            function sync() {
+                var d = fp.selectedDates[0];
+                var y = d ? d.getFullYear() : new Date().getFullYear();
+                first = y - (y % PAGE);
+                render();
+            }
+
+            return {
+                onReady: function () {
+                    fp.calendarContainer.classList.add('la-yearselect');
+
+                    root = document.createElement('div');
+                    root.className = 'la-yearselect-body';
+                    root.innerHTML =
+                        '<div class="flatpickr-months"><span class="flatpickr-prev-month"><svg width="14" height="14" viewBox="0 0 17 17"><path d="M5.207 8.471l7.146 7.147-.707.707-7.853-7.854 7.854-7.853.707.707-7.147 7.146z"/></svg></span>' +
+                        '<span class="la-yearselect-label"></span>' +
+                        '<span class="flatpickr-next-month"><svg width="14" height="14" viewBox="0 0 17 17"><path d="M13.207 8.472l-7.854 7.854-.707-.707 7.146-7.146-7.146-7.148.707-.707 7.854 7.854z"/></svg></span></div>' +
+                        '<div class="flatpickr-monthSelect-months"></div>';
+                    fp.calendarContainer.appendChild(root);
+
+                    label = root.querySelector('.la-yearselect-label');
+                    grid = root.querySelector('.flatpickr-monthSelect-months');
+                    root.querySelector('.flatpickr-prev-month').addEventListener('mousedown', page(-1));
+                    root.querySelector('.flatpickr-next-month').addEventListener('mousedown', page(1));
+                    grid.addEventListener('click', pick);
+                    grid.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(e); }
+                    });
+                    sync();
+                },
+                onOpen: sync,
+                onValueUpdate: function () { if (grid) { sync(); } }
+            };
+        };
+    }
+
     function config(input, options) {
         options = $.extend({}, options);
 
@@ -286,8 +357,11 @@ $('#totop').on('click', function (e) {
             noCalendar: !hasDate
         };
 
-        // year and/or month only (e.g. 'YYYY', 'YYYY-MM', 'MM'): month grid instead of days
-        if (hasDate && !hasDay && !hasTime && window.monthSelectPlugin) {
+        // year only ('YYYY'): grid of years
+        if (/^Y+$/.test(dateFormat) && !hasTime) {
+            cfg.plugins = [yearSelectPlugin()];
+        } else if (hasDate && !hasDay && !hasTime && window.monthSelectPlugin) {
+            // month (e.g. 'YYYY-MM', 'MM'): month grid instead of days
             cfg.plugins = [new monthSelectPlugin({shorthand: true, dateFormat: dateFormat, altFormat: dateFormat})];
         }
 

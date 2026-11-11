@@ -410,8 +410,12 @@ try {
     await closePicker(page);
 
     await openPicker(page, 'input.year');
-    await clickEl(page, '.flatpickr-calendar.open .flatpickr-prev-month');
-    await pickMonth(page, 'Jun');
+    const monthCells = await page.$$eval('.flatpickr-calendar.open .la-yearselect-body .flatpickr-monthSelect-month', (c) => c.map((e) => e.textContent.trim()));
+    check('flatpickr year (YYYY): grid of 12 years, not months', monthCells.length === 12 && monthCells.every((t) => /^\d{4}$/.test(t)), monthCells.join(','));
+    if (!monthCells.includes(String(Y - 1))) {
+        await clickEl(page, '.flatpickr-calendar.open .la-yearselect-body .flatpickr-prev-month');
+    }
+    await pickMonth(page, String(Y - 1));
     check('flatpickr year (YYYY, like sullair-click catalogs): previous year picked', await value(page, 'input.year') === String(Y - 1), await value(page, 'input.year'));
     await closePicker(page);
 
